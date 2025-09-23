@@ -51,7 +51,7 @@ html, body {
     flex: 1 1 auto;
     padding: 10px 20px;
     border: none;
-    background: #6da6cb;
+    background: #000000;
     color: #fff;
     border-radius: 5px;
     cursor: pointer;
@@ -105,18 +105,36 @@ html, body {
     color: #555;
 }
 
-.card button {
-    padding: 10px 15px;
-    border: none;
-    background: #00230f;
+.card-buttons {
+    display: flex;
+    gap: 10px; 
+    flex-wrap: wrap; 
+}
+
+.invest-btn {
+    background: #06632d;
     color: #fff;
     border-radius: 5px;
+    padding: 10px 15px;
+    border: none;
     cursor: pointer;
     transition: background 0.3s;
 }
+.invest-btn:hover {
+    background: #1e8449;
+}
 
-.card button:hover {
-    background: #1e3628;
+.more-btn {
+    background: #000000;
+    color: #fff;
+    border-radius: 5px;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.more-btn:hover {
+    background: #162e3e;
 }
 
 /* progress bar */
@@ -130,7 +148,7 @@ html, body {
 
 .progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, #f39c12, #f1c40f);
+    background: linear-gradient(90deg, #169e5f, #075116);
     text-align: center;
     color: #fff;
     font-size: 0.8rem;
