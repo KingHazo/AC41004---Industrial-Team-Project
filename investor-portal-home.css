@@ -96,6 +96,12 @@ body {
     width: 100%;
     box-sizing: border-box;
     word-wrap: break-word;
+    transition: all 0.3s ease; 
+}
+
+.card:hover {
+    filter: brightness(0.97); 
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5); 
 }
 
 .card h3 {
