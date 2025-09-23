@@ -1,0 +1,204 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+}
+
+html,
+body {
+    width: 100%;
+     /* prevents horizontal scroll */
+    overflow-x: hidden;
+    background: #f5f7fa;
+    color: #333;
+}
+
+/* sections */
+.section {
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+@media (max-width: 480px) {
+    .section {
+        padding: 20px 10px;
+    }
+}
+
+.section h2 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+/* search/filter */
+.search-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search-filter input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+}
+
+.filter-btn {
+    background: transparent;
+    border: none;
+    color: #000000;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s;
+    font-size: 24px;
+}
+
+
+/* pitch card grig styling */
+.pitches {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(3, 1fr);
+    width: 100%;
+}
+
+@media (max-width: 900px) {
+    .pitches {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .pitches {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+/* card styling */
+.card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    transition: all 0.3s ease; 
+}
+
+.card:hover {
+    filter: brightness(0.97); 
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5); 
+}
+
+.card h3 {
+    color: #2c3e50;
+}
+
+.card p {
+    color: #555;
+}
+
+.card-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.invest-btn {
+    background: #06632d;
+    color: #fff;
+    border-radius: 5px;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.invest-btn:hover {
+    background: #1e8449;
+}
+
+.more-btn {
+    background: #000000;
+    color: #fff;
+    border-radius: 5px;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.more-btn:hover {
+    background: #162e3e;
+}
+
+/* progress bar */
+.progress-container {
+    background: #ecf0f1;
+    border-radius: 10px;
+    overflow: hidden;
+    height: 20px;
+    width: 100%;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #169e5f, #075116);
+    text-align: center;
+    color: #fff;
+    font-size: 0.8rem;
+    line-height: 20px;
+    transition: width 1s ease-in-out;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* investor profit share */
+.profit-share {
+    font-size: 0.9rem;
+    color: #2c3e50;
+    background: #ecf0f1;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.profit-share strong {
+    color: #27ae60;
+}
+
+.active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filter-tag {
+    background: #ecf0f1;
+    color: #2c3e50;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: default;
+    transition: background 0.3s;
+}
+
+.filter-tag:hover {
+    background: #dcdfe1; 
+}
