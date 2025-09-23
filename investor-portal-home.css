@@ -5,9 +5,11 @@
     font-family: 'Arial', sans-serif;
 }
 
-html, body {
+html,
+body {
     width: 100%;
-    overflow-x: hidden; /* prevents horizontal scroll */
+     /* prevents horizontal scroll */
+    overflow-x: hidden;
     background: #f5f7fa;
     color: #333;
 }
@@ -34,33 +36,36 @@ html, body {
 /* search/filter */
 .search-filter {
     display: flex;
-    flex-wrap: wrap; /* ensures responsive wrapping on mobile */
+    align-items: center;
     gap: 10px;
     margin-bottom: 20px;
 }
 
 .search-filter input {
-    flex: 1 1 100%;
-    min-width: 0;
+    flex: 1;
     padding: 10px 15px;
     border: 1px solid #ccc;
     border-radius: 5px;
 }
 
-.search-filter button {
-    flex: 1 1 auto;
-    padding: 10px 20px;
+.filter-btn {
+    background: #000;
     border: none;
-    background: #000000;
     color: #fff;
+    padding: 10px;
     border-radius: 5px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: background 0.3s;
+    font-size: 16px;
 }
 
-.search-filter button:hover {
-    background: #3f89ba;
+.filter-btn:hover {
+    background: #162e3e;
 }
+
 
 /* pitch card grig styling */
 .pitches {
@@ -88,7 +93,7 @@ html, body {
     background: #fff;
     padding: 20px;
     border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -107,8 +112,8 @@ html, body {
 
 .card-buttons {
     display: flex;
-    gap: 10px; 
-    flex-wrap: wrap; 
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .invest-btn {
@@ -120,6 +125,7 @@ html, body {
     cursor: pointer;
     transition: background 0.3s;
 }
+
 .invest-btn:hover {
     background: #1e8449;
 }
@@ -133,6 +139,7 @@ html, body {
     cursor: pointer;
     transition: background 0.3s;
 }
+
 .more-btn:hover {
     background: #162e3e;
 }

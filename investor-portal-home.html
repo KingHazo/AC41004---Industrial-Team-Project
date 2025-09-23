@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Investor Portal Home</title>
     <link rel="stylesheet" href="investor-portal-home.css">
+    <script src="https://kit.fontawesome.com/004961d7c9.js" crossorigin="anonymous"></script>
+
 </head>
 
 <body>
@@ -15,8 +17,11 @@
         <h2>Discover New Pitches</h2>
         <div class="search-filter">
             <input type="text" placeholder="Search pitches...">
-            <button>Filter</button>
+            <button class="filter-btn" aria-label="Filter">
+                <i class="fa-solid fa-filter"></i>
+            </button>
         </div>
+
         <div class="pitches">
             <!-- dummy cards-->
             <div class="card">
@@ -93,7 +98,7 @@
                 <div class="profit-share">
                     Investor Profit Share: <strong>20%</strong>
                 </div>
-               <div class="card-buttons">
+                <div class="card-buttons">
                     <button class="invest-btn">Invest</button>
                     <button class="more-btn">Find Out More</button>
                 </div>
