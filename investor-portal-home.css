@@ -181,3 +181,24 @@ body {
 .profit-share strong {
     color: #27ae60;
 }
+
+.active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filter-tag {
+    background: #ecf0f1;
+    color: #2c3e50;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: default;
+    transition: background 0.3s;
+}
+
+.filter-tag:hover {
+    background: #dcdfe1; 
+}
