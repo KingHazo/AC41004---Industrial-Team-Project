@@ -6,6 +6,14 @@ body {
     flex-direction: column;
 }
 
+/* pushes footer down */
+main {
+    flex: 1;
+}
+
+/* 
+ Header & Navigation
+ */
 .site-header {
     display: flex;
     justify-content: space-between;
@@ -29,14 +37,14 @@ body {
     align-items: center;
     padding: 0;
     margin: 0;
-
 }
 
 .nav-links {
-    text-decoration: none;
     color: #333;
+    text-decoration: none;
     padding: 0.25rem 0;
     transition: color 0.15s ease;
+    cursor: pointer;
 }
 
 .nav-links:hover {
@@ -44,12 +52,58 @@ body {
     outline: none;
 }
 
-/* pushes footer down */
-main {
-    flex: 1;
-
+/* Dropdown */
+.dropdown {
+    position: relative;
 }
 
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background: #fff;
+    list-style: none;
+    padding: 0.5rem 0;
+    margin: 0;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    top: 100%;
+    right: 0;
+    z-index: 10;
+    min-width: 180px;
+    border-radius: 5px;
+}
+
+.dropdown-menu li {
+    padding: 0.5rem 1rem;
+}
+
+.dropdown-menu li a {
+    color: #333;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-menu li a:hover {
+    background: #f0f0f0;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+/* Dropdown arrow */
+.arrow {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.dropdown.open .arrow {
+    transform: rotate(180deg);
+}
+
+/* 
+ Hero Section
+ */
 .hero {
     position: relative;
     width: 100%;
@@ -61,6 +115,7 @@ main {
     color: #fff;
     text-align: center;
     margin-bottom: 2rem;
+    background: url("https://cdn.pixabay.com/photo/2024/09/21/02/13/global-business-9062781_1280.jpg") center/cover no-repeat;
 }
 
 .hero-bg {
@@ -73,17 +128,12 @@ main {
     background-position: center;
     opacity: 0;
     transition: opacity 1s ease-in-out;
-
 }
 
-.bg1 {
-    z-index: 0;
-}
-
+.bg1,
 .bg2 {
     z-index: 0;
 }
-
 
 .hero-overlay {
     position: relative;
@@ -92,7 +142,6 @@ main {
     padding: 2rem;
     border-radius: 8px;
 }
-
 
 .hero-button button {
     margin: 0 0.5rem;
@@ -110,8 +159,85 @@ main {
     background: #072a61;
 }
 
+/* 
+ Forms (Signup / Login)
+ */
+.form-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 1rem;
+}
 
+.signup-form {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
 
+.signup-form h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: #0b3d91;
+}
+
+.signup-form label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.signup-form input {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    outline: none;
+    transition: border 0.2s ease;
+}
+
+.signup-form input:focus {
+    border-color: #0b3d91;
+}
+
+.signup-form .btn {
+    padding: 0.75rem;
+    border: none;
+    border-radius: 5px;
+    background: #0b3d91;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.signup-form .btn:hover {
+    background: #072a61;
+}
+
+.signup-form .alt-link {
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.signup-form .alt-link a {
+    color: #0b3d91;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.signup-form .alt-link a:hover {
+    text-decoration: underline;
+}
+
+/* 
+ Footer */
 .footer {
     background: #0b3d91;
     color: #fff;
@@ -139,11 +265,21 @@ main {
     color: #ffcc00;
 }
 
-.down-link {
-    text-decoration: none;
+
+.error {
+    display: block;
+    font-size: 0.8rem;
+    color: red;
+    margin-top: -0.5rem;
+    margin-bottom: 0.75rem;
 }
 
-
+.success {
+    text-align: center;
+    font-size: 0.9rem;
+    color: green;
+    margin-bottom: 1rem;
+}
 
 
 @media (max-width: 600px) {
@@ -155,6 +291,10 @@ main {
 
     .nav-list {
         gap: 0.75rem;
+    }
+
+    .signup-form {
+        padding: 1.5rem;
     }
 
     .hero-button {
