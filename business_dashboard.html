@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Dashboard</title>
+  <link rel="stylesheet" href="business_dashboard.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <!-- header -->
+  <header class="site-header">
+    <a class="logo" href="index.html">Fundify</a>
+    <nav class="main-nav">
+      <ul class="nav-list">
+        <li><a class="nav-links" href="business-dashboard.html">Dashboard</a></li>
+        <li><a class="nav-links" href="create-pitch.html">Create Pitch</a></li>
+        <li><a class="nav-links" href="login.html">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+
+
+  <section id="dashboard" class="section">
+    <h2>My Pitches</h2>
+
+    <!-- add new pitch -->
+    <div class="create-new">
+      <a href="create-pitch.html" class="create-btn">+ Create New Pitch</a>
+    </div>
+
+    <div class="pitches">
+      <!-- test pitch card -->
+      <div class="card">
+        <h3>EcoBottle – Smart Reusable Bottle</h3>
+        <p>Status: <span class="status active">Active</span></p>
+        <div class="progress-container">
+          <div class="progress-bar" style="width: 60%;">£6,000 / £10,000</div>
+        </div>
+        <div class="card-buttons">
+          <button class="view-btn">View</button>
+          <button class="edit-btn">Edit</button>
+          <button class="profit-btn">Declare Profit</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Startup B</h3>
+        <p>Status: <span class="status draft">Draft</span></p>
+        <div class="progress-container">
+          <div class="progress-bar" style="width: 0%;">£0 / £5,000</div>
+        </div>
+        <div class="card-buttons">
+          <button class="view-btn">View</button>
+          <button class="edit-btn">Edit</button>
+          <button class="profit-btn" disabled>Declare Profit</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Startup C</h3>
+        <p>Status: <span class="status closed">Closed</span></p>
+        <div class="progress-container">
+          <div class="progress-bar" style="width: 100%;">£8,000 / £8,000</div>
+        </div>
+        <div class="card-buttons">
+          <button class="view-btn">View</button>
+          <button class="edit-btn" disabled>Edit</button>
+          <button class="profit-btn">Declare Profit</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<footer class="footer">
+  <ul class="down-footer">
+    <li><a class="down-link" href="#">Fundify &copy; 2025</a></li>
+    <li><a class="down-link" href="#">Contact</a></li>
+    <li><a class="down-link" href="#">Terms</a></li>
+    <li><a class="down-link" href="#">Privacy</a></li>
+  </ul>
+</footer>
+
+  <script src="business_dashboard.js"></script>
+</body>
+
+</html>
