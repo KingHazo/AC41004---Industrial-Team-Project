@@ -16,6 +16,6 @@ editButtons.forEach(btn => {
 
 profitButtons.forEach(btn => {
   btn.addEventListener('click', () => {
-    alert("Declare profits (to be implemented)");
+    window.location.href = 'profit_declare.html';
   });
 });
