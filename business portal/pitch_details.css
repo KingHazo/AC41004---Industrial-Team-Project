@@ -10,41 +10,6 @@ body {
   color: #333;
 }
 
-/* Header */
-.site-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background: #ffffff;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.logo {
-  font-weight: 700;
-  font-size: 1.25rem;
-  color: #0b3d91;
-  text-decoration: none;
-}
-
-.nav-list {
-  display: flex;
-  list-style: none;
-  gap: 15px;
-  align-items: center;
-}
-
-.nav-links {
-  text-decoration: none;
-  color: #333;
-  transition: color 0.2s ease;
-}
-
-.nav-links:hover,
-.nav-links.active {
-  color: #0b3d91;
-  font-weight: 600;
-}
 
 .section {
   padding: 40px 20px;
@@ -174,32 +139,4 @@ body {
 
 .profit-btn:hover {
   background: #1e8449;
-}
-
-/* Footer */
-.footer {
-  background: #0b3d91;
-  color: #fff;
-  padding: 3rem 3rem;
-  text-align: center;
-}
-
-.down-footer {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  list-style: none;
-  gap: 1.5rem;
-  margin: 0;
-  padding: 0;
-}
-
-.down-link {
-  color: #fff;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.down-link:hover {
-  color: #ffcc00;
 }
