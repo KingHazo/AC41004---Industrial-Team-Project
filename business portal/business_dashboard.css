@@ -184,31 +184,3 @@ body {
   background: #ddd;
   cursor: not-allowed;
 }
-
-/* footer */
-.footer {
-  background: #0b3d91;
-  color: #fff;
-  padding: 3rem 3rem;
-  text-align: center;
-}
-
-.down-footer {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  list-style: none;
-  gap: 1.5rem;
-  margin: 0;
-  padding: 0;
-}
-
-.down-link {
-  color: #fff;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.down-link:hover {
-  color: #ffcc00;
-}
