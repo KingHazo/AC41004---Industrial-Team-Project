@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profit Declaration</title>
+  <link rel="stylesheet" href="profit_declare.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <a class="logo" href="index.html">Fundify</a>
+    <nav class="main-nav">
+      <ul class="nav-list">
+        <li><a class="nav-links" href="business-dashboard.html">Dashboard</a></li>
+        <li><a class="nav-links" href="create_pitch.html">Create Pitch</a></li>
+        <li><a class="nav-links" href="login.html">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Profit declaration section -->
+  <main class="section">
+    <div class="profit-card">
+      <h2>Declare Profits – EcoBottle Pitch</h2>
+      <p><strong>Status:</strong> Funded</p>
+      <p><strong>Raised:</strong> £10,000 | <strong>Investor Share:</strong> 20%</p>
+
+      <form class="profit-form">
+        <!-- profit input -->
+        <label for="profit">Total Profit (£)</label>
+        <input type="number" id="profit" placeholder="Enter profit amount" required>
+
+
+        <label for="distributable">Distributable Profit (£)</label>
+        <input type="text" id="distributable" readonly value="£0">
+
+        <div class="form-buttons">
+          <button type="submit" class="submit-btn">Distribute Profits</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+
+<footer class="footer">
+  <ul class="down-footer">
+    <li><a class="down-link" href="#">Fundify &copy; 2025</a></li>
+    <li><a class="down-link" href="#">Contact</a></li>
+    <li><a class="down-link" href="#">Terms</a></li>
+    <li><a class="down-link" href="#">Privacy</a></li>
+  </ul>
+</footer>
+
+  <script src="profit_declare.js"></script>
+</body>
+
+</html>
