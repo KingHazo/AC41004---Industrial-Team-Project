@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pitch Details</title>
+    <link rel="stylesheet" href="investor_pitch_details.css" />
+    <link rel="stylesheet" href="/navbar.css" />
+    <link rel="stylesheet" href="/footer.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+</head>
+
+<body>
+    <div id="investor-navbar-placeholder"></div>
+
+    <main class="section">
+        <div class="pitch-card">
+            <h2>EcoBottle – Smart Reusable Bottle</h2>
+            <p class="status active">Status: Active</p>
+
+            <!-- photos -->
+            <div class="media-gallery">
+                <img src="https://pixabay.com/photos/housewares-sport-daily-life-health-7305310/" alt="Pitch Image 1">
+                <img src="https://pixabay.com/photos/housewares-sport-daily-life-health-7305310/" alt="Pitch Image 2">
+            </div>
+
+            <h3>Elevator Pitch</h3>
+            <p>A reusable smart water bottle that tracks hydration and reduces plastic waste.</p>
+
+            <!-- details -->
+            <h3>Detailed Pitch</h3>
+            <p>
+                EcoBottle syncs with a mobile app to give hydration reminders and insights. Targeting eco-conscious
+                consumers,
+                the product aims to reduce single-use plastic. Funds support tooling, first production run, and
+                marketing.
+            </p>
+
+            <!-- funding progress -->
+            <h3>Funding Progress</h3>
+            <div class="progress-container">
+                <div class="progress-bar" style="width: 60%;">£6,000 / £10,000</div>
+            </div>
+            <p class="meta-line"><strong>Funding Window Ends:</strong> 30 Nov 2025</p>
+
+            <!-- Profit share -->
+            <h3>Investor Profit Share</h3>
+            <p><strong>20%</strong> of profits distributed to investors.</p>
+
+            <!-- tiers -->
+            <h3>Investment Tiers</h3>
+            <table class="tiers-table" id="tiers-table">
+                <thead>
+                    <tr>
+                        <th>Tier</th>
+                        <th>Min (£)</th>
+                        <th>Max (£)</th>
+                        <th>Multiplier</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-tier="Bronze" data-min="100" data-max="999" data-mult="1.0">
+                        <td>Bronze</td>
+                        <td>100</td>
+                        <td>999</td>
+                        <td>1.0</td>
+                    </tr>
+                    <tr data-tier="Silver" data-min="1000" data-max="4999" data-mult="1.2">
+                        <td>Silver</td>
+                        <td>1000</td>
+                        <td>4999</td>
+                        <td>1.2</td>
+                    </tr>
+                    <tr data-tier="Gold" data-min="5000" data-max="9999999" data-mult="1.5">
+                        <td>Gold</td>
+                        <td>5000+</td>
+                        <td>—</td>
+                        <td>1.5</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- invest form -->
+            <div class="invest-card">
+                <h3>Invest Now</h3>
+                <form id="invest-form" class="invest-form">
+                    <label for="invest-amount">Amount (£)</label>
+                    <input type="number" id="invest-amount" min="1" placeholder="e.g., 1200" required />
+
+                    <div class="inline">
+                        <div class="pill"><span class="label">Detected Tier:</span> <span id="detected-tier">—</span>
+                        </div>
+                        <div class="pill"><span class="label">Multiplier:</span> <span id="detected-mult">—</span></div>
+                        <div class="pill"><span class="label">Calculated Shares:</span> <span id="calc-shares">—</span>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button type="submit" class="btn primary">Confirm Investment</button>
+                        <button type="button" id="cancel-investment" class="btn danger outline">Cancel
+                            Investment</button>
+                    </div>
+
+                    <p class="hint">You can cancel your investment while the funding window is open</p>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <div src="/load-footer.js"></div>
+
+    <script src="/load-navbar.js"></script>
+    <script src="investor_pitch_details.js"></script>
+    <script src="/load-footer.js"></script>
+</body>
+
+</html>
