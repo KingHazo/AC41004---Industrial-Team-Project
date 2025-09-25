@@ -1,13 +1,3 @@
-const login = document.getElementById("login");
-console.log(login);
-
-login.addEventListener("click", (event) => {
-    event.preventDefault();
-    window.location.href = "login.html"
-});
-
-
-
 //list of images used for the background 
 const images = [
     "https://cdn.pixabay.com/photo/2024/09/21/02/13/global-business-9062781_1280.jpg",
