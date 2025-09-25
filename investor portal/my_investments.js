@@ -28,7 +28,7 @@ list.addEventListener('click', (e) => {
     const action = btn.dataset.action;
 
     if (action === 'view') {
-        window.location.href = 'investor-pitch-details.html';
+        window.location.href = 'investor_pitch_details.html';
     }
 
     if (action === 'cancel') {
