@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['userId'] = $investor['InvestorID']; // Store user ID
         $_SESSION['userType'] = 'investor'; // Store user type
         // Redirect to a dashboard or profile page
-        header("Location: investorpage.php");
+        header("Location: investor-portal-home.php");
         exit();
     }
 
@@ -42,6 +42,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    echo "Invalid email or password.";
+    // send an error message to log in page
+    header("Location: login.html?error=invalid_credentials");
+    exit();
 }
 ?>
