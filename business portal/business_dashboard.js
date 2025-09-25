@@ -4,7 +4,7 @@ const profitButtons = document.querySelectorAll('.profit-btn');
 
 viewButtons.forEach(btn => {
   btn.addEventListener('click', () => {
-    alert("View pitch details (to be implemented)");
+    window.location.href = 'pitch_details.html';
   });
 });
 
@@ -16,6 +16,6 @@ editButtons.forEach(btn => {
 
 profitButtons.forEach(btn => {
   btn.addEventListener('click', () => {
-    alert("Declare profits (to be implemented)");
+    window.location.href = 'profit_declare.html';
   });
 });

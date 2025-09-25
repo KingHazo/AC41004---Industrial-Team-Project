@@ -4,6 +4,7 @@ body {
     margin: 0;
     display: flex;
     flex-direction: column;
+
 }
 
 /* pushes footer down */
@@ -50,6 +51,8 @@ main {
 .nav-links:hover {
     color: #0b3d91;
     outline: none;
+
+    font-family: 'Montserrat', sans-serif;
 }
 
 /* Dropdown */
@@ -170,6 +173,7 @@ main {
     padding: 2rem 1rem;
 }
 
+<<<<<<< HEAD
 .signup-form {
     background: #fff;
     padding: 2rem;
@@ -280,6 +284,7 @@ main {
     color: green;
     margin-bottom: 1rem;
 }
+
 
 
 @media (max-width: 600px) {

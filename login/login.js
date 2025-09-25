@@ -13,6 +13,8 @@ login.addEventListener('click', (e) => {
     if (loginDetails.name !== "" && loginDetails.password !== "") {
         alert("Login Successfully (test mode)");
         console.log("Login details:", loginDetails);
+         // redirect to the correct page (set to the business portal right now for testing)
+        window.location.href = '../business%20portal/business_dashboard.html';
 
     } else {
         alert("Fields cannot be empty");

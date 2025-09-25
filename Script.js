@@ -1,4 +1,5 @@
 
+
 document.addEventListener("DOMContentLoaded", () => {
     // Toggle dropdown menus when clicked
     document.querySelectorAll('.dropdown > span').forEach(toggle => {
@@ -23,6 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+
+
+//list of images used for the background 
 
 const images = [
     "https://cdn.pixabay.com/photo/2024/09/21/02/13/global-business-9062781_1280.jpg",
