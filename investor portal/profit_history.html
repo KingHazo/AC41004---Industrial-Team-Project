@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profit History</title>
+    <link rel="stylesheet" href="profit_history.css" />
+    <link rel="stylesheet" href="/navbar.css" />
+    <link rel="stylesheet" href="/footer.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+</head>
+
+<body>
+    <div id="investor-navbar-placeholder"></div>
+
+    <main class="section">
+        <h2>Profit History</h2>
+
+        <!-- KPI cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <p class="kpi-label">Total Profits Received</p>
+                <p class="kpi-value" id="kpi-total">£0.00</p>
+            </div>
+            <div class="kpi-card">
+                <p class="kpi-label">Payouts (All Time)</p>
+                <p class="kpi-value" id="kpi-count">0</p>
+            </div>
+            <div class="kpi-card">
+                <p class="kpi-label">Last Payout</p>
+                <p class="kpi-value" id="kpi-last">—</p>
+            </div>
+        </div>
+
+        <!-- search -->
+        <div class="toolbar">
+            <div class="chips">
+                <button class="chip active" data-range="all">All</button>
+                <button class="chip" data-range="30">Last 30 days</button>
+                <button class="chip" data-range="365">Last 12 months</button>
+            </div>
+            <div class="search">
+                <input id="search" type="text" placeholder="Search by pitch or note..." />
+                <button id="export" class="btn small">Export CSV</button>
+            </div>
+        </div>
+
+        <!-- history table -->
+        <div class="table-wrap">
+            <table class="history-table" id="history-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Pitch</th>
+                        <th>Period</th>
+                        <th class="right">Amount</th>
+                        <th>Note</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="history-body">
+                </tbody>
+            </table>
+            <p id="no-results" class="no-results" hidden>No payouts found for the selected filters</p>
+        </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="/load-navbar.js"></script>
+    <script src="profit_history.js"></script>
+    <script src="/load-footer.js"></script>
+</body>
+
+</html>
