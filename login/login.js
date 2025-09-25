@@ -13,8 +13,21 @@ login.addEventListener('click', (e) => {
     if (loginDetails.name !== "" && loginDetails.password !== "") {
         alert("Login Successfully (test mode)");
         console.log("Login details:", loginDetails);
-         // redirect to the correct page (set to the business portal right now for testing)
-        window.location.href = '../business%20portal/business_dashboard.html';
+
+        // check the current page URL for now 
+        //Chnage this to some sort of ID later
+        const path = window.location.pathname.toLowerCase();
+
+        if (path.includes("invest")) {
+            
+            window.location.href = '../investor%20portal/investor-portal-home.html';
+        } else if (path.includes("business")) {
+          
+            window.location.href = '../business%20portal/business_dashboard.html';
+        } else {
+        
+            window.location.href = '../index.html';
+        }
 
     } else {
         alert("Fields cannot be empty");
