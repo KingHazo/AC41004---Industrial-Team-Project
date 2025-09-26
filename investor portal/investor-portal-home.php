@@ -1,3 +1,17 @@
+<?php
+session_start();
+
+// 1. Authentication Check: Redirects non-investors back to the login page.
+if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'investor') {
+    // Note: The redirection path needs to be correct relative to the document root (/)
+    header('Location: /login/login-investor.php'); 
+    exit();
+}
+
+// 2. Database connection: Include this only once at the top
+include '../db.php';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -35,8 +49,7 @@
 
         <div class="pitches">
             <?php
-            // include your database connection file
-            include '../db.php';
+
             try {
                 // select all pitches
                 $sql = "SELECT * FROM Pitch";
