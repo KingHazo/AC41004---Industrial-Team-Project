@@ -16,14 +16,14 @@
     <div id="navbar-placeholder"></div>
 
     <main>
-        <form action="" class="login-form">
+        <form action="login.php" method="post" class="login-form">
             <h2>Login</h2>
             <label for="email">Email/Username</label>
-            <input id="email" class="email" type="text" placeholder="Enter email/Username" required>
-
+            <input id="email" name="email" class="email" type="text" placeholder="Enter email/Username" required>
+        
             <label for="password">Password</label>
-            <input id="password" class="password" type="password" placeholder="Enter password" required>
-
+            <input id="password" name="password" class="password" type="password" placeholder="Enter password" required>
+        
             <button id="login" type="submit">Login</button>
             <a href="#">Forgot Password?</a>
         </form>
@@ -33,6 +33,6 @@
 </body>
 <script src="../load-navbar.js"></script>
 <script src="../load-footer.js"></script>
-<script src="login.js"></script>
+<!-- <script src="/login.js"></script> -->
 
 </html>
