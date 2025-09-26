@@ -28,7 +28,7 @@
             <label for="password">Password</label>
             <input id="password" name="password" class="password" type="password" placeholder="Enter password" required>
             
-            <input type="hidden" name="login_type" value="business">
+            <input type="hidden" name="login_type" value="investor">
 
             <button id="login" type="submit">Login</button>
 

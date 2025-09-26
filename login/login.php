@@ -20,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         session_start();
         $_SESSION['userId'] = $investor['InvestorID'];
         $_SESSION['userType'] = 'investor';
-        header("Location: investor-portal-home.php");
+        header("Location: ../investor portal/investor-portal-home.php");
         exit();
     }
 
@@ -34,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         session_start();
         $_SESSION['userID'] = $business['BusinessID'];
         $_SESSION['userType'] = 'business';
-        header("Location: businesspage.php");
+        header("Location: ../business portal/business_dashboard.php");
         exit();
     }
 
