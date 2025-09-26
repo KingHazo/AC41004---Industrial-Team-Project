@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['userId'] = $investor['InvestorID']; // Store user ID
         $_SESSION['userType'] = 'investor'; // Store user type
         // Redirect to a dashboard or profile page
-        header("Location: investor-portal-home.php");
+        header("Location: investor_portal_home.php");
         exit();
     }
 

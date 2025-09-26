@@ -20,7 +20,7 @@ login.addEventListener('click', (e) => {
 
         if (path.includes("invest")) {
             
-            window.location.href = '../investor%20portal/investor-portal-home.html';
+            window.location.href = '../investor%20portal/investor_portal_home.html';
         } else if (path.includes("business")) {
           
             window.location.href = '../business%20portal/business_dashboard.html';

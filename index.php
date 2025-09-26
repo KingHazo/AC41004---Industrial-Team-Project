@@ -27,6 +27,6 @@ try {
 ?>
 <br>
 <a href="login.html">Go to the Login Page</a>
-<a href="investor-portal-home.php">Go to the Login Page</a>
+<a href="investor_portal_home.php">Go to the Login Page</a>
 </body>
 </html>
