@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Investor Portal Home</title>
-    <link rel="stylesheet" href="investor-portal-home.css">
+    <link rel="stylesheet" href="investor_portal_home.css">
     <script src="https://kit.fontawesome.com/004961d7c9.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
