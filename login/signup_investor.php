@@ -13,24 +13,27 @@
 
 <body>
      <?php include '../navbar.php'; ?>
-
     <main class="form-container">
-        <form class="signup-form">
+        <form class="signup-form" method="POST" action="signup.php">
+            <input type="hidden" name="type" value="investor"> 
             <h2>Investor Signup</h2>
             <p class="success"></p>
 
+            <label for="investor_name">Name</label>
+            <input type="text" id="investor_name" name="investor_name" placeholder="Enter your full name" required>
+            <span class="error"></span>
+
             <label for="email">Email</label>
-            <input type="email" id="email" placeholder="Enter your email" required>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
             <span class="error"></span>
 
             <label for="password">Password</label>
-            <input type="password" id="password" placeholder="Enter password" required>
+            <input type="password" id="password" name="password" placeholder="Enter password" required>
             <span class="error"></span>
 
             <label for="confirm-password">Confirm Password</label>
-            <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+            <input type="password" id="confirm-password" name="confirm_password" placeholder="Confirm Password" required>
             <span class="error"></span>
-
 
             <button type="submit" class="btn">Sign Up</button>
             <p class="alt-link">Already have an account? <a href="login_investor.php">Login</a></p>
