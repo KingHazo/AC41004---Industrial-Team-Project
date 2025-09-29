@@ -1,22 +1,16 @@
 <?php session_start();
-// CRITICAL FIX: session_start() MUST be the very first thing executed, placed immediately after the opening tag.
 
-// 1. Authentication Check: Redirects non-investors back to the login page.
+// check if the user is loggend and as an investor
 if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'investor') {
-    // If the session is invalid, redirect immediately.
-    // The path starting with '/' is the most reliable way to redirect from any file location.
+    // redirect to log in
     header('Location: /login/login-investor.php'); 
     exit();
 }
 
-// 2. Database connection: Using the absolute path to guarantee the file is found.
-// This path is reliable and bypasses issues caused by ambiguous relative paths (like '../').
 require_once dirname(__DIR__) . '/db.php';
 
-// CRITICAL SAFETY CHECK: Prevent 500 error if db.php failed to connect or load.
+// if db.php failed to connect to prevent crash
 if (!isset($mysql) || !($mysql instanceof PDO)) {
-    // If the database object is missing, log the error and redirect gracefully 
-    // instead of crashing with a generic 500 Internal Server Error.
     error_log("FATAL ERROR: \$mysql object not available in investor-portal-home.php.");
     header('Location: /login/login-investor.php?error=db_unavail');
     exit();
@@ -55,8 +49,7 @@ if (!isset($mysql) || !($mysql instanceof PDO)) {
         </div>
 
         <div class="pitches">
-            <?php
-            // Database connection is established and checked at the top of the file
+            <?phpe
             try {
                 // select all pitches
                 $sql = "SELECT * FROM Pitch";
@@ -91,7 +84,7 @@ if (!isset($mysql) || !($mysql instanceof PDO)) {
                 <?php
                 }
             } catch (PDOException $e) {
-                // If the query fails (e.g., table name typo), show a friendly message
+                // if the query fails
                 echo "<p style='color: red; text-align: center; margin-top: 20px;'>Error loading pitches: " . htmlspecialchars($e->getMessage()) . "</p>";
                 error_log("Pitch Load Query Error: " . $e->getMessage());
             }

@@ -17,7 +17,7 @@
         <form action="login.php" method="post" class="login-form">
             <h2>Investor Owner Login</h2>
             <?php
-            // Display an error message if the URL contains a specific error parameter
+            // display an error message
             if (isset($_GET['error']) && $_GET['error'] == 'invalid_credentials') {
                 echo "<p style='color:red;'>Invalid email or password.</p>";
             }
