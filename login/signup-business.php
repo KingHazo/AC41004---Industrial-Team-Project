@@ -23,15 +23,15 @@
             <span class="error"></span>
 
             <label for="email">Email</label>
-            <input type="email" id="email" placeholder="Enter your email" required>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
             <span class="error"></span>
 
             <label for="password">Password</label>
-            <input type="password" id="password" placeholder="Enter password" required>
+            <input type="password" id="password" name="password" placeholder="Enter password" required>
             <span class="error"></span>
 
             <label for="confirm-password">Confirm Password</label>
-            <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+            <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm Password" required>
             <span class="error"></span>
 
             <input type="hidden" name="signup_type" value="business">
