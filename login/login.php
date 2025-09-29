@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['loggedin'] = true;
             $_SESSION['user_id'] = $investor['InvestorID'];
             $_SESSION['user_type'] = 'investor';
-            header("Location: ../investor portal/investor-portal-home.php");
+            header("Location: ../investorportal/investor-portal-home.php");
             exit();
         }
 
