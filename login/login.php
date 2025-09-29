@@ -1,8 +1,17 @@
 <?php
 
-include 'db.php';
+// (like user ID and user type) across multiple pages. 
+// must be called at the start
+session_start();
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+include __DIR__ . '/../sql/db.php';
+
+/*
+ wrapped the $_SERVER["REQUEST_METHOD"] check with isset() to avoid PHP warnings.
+  warning occurs if this script is run outside a web server
+*/
+
+if (isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] == "POST") {
 
     $email = htmlspecialchars(trim($_POST['email']));
     $password = htmlspecialchars(trim($_POST['password']));
@@ -19,11 +28,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // if a user is found in the investor table
     if ($investor) {
-        session_start();
+       //session_start();
         $_SESSION['userId'] = $investor['InvestorID']; // Store user ID
         $_SESSION['userType'] = 'investor'; // Store user type
         // Redirect to a dashboard or profile page
-        header("Location: investor_portal_home.php");
+        header("Location: /../investor%20portal/investor_portal_home.php");
         exit();
     }
 
@@ -35,10 +44,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $business = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($business) {
-        session_start();
+        //session_start();
         $_SESSION['userID'] = $business['BusinessID'];
         $_SESSION['userType'] = 'business';
-        header("Location: businesspage.php");
+        header("Location: ../business_portal/business_dashboard.php");
         exit();
     }
 

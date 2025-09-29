@@ -1,8 +1,8 @@
 <?php
-$host = "database.crwckgs6iy7z.us-east-1.rds.amazonaws.com";
+$host = "database-3.ctcgqoecevan.us-east-1.rds.amazonaws.com";
 $username = "admin";
-$password = "admin1234";
-$database = "AC41004_DB"; 
+$password = "admin123";
+$database = "database-3"; 
 try {
     $mysql = new PDO("mysql:host=".$host.";dbname=".$database,
     $username, $password);

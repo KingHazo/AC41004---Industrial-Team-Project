@@ -12,13 +12,13 @@
 </head>
 
 <body>
-    <div id="navbar-placeholder"></div>
+    <?php include 'navBar.php'; ?>
     <h1>work in progress...</h1>
     <main>
 
 
     </main>
-     <div id="footer-placeholder"></div>
+     <?php include 'footer.php'; ?>
 
 </body>
 <script src="load_navbar.js"></script>

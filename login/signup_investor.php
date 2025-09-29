@@ -4,19 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signup - Business Owner | Fundify</title>
-    <link rel="stylesheet" href="../Style.css">
+    <title>Signup - Investor | Fundify</title>
+    <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="../navbar.css">
     <link rel="stylesheet" href="../footer.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-   <div id="navbar-placeholder"></div>
+     <?php include '../navbar.php'; ?>
+
     <main class="form-container">
         <form class="signup-form">
-            <h2>Business Owner Signup</h2>
+            <h2>Investor Signup</h2>
             <p class="success"></p>
+
             <label for="email">Email</label>
             <input type="email" id="email" placeholder="Enter your email" required>
             <span class="error"></span>
@@ -31,10 +33,10 @@
 
 
             <button type="submit" class="btn">Sign Up</button>
-            <p class="alt-link">Already have an account? <a href="login_business.html">Login</a></p>
+            <p class="alt-link">Already have an account? <a href="login_investor.php">Login</a></p>
         </form>
     </main>
-    <div id="footer-placeholder"></div>
+      <?php include '../footer.php'; ?>
     <script src="../load_footer.js"></script>
     <script src="../load_navbar.js"></script>
     <script src="/signup.js"></script>
