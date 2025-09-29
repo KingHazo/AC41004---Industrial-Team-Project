@@ -1,20 +1,16 @@
 <?php session_start();
 
-// Use require_once with full path for reliability
 require_once dirname(__DIR__) . '/db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = htmlspecialchars(trim($_POST['name']));
-    // FIX 1: Convert email to lowercase to prevent case-insensitivity conflicts
     $email = strtolower(htmlspecialchars(trim($_POST['email'])));
     
-    // Using raw input variables as requested
     $password = htmlspecialchars(trim($_POST['password']));
     $confirm_password = htmlspecialchars(trim($_POST['confirm-password']));
     
     $signup_type = $_POST['signup_type'];
 
-    // 1. Password mismatch check
     if ($password !== $confirm_password) {
         if ($signup_type == 'investor') {
             header("Location: signup-investor.php?error=passwords_mismatch");
@@ -24,11 +20,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    // NOTE: Password Hashing removed as requested. Raw password will be stored.
 
     try{
-        // 2. CRITICAL FIX: UNIVERSAL EMAIL EXISTENCE CHECK
-        // Check if the email already exists in EITHER the Investor or the Business table.
+        // does email exist?
         $email_found = false;
 
         // Check 2a: Is email in Investor table?
@@ -37,25 +31,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt_check_investor->bindParam(':email', $email);
         $stmt_check_investor->execute();
 
-        // FIX: Use fetch() instead of rowCount() for more reliable existence check
         if ($stmt_check_investor->fetch()) {
             $email_found = true;
         }
 
-        // Check 2b: Is email in Business table? (Only check if not found in Investor)
         if (!$email_found) {
             $sql_check_business = "SELECT 1 FROM Business WHERE Email = :email LIMIT 1";
             $stmt_check_business = $mysql->prepare($sql_check_business);
             $stmt_check_business->bindParam(':email', $email);
             $stmt_check_business->execute();
 
-            // FIX: Use fetch() instead of rowCount() for more reliable existence check
             if ($stmt_check_business->fetch()) {
                 $email_found = true;
             }
         }
 
-        // If email found in EITHER table, redirect with the error
+        // if email is found
         if ($email_found) {
             if ($signup_type == 'investor') {
                 header("Location: signup-investor.php?error=email_exists");
@@ -65,7 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         }
         
-        // 3. INSERTION LOGIC (Only runs if email is confirmed unique)
+        // insert if no error
         if ($signup_type == 'investor') {
             // insert a new investor
             $sql_insert = "INSERT INTO Investor (Name, Password, Email) VALUES (:name, :password, :email)";
@@ -81,7 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['email'] = $email;
                 $_SESSION['user_type'] = 'investor';
                 
-                // Redirect to the investor portal
+                // redirect to the investor portal
                 header("Location: ../investorportal/investor-portal-home.php");
                 exit();
             } else {
@@ -104,10 +95,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['user_type'] = 'business';
                 
                 // Path corrected to use underscore
-                header("Location: ../business_portal/business_dashboard.html");
+                header("Location: ../business portal/business_dashboard.html");
                 exit();
             } else {
-                // Error redirect to correct business signup page
+                // redirect to correct business signup page if there is an error
                 header("Location: signup-business.php?error=db_error");
                 exit();
             }
@@ -118,7 +109,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 } else {
-    // if the request is not a POST request
     header("Location: /login/login.php");
     exit();
 }
