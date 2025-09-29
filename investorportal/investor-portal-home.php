@@ -49,7 +49,7 @@ if (!isset($mysql) || !($mysql instanceof PDO)) {
         </div>
 
         <div class="pitches">
-            <?phpe
+            <?php
             try {
                 // select all pitches
                 $sql = "SELECT * FROM Pitch";
