@@ -139,23 +139,23 @@ try {
         <div class="pitches">
             
             <?php if (empty($recentInvestments) && !$dbError): ?>
-                <p>You have no recent investments. The dashboard searched for investments under **Investor ID: <?php echo htmlspecialchars($investorID); ?>** but found none. Please ensure your `Investment` table contains data for this ID and that your table/column names are correct (e.g., case sensitivity).</p>
+                <p>You have no recent investments.</p>
                 <?php if ($totalInvested === number_format(0, 2)): ?>
-                    <p style="color: blue;">(Diagnostic Note: Total Invested is £0.00, confirming the queries executed but returned an empty set.)</p>
+                    <p style="color: blue;">(Total Invested is £0.00)</p>
                 <?php endif; ?>
             <?php elseif (!empty($recentInvestments)): ?>
                 <?php foreach ($recentInvestments as $investment): 
                     $pitchID = $investment['PitchID'];
                     $currentFunding = $pitchFunding[$pitchID] ?? 0;
-                    $fundingGoal = $investment['FundingGoal']; // Aliased from TargetAmount
-                    $investedAmount = $investment['InvestmentAmount']; // Aliased from Amount
+                    $fundingGoal = $investment['FundingGoal']; // TargetAmount
+                    $investedAmount = $investment['InvestmentAmount']; // Amount
                     $profitShare = $investment['ProfitSharePercentage'];
                     
                     // progress percentage
                     $progressPct = ($fundingGoal > 0) ? round(($currentFunding / $fundingGoal) * 100) : 0;
                     $progressDisplay = "£" . number_format($currentFunding, 0) . " / £" . number_format($fundingGoal, 0);
 
-                    $pitchName = htmlspecialchars($investment['PitchName']); // Aliased from Title
+                    $pitchName = htmlspecialchars($investment['PitchName']); // Title
                     $investedDisplay = "£" . number_format($investedAmount, 2);
                 ?>
                 <div class="card">
