@@ -94,7 +94,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['email'] = $email;
                 $_SESSION['user_type'] = 'business';
                 
-                // Path corrected to use underscore
                 header("Location: ../business portal/business_dashboard.html");
                 exit();
             } else {

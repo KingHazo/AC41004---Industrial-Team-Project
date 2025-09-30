@@ -1,6 +1,6 @@
 <?php session_start();
 
-// check if the user is loggend and as an investor
+// check if the user is logged in and as an investor
 if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'investor') {
     // redirect to log in
     header('Location: /login/login-investor.php'); 
@@ -15,6 +15,7 @@ if (!isset($mysql) || !($mysql instanceof PDO)) {
     header('Location: /login/login-investor.php?error=db_unavail');
     exit();
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
