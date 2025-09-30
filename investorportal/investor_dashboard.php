@@ -20,10 +20,11 @@ $investorID = $_SESSION['user_id'];
 $totalInvested = 0;
 $recentInvestments = [];
 $pitchFunding = []; // store the total amount raised per pitch
+$dbError = null;
 
 try {
     // find the total invested
-    $sql_total = "SELECT SUM(InvestmentAmount) AS TotalInvested FROM Investment WHERE InvestorID = :investorID";
+    $sql_total = "SELECT SUM(Amount) AS TotalInvested FROM Investment WHERE InvestorID = :investorID";
     $stmt_total = $mysql->prepare($sql_total);
     $stmt_total->bindParam(':investorID', $investorID);
     $stmt_total->execute();
@@ -37,14 +38,13 @@ try {
     }
 
     // find 3 most recent investments
-    // id desc
     $sql_investments = "
         SELECT 
             I.InvestmentID, 
-            I.InvestmentAmount, 
+            I.Amount AS InvestmentAmount,            
             P.PitchID,
-            P.PitchName, 
-            P.FundingGoal, 
+            P.Title AS PitchName,                    
+            P.TargetAmount AS FundingGoal,           
             P.ProfitSharePercentage
         FROM Investment I
         JOIN Pitch P ON I.PitchID = P.PitchID
@@ -67,7 +67,7 @@ try {
         $sql_pitch_funding = "
             SELECT 
                 PitchID, 
-                SUM(InvestmentAmount) AS CurrentFunding
+                SUM(Amount) AS CurrentFunding
             FROM Investment
             WHERE PitchID IN ($inPlaceholders)
             GROUP BY PitchID
@@ -81,8 +81,9 @@ try {
     }
 
 } catch (PDOException $e) {
-    error_log("Database Error in investor-portal-home.php: " . $e->getMessage());
-    $totalInvested = "DB Error";
+    $dbError = "Database Query Failed: " . $e->getMessage();
+    error_log("Database Error in investor-portal-home.php: " . $dbError);
+    $totalInvested = "DB Error"; 
     $recentInvestments = [];
 }
 
@@ -106,6 +107,7 @@ try {
     <div id="investor-navbar-placeholder"></div>
 
     <main class="section">
+        
         <h2>My Portfolio</h2>
 
         <!-- kpi cards -->
@@ -129,28 +131,31 @@ try {
         <!-- quick actions -->
         <div class="actions">
             <a class="btn primary" href="investor-portal-home.php">Browse Pitches</a>
-            <a class="btn" href="my_investments.html">View My Investments</a>
+            <a class="btn" href="my_investments.php">View My Investments</a>
         </div>
 
         <!-- recent holdings -->
         <h3>Recent Holdings (Last <?php echo count($recentInvestments); ?> Investments)</h3>
         <div class="pitches">
             
-            <?php if (empty($recentInvestments)): ?>
-                <p>You have no recent investments. <a href="investor-portal-home.php">Start browsing pitches!</a></p>
-            <?php else: ?>
+            <?php if (empty($recentInvestments) && !$dbError): ?>
+                <p>You have no recent investments. The dashboard searched for investments under **Investor ID: <?php echo htmlspecialchars($investorID); ?>** but found none. Please ensure your `Investment` table contains data for this ID and that your table/column names are correct (e.g., case sensitivity).</p>
+                <?php if ($totalInvested === number_format(0, 2)): ?>
+                    <p style="color: blue;">(Diagnostic Note: Total Invested is £0.00, confirming the queries executed but returned an empty set.)</p>
+                <?php endif; ?>
+            <?php elseif (!empty($recentInvestments)): ?>
                 <?php foreach ($recentInvestments as $investment): 
                     $pitchID = $investment['PitchID'];
                     $currentFunding = $pitchFunding[$pitchID] ?? 0;
-                    $fundingGoal = $investment['FundingGoal'];
-                    $investedAmount = $investment['InvestmentAmount'];
+                    $fundingGoal = $investment['FundingGoal']; // Aliased from TargetAmount
+                    $investedAmount = $investment['InvestmentAmount']; // Aliased from Amount
                     $profitShare = $investment['ProfitSharePercentage'];
                     
                     // progress percentage
                     $progressPct = ($fundingGoal > 0) ? round(($currentFunding / $fundingGoal) * 100) : 0;
                     $progressDisplay = "£" . number_format($currentFunding, 0) . " / £" . number_format($fundingGoal, 0);
 
-                    $pitchName = htmlspecialchars($investment['PitchName']);
+                    $pitchName = htmlspecialchars($investment['PitchName']); // Aliased from Title
                     $investedDisplay = "£" . number_format($investedAmount, 2);
                 ?>
                 <div class="card">
@@ -162,7 +167,7 @@ try {
                     <div class="meta">
                         <!-- profit share -->
                         <span class="profit-share">Profit Share: <strong><?php echo htmlspecialchars($profitShare); ?>%</strong></span>
-                        <!-- DYNAMIC DATA: Investor's Amount -->
+                        <!-- amount invested -->
                         <span class="invested">You invested: <strong><?php echo $investedDisplay; ?></strong></span>
                     </div>
                     <div class="card-buttons">
