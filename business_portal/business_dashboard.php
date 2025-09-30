@@ -1,3 +1,28 @@
+<?php
+// start the session to get current business
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// make sure user is logged in and is a business
+if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'business') {
+    header("Location: ../login/login_signup.php");
+    exit();
+}
+
+// include database connection
+include '../sql/db.php';
+
+// get the current business ID
+$businessId = $_SESSION['userId'];
+
+// fetch all pitches for this business
+$stmt = $mysql->prepare("SELECT * FROM Pitch WHERE BusinessID = :businessId");
+$stmt->bindParam(':businessId', $businessId);
+$stmt->execute();
+$pitches = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,63 +37,56 @@
 </head>
 
 <body>
-  <div id="business-navbar-placeholder"></div>
+   <?php include '../navbar.php'; ?>
 
   <section id="dashboard" class="section">
     <h2>My Pitches</h2>
 
     <!-- add new pitch -->
     <div class="create-new">
-      <a href="create_pitch.html" class="create-btn">+ Create New Pitch</a>
+      <a href="create_pitch.php" class="create-btn">+ Create New Pitch</a>
     </div>
 
     <div class="pitches">
-      <!-- test pitch card -->
-      <div class="card">
-        <h3>EcoBottle – Smart Reusable Bottle</h3>
-        <p>Status: <span class="status active">Active</span></p>
-        <div class="progress-container">
-          <div class="progress-bar" style="width: 60%;">£6,000 / £10,000</div>
-        </div>
-        <div class="card-buttons">
-          <button class="view-btn">View</button>
-          <button class="edit-btn">Edit</button>
-          <button class="profit-btn">Declare Profit</button>
-        </div>
-      </div>
+      <?php foreach ($pitches as $pitch): 
+            // calculate progress percentage
+            $progress = $pitch['TargetAmount'] > 0 ? ($pitch['CurrentAmount'] / $pitch['TargetAmount']) * 100 : 0;
 
+            // determine status
+            $status = "draft";
+            $disableEdit = false;
+            $disableProfit = false;
+            $now = date("Y-m-d");
+            if ($pitch['WindowEndDate'] && $now > $pitch['WindowEndDate']) {
+                $status = "closed";
+                $disableEdit = true;
+            } elseif ($pitch['CurrentAmount'] > 0) {
+                $status = "active";
+            } 
+      ?>
       <div class="card">
-        <h3>Startup B</h3>
-        <p>Status: <span class="status draft">Draft</span></p>
+        <h3><?php echo htmlspecialchars($pitch['Title']); ?></h3>
+        <p>Status: <span class="status <?php echo $status; ?>"><?php echo ucfirst($status); ?></span></p>
         <div class="progress-container">
-          <div class="progress-bar" style="width: 0%;">£0 / £5,000</div>
+          <div class="progress-bar" style="width: <?php echo $progress; ?>%;">
+            £<?php echo number_format($pitch['CurrentAmount'], 2); ?> / £<?php echo number_format($pitch['TargetAmount'], 2); ?>
+          </div>
         </div>
         <div class="card-buttons">
-          <button class="view-btn">View</button>
-          <button class="edit-btn">Edit</button>
-          <button class="profit-btn" disabled>Declare Profit</button>
+           <form action="pitch_details.php" method="get" style="display:inline;">
+        <input type="hidden" name="id" value="<?php echo $pitch['PitchID']; ?>">
+        <button type="submit" class="view-btn">View</button>
+    </form>
+          <button class="edit-btn" <?php echo $disableEdit ? "disabled" : ""; ?>>Edit</button>
+          <button class="profit-btn" <?php echo $disableProfit ? "disabled" : ""; ?>>Declare Profit</button>
         </div>
       </div>
-
-      <div class="card">
-        <h3>Startup C</h3>
-        <p>Status: <span class="status closed">Closed</span></p>
-        <div class="progress-container">
-          <div class="progress-bar" style="width: 100%;">£8,000 / £8,000</div>
-        </div>
-        <div class="card-buttons">
-          <button class="view-btn">View</button>
-          <button class="edit-btn" disabled>Edit</button>
-          <button class="profit-btn">Declare Profit</button>
-        </div>
-      </div>
+      <?php endforeach; ?>
     </div>
   </section>
- <div id="footer-placeholder"></div>
+  <?php include '../footer.php'; ?>
 
-  <script src="load_business_navbar.js"></script>
   <script src="business_dashboard.js"></script>
-  <script src="../load_footer.js"></script>
 </body>
 
 

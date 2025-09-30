@@ -12,7 +12,8 @@
 </head>
 
 <body>
-   <div id="business-navbar-placeholder"></div>
+
+  <?php include '../navbar.php'; ?>
 
   <!-- Form Section -->
   <main class="section">
@@ -95,9 +96,7 @@
         </div>
       </div>
     </div>
- <div id="footer-placeholder"></div>
-  <script src="load_business_navbar.js"></script>
-   <script src="../load_footer.js"></script>
+      <?php include '../footer.php'; ?>
   <script src="create_pitch.js"></script>
 </body>
 
