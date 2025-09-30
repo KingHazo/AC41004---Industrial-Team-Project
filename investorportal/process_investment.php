@@ -17,6 +17,8 @@ if (!isset($mysql) || !($mysql instanceof PDO)) {
     exit();
 }
 
+$mysql->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['success' => false, 'message' => 'Method not allowed.']);
@@ -70,7 +72,7 @@ try {
     $oldAmount = 0.0;
     $isUpdate = false;
 
-    // if existing investment
+    // --- CRITICAL FIX 1: Check for existing investment without resetting $investmentID ---
     if ($investmentID > 0) {
         $sql_check_inv = "SELECT Amount FROM Investment WHERE InvestmentID = :investmentID AND InvestorID = :investorID AND PitchID = :pitchID";
         $stmt_check_inv = $mysql->prepare($sql_check_inv);
@@ -79,16 +81,12 @@ try {
         $stmt_check_inv->bindParam(':pitchID', $pitchID, PDO::PARAM_INT);
         $stmt_check_inv->execute();
         $existing = $stmt_check_inv->fetch(PDO::FETCH_ASSOC);
-        
+
         if ($existing) {
             $oldAmount = (float)$existing['Amount'];
             $isUpdate = true;
-        } else {
-             // If ID was not found = new investment 
-             $investmentID = 0; 
         }
     }
-    
     // get the change in the investment required
     $netAmountChange = $newAmount - $oldAmount;
 
@@ -117,15 +115,14 @@ try {
 
     $message = $isUpdate ? 'Investment successfully updated.' : 'Investment successfully created.';
 
-    // update/insert investment record
     if ($isUpdate) {
         $sql_inv = "
-            UPDATE Investment SET Amount = :newAmount, CalculateShare = :shares, DateMade = NOW() 
+            UPDATE Investment SET Amount = :newAmount, CalculateShare = :shares, DateMade = NOW()
             WHERE InvestmentID = :investmentID
         ";
         $stmt_inv = $mysql->prepare($sql_inv);
         $stmt_inv->bindParam(':investmentID', $investmentID, PDO::PARAM_INT);
-    } else {
+    } else if ($investmentID === 0) {
         $sql_inv = "
             INSERT INTO Investment (InvestorID, PitchID, Amount, CalculateShare, DateMade) 
             VALUES (:investorID, :pitchID, :newAmount, :shares, NOW())
@@ -133,11 +130,12 @@ try {
         $stmt_inv = $mysql->prepare($sql_inv);
         $stmt_inv->bindParam(':investorID', $investorID, PDO::PARAM_INT);
         $stmt_inv->bindParam(':pitchID', $pitchID, PDO::PARAM_INT);
+    } else {
+         throw new \Exception("Update failed: Investment record not found for update (ID: $investmentID). State error.");
     }
-
     // shared parameters
     $stmt_inv->bindParam(':newAmount', $newAmount);
-    $stmt_inv->bindParam(':shares', $shares, PDO::PARAM_INT); // shares as INT
+    $stmt_inv->bindParam(':shares', $shares, PDO::PARAM_INT);
     $stmt_inv->execute();
     
     // if new insert, get the ID
@@ -164,14 +162,15 @@ try {
     echo json_encode([
         'success' => true, 
         'message' => $message,
-        'investment_id' => $investmentID // return the id for js to use
+        'investment_id' => $investmentID
     ]);
 
 } catch (PDOException $e) {
     if ($mysql->inTransaction()) {
         $mysql->rollBack();
     }
+    // Log the full error to your server logs for debugging
     error_log("Investment Transaction Error: " . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'A database error occurred during the investment transaction.']);
+    echo json_encode(['success' => false, 'message' => 'A database error occurred during the investment transaction. Please check server logs for details.']);
 }

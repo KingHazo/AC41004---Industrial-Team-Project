@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // variables from php
-    const PITCH_ID = document.getElementById('pitch-id')?.value;
+    // Ensure PITCH_ID is correctly parsed as an integer (0 if not found/valid)
+    const pitchIdElement = document.getElementById('pitch-id');
+    const PITCH_ID = pitchIdElement ? parseInt(pitchIdElement.value, 10) : 0;
+
     let investmentIdElement = document.getElementById('investment-id');
     let INVESTMENT_ID = investmentIdElement ? parseInt(investmentIdElement.value, 10) : 0;
     
@@ -72,14 +74,18 @@ document.addEventListener('DOMContentLoaded', () => {
     investForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        if (PITCH_ID === 0 || isNaN(PITCH_ID)) {
+            return alertMessage('Invalid Pitch ID detected. Cannot proceed.', 'error');
+        }
+
         // checks before submission
         if (!isInvestable) return alertMessage('Pitch is not currently open for investment.', 'error');
         
         const amount = parseFloat(investAmountInput.value);
         const shares = confirmBtn.getAttribute('data-shares');
         
-        if (amount <= 0 || !shares) {
-            return alertMessage('Please enter a valid amount to proceed.', 'error');
+        if (amount <= 0 || !shares || parseInt(shares, 10) <= 0) {
+            return alertMessage('Please enter a valid amount and ensure shares are calculated.', 'error');
         }
 
         const actionType = INVESTMENT_ID > 0 ? 'Update' : 'New';
@@ -102,19 +108,25 @@ document.addEventListener('DOMContentLoaded', () => {
                             'Content-Type': 'application/x-www-form-urlencoded',
                         },
                         body: new URLSearchParams({
-                            pitch_id: PITCH_ID,
+                            pitch_id: PITCH_ID, // Use the already parsed integer ID
                             investment_id: INVESTMENT_ID, // 0 for new investment
                             amount: amount,
                             shares: shares
                         })
                     });
 
-                    if (response.ok) {
-                        result = await response.json();
-                        break;
-                    } else {
-                        throw new Error(`Server returned status: ${response.status}`);
+                    // Check for 4xx/5xx status codes
+                    if (!response.ok) {
+                        try {
+                            const errorResult = await response.json();
+                            throw new Error(errorResult.message || `Server returned status: ${response.status}`);
+                        } catch (jsonError) {
+                            throw new Error(`Server returned status: ${response.status}`);
+                        }
                     }
+
+                    result = await response.json();
+                    break;
                 } catch (error) {
                     if (i < maxRetries - 1) {
                         const delay = Math.pow(2, i) * 1000;
@@ -126,6 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (result && result.success) {
+                // Display success message first
                 alertMessage(result.message, 'success');
                 
                 if (actionType === 'New' && result.investment_id) {
@@ -139,10 +152,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // reload the page to refresh balance/progress bar
-                setTimeout(() => window.location.reload(), 1500); 
+                // *** FIX: Added 500ms delay to ensure success message is visible before reload ***
+                setTimeout(() => window.location.reload(), 500); 
 
             } else if (result) {
+                // This handles the explicit error messages returned by PHP (e.g., 'Insufficient balance')
                 alertMessage(result.message || 'Investment failed with an unknown error.', 'error');
             } else {
                 alertMessage('Failed to process investment due to a network or server issue.', 'error');
@@ -150,18 +164,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error('Investment transaction failed:', error);
-            alertMessage('An unexpected error occurred. Check your connection or try again later.', 'error');
+            // Display the specific error message from the PHP/fetch failure
+            alertMessage(error.message || 'An unexpected error occurred. Check your connection or try again later.', 'error');
             
         } finally {
             confirmBtn.disabled = false;
             confirmBtn.textContent = actionType === 'Update' ? 'Update Investment' : 'Confirm Investment';
+            // Only re-enable cancel button if an investment ID is active
             if (cancelBtn && INVESTMENT_ID > 0) cancelBtn.disabled = false;
         }
     });
 
     cancelBtn?.addEventListener('click', () => {
         if (typeof showConfirmation !== 'function' || typeof deleteInvestment !== 'function') {
-             return alertMessage('Cancellation utility functions are not available.', 'error');
+            return alertMessage('Cancellation utility functions are not available.', 'error');
         }
 
         if (!isInvestable || cancelBtn.disabled) {
@@ -176,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 () => deleteInvestment(investmentIdToCancel)
             );
         } else {
-             alertMessage('No active investment ID found to cancel.', 'error');
+            alertMessage('No active investment ID found to cancel.', 'error');
         }
     });
 });
