@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="footer.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-  
+
 <body>
     <?php include 'navBar.php'; ?>
     <!-- <div id="navbar-placeholder"></div> -->
@@ -21,15 +21,18 @@
         <div class="hero-overlay">
             <h1>Empowering Small Businesses, Connecting Investors</h1>
             <p>A crowdfunding platform where businesses share ideas and investors support them.</p>
+
             <div class="hero-button">
-                <button onclick="window.location.href='login/login_business.php'">Get Started as Business</button>
-                <button onclick="window.location.href='login/login_investor.php'">Get Started as Investor</button>
+                <button onclick="window.location.href='login/login_signup.php?type=business'">Get Started as
+                    Business</button>
+                <button onclick="window.location.href='login/login_signup.php?type=investor'">Get Started as
+                    Investor</button>
             </div>
 
         </div>
     </main>
 
-        <?php include 'footer.php'; ?>
+    <?php include 'footer.php'; ?>
 
 </body>
 
