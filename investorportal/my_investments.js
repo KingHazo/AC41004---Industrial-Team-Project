@@ -129,7 +129,7 @@ list.addEventListener('click', (e) => {
 
     if (action === 'view') {
         // update to pass the correct PitchID when implemented. !!!!!! :O
-        window.location.href = 'investor_pitch_details.html';
+        window.location.href = 'investor_pitch_details.php';
     }
 
     if (action === 'cancel') {

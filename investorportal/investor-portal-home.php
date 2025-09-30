@@ -53,12 +53,20 @@ if (!isset($mysql) || !($mysql instanceof PDO)) {
             <?php
             try {
                 // select all pitches
-                $sql = "SELECT * FROM Pitch";
+                $sql = "SELECT PitchID, Title, ElevatorPitch, CurrentAmount, TargetAmount, ProfitSharePercentage FROM Pitch";
                 $stmt = $mysql->query($sql);
  
                 // make a card for each pitch
                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    // Prevent division by zero error
+
+                    $pitch_id = $row['PitchID'];
+
+                    if (empty($pitch_id)) {
+                        error_log("Skipping pitch card due to missing PitchID in database record.");
+                        continue;
+                    }
+
+                    // stop division by zero error
                     $currentAmount = $row['CurrentAmount'] ?? 0;
                     $targetAmount = $row['TargetAmount'] ?? 1;
                     
@@ -79,7 +87,7 @@ if (!isset($mysql) || !($mysql instanceof PDO)) {
                         </div>
                     <div class="card-buttons">
                         <button class="invest-btn">Invest</button>
-                        <button class="more-btn">Find Out More</button>
+                        <button class="more-btn" data-pitch-id="<?php echo htmlspecialchars($pitch_id); ?>">Find Out More</button>
                     </div>
                 </div>
                 <?php

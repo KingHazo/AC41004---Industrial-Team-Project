@@ -60,6 +60,6 @@ document.getElementById('notify-form')?.addEventListener('submit', (e) => {
 document.getElementById('close-account')?.addEventListener('click', () => {
     if (confirm('Are you sure you want to close your account? This cannot be undone.')) {
         alert('Account closed (test mode).');
-        window.location.href = '../login.html';
+        window.location.href = '../login.php';
     }
 });

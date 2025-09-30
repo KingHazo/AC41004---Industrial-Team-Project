@@ -1,7 +1,7 @@
 // View pitch (investor view)
 document.querySelectorAll('.view-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-        window.location.href = 'investor_pitch_details.html'; // to be created next
+        window.location.href = 'investor_pitch_details.php'; // to be created next
     });
 });
 
