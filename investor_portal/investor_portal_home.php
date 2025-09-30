@@ -1,3 +1,9 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -11,17 +17,7 @@
 </head>
 
 <body>
-
-    <header class="site-header">
-        <a class="logo" href="#">Fundify</a>
-        <nav class="main-nav">
-            <ul class="nav-list">
-                <li><a class="nav-links" href="#">Discover</a></li>
-                <li><a class="nav-links" href="#">My Portfolio</a></li>
-                <li><a id="login" class="nav-links login" href="#">Logout</a></li>
-            </ul>
-        </nav>
-    </header>
+ <?php include '../navbar.php'; ?>
 
     <section id="discover" class="section">
         <h2>Discover New Pitches</h2>
@@ -69,8 +65,9 @@
             <?php
             }
             ?>
-        </div>
+   
     </section>
+    
 
 </body>
 </html>

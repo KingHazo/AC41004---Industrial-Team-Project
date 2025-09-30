@@ -29,6 +29,7 @@ if (isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] === "POST") 
         if ($investor && password_verify($password, $investor['Password'])) {
             $_SESSION['userId'] = $investor['InvestorID'];
             $_SESSION['userType'] = 'investor';
+            $_SESSION['logged_in'] = true;
             header("Location: ../investor_portal/investor_portal_home.php");
             exit();
         }
@@ -42,6 +43,7 @@ if (isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] === "POST") 
         if ($business && password_verify($password, $business['Password'])) {
             $_SESSION['userId'] = $business['BusinessID'];
             $_SESSION['userType'] = 'business';
+            $_SESSION['logged_in'] = true;
             header("Location: ../business_portal/business_dashboard.php");
             exit();
         }
