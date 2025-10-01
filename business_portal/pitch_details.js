@@ -16,6 +16,6 @@ if (editBtn) {
 
 if (profitBtn) {
   profitBtn.addEventListener('click', () => {
-    window.location.href = "profit_declare.html";
+    window.location.href = "profit_declare.php";
   });
 }
