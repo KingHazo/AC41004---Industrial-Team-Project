@@ -89,6 +89,42 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
     <link rel="stylesheet" href="/footer.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
     rel="stylesheet" />
+    <!-- INLINE STYLE FOR NEW UI ELEMENTS -->
+    <style>
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #ffffff; /* Spinner color to match button text */
+            border-radius: 50%;
+            width: 1.25rem;
+            height: 1.25rem;
+            animation: spin 1s linear infinite;
+            display: none; /* Controlled by JS */
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .alert-message {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            display: none; /* Initially hidden */
+        }
+        .alert-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .actions {
+            display: flex; /* Ensure buttons are side-by-side */
+            gap: 10px;
+        }
+    </style>
 </head>
 
 <body>
@@ -100,6 +136,10 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
             <p class="status <?php echo $isInvestable ? 'active' : ($isFunded ? 'funded' : 'closed'); ?>">
                 Status: <?php echo $isInvestable ? 'Active' : ($isFunded ? 'Funded' : 'Closed'); ?>
             </p>
+
+            <div id="messageBox" class="alert-message hidden" role="alert">
+                <p id="messageContent"></p>
+            </div>
 
             <!-- photos - PLACEHOLDERS -->
             <div class="media-gallery">
@@ -177,9 +217,9 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
-                          <tr>
-                            <td colspan="5">No investment tiers defined for this pitch.</td>
-                          </tr>
+                              <tr>
+                                <td colspan="5">No investment tiers defined for this pitch.</td>
+                              </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -213,8 +253,10 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
                         <button type="submit" 
                             class="btn primary" 
                             id="confirm-btn"
+                            data-shares="0"
                             <?php echo $isInvestable ? '' : 'disabled'; ?>>
-                            <?php echo $existingInvestment ? 'Update Investment' : 'Confirm Investment'; ?>
+                            <span id="buttonText"><?php echo $existingInvestment ? 'Update Investment' : 'Confirm Investment'; ?></span>
+                            <div id="loadingSpinner" class="spinner"></div>
                         </button>
                         
                         <?php if ($existingInvestment): ?>

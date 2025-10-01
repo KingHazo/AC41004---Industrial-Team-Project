@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'investor' || !
     exit();
 }
 
-// Ensure db.php is required correctly
+// ensure db.php is required correctly
 require_once dirname(__DIR__) . '/db.php';
 
 if (!isset($mysql) || !($mysql instanceof PDO)) {
@@ -73,7 +73,7 @@ try {
     $oldAmount = 0.0;
     $isUpdate = false;
 
-    // Check for existing investment 
+    // check for existing investment 
     if ($investmentID > 0) {
         $sql_check_inv = "SELECT Amount FROM Investment WHERE InvestmentID = :investmentID AND InvestorID = :investorID AND PitchID = :pitchID";
         $stmt_check_inv = $mysql->prepare($sql_check_inv);
@@ -166,16 +166,18 @@ try {
         'message' => $message,
         'investment_id' => $investmentID
     ]);
+    exit();
 
 } catch (PDOException $e) {
     if ($mysql->inTransaction()) {
         $mysql->rollBack();
     }
-    // Log the full error to your server logs for debugging
+    // debugging
     error_log("Investment Transaction Error: " . $e->getMessage());
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'A database error occurred during the investment transaction. Please check server logs for details.']);
-    
+    exit();
+
 } catch (\Exception $e) {
     if ($mysql->inTransaction()) {
         $mysql->rollBack();
@@ -183,4 +185,5 @@ try {
     error_log("Investment Logic Error: " . $e->getMessage());
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    exit();
 }

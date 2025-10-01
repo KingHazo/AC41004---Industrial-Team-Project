@@ -1,20 +1,61 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Ensure PITCH_ID is correctly parsed as an integer (0 if not found/valid)
-    const pitchIdElement = document.getElementById('pitch-id');
-    const PITCH_ID = pitchIdElement ? parseInt(pitchIdElement.value, 10) : 0;
-
-    let investmentIdElement = document.getElementById('investment-id');
-    let INVESTMENT_ID = investmentIdElement ? parseInt(investmentIdElement.value, 10) : 0;
+function alertMessage(message, type) {
+    const messageBox = document.getElementById('messageBox');
+    const messageContent = document.getElementById('messageContent');
     
+    // reset classes
+    messageBox.classList.remove('success', 'error');
+    messageBox.style.display = 'block';
+    
+    if (type === 'success') {
+        messageBox.classList.add('success');
+        messageContent.innerHTML = `✅ **Success!** ${message}`;
+    } else {
+        messageBox.classList.add('error');
+        messageContent.innerHTML = `❌ **Error:** ${message}`;
+    }
+
+    // logging for deep debugging
+    const icon = type === 'success' ? '✅' : '❌';
+    console.log(`${icon} [${type.toUpperCase()}] Server Response: ${message}`);
+}
+
+if (typeof showConfirmation !== 'function') {
+    window.showConfirmation = function(message, callback) {
+        if (confirm(message)) { 
+            callback();
+        }
+    }
+}
+if (typeof deleteInvestment !== 'function') {
+    window.deleteInvestment = function(id) {
+        alertMessage(`Attempting to delete investment ID ${id}. (Need to implement delete logic in PHP/JS)`, 'error');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    
+    const pitchIdElement = document.getElementById('pitch-id');
     const investAmountInput = document.getElementById('invest-amount');
     const investForm = document.getElementById('invest-form');
     const confirmBtn = document.getElementById('confirm-btn');
     const cancelBtn = document.getElementById('cancel-investment');
     
+    if (!investForm) {
+         console.error("CRITICAL ERROR: Investment form (ID: 'invest-form') not found. Submission will fail.");
+         return;
+    }
+
+    const PITCH_ID = pitchIdElement ? parseInt(pitchIdElement.value, 10) : 0;
+    
+    let investmentIdElement = document.getElementById('investment-id');
+    let INVESTMENT_ID = investmentIdElement ? parseInt(investmentIdElement.value, 10) : 0;
+    
     const detectedTierSpan = document.getElementById('detected-tier');
     const detectedMultSpan = document.getElementById('detected-mult');
     const calcSharesSpan = document.getElementById('calc-shares');
-    
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const buttonText = document.getElementById('buttonText');
+
     // is investable?
     const isInvestable = investAmountInput && !investAmountInput.disabled;
 
@@ -29,7 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // investment calc
     const updateInvestmentDetails = () => {
         const amount = parseFloat(investAmountInput.value) || 0;
         
@@ -38,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
             detectedTierSpan.textContent = '—';
             detectedMultSpan.textContent = '—';
             calcSharesSpan.textContent = '—';
+            // Only disable if not investable OR amount is too low
             confirmBtn.disabled = !isInvestable || amount < 1; 
             return;
         }
@@ -68,11 +109,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (investAmountInput) {
         investAmountInput.addEventListener('input', updateInvestmentDetails);
-        updateInvestmentDetails();
+        updateInvestmentDetails(); // Initial calculation
     }
 
-    investForm?.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    investForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); 
+        
+        // hide previous message
+        document.getElementById('messageBox').style.display = 'none';
 
         if (PITCH_ID === 0 || isNaN(PITCH_ID)) {
             return alertMessage('Invalid Pitch ID detected. Cannot proceed.', 'error');
@@ -92,7 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // turn off UI elements and show loading state
         confirmBtn.disabled = true;
-        confirmBtn.textContent = actionType === 'Update' ? 'Updating...' : 'Confirming...';
+        buttonText.textContent = actionType === 'Update' ? 'Updating...' : 'Confirming...';
+        loadingSpinner.style.display = 'block';
         if (cancelBtn) cancelBtn.disabled = true;
 
         try {
@@ -100,28 +145,27 @@ document.addEventListener('DOMContentLoaded', () => {
             let response = null;
             let result = null;
 
+            const postBody = new URLSearchParams({
+                pitch_id: PITCH_ID, 
+                investment_id: INVESTMENT_ID, 
+                amount: amount,
+                shares: shares
+            });
+
             for (let i = 0; i < maxRetries; i++) {
                 try {
                     response = await fetch('process_investment.php', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        body: new URLSearchParams({
-                            pitch_id: PITCH_ID, // Use the already parsed integer ID
-                            investment_id: INVESTMENT_ID, // 0 for new investment
-                            amount: amount,
-                            shares: shares
-                        })
+                        // CRITICAL FIX: REMOVED Content-Type header. fetch will set it correctly.
+                        body: postBody
                     });
 
-                    // Check for 4xx/5xx status codes
                     if (!response.ok) {
                         try {
                             const errorResult = await response.json();
                             throw new Error(errorResult.message || `Server returned status: ${response.status}`);
                         } catch (jsonError) {
-                            throw new Error(`Server returned status: ${response.status}`);
+                            throw new Error(`Server returned status: ${response.status} (Non-JSON response)`);
                         }
                     }
 
@@ -138,45 +182,47 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (result && result.success) {
-                // Display success message first
                 alertMessage(result.message, 'success');
                 
                 if (actionType === 'New' && result.investment_id) {
                     INVESTMENT_ID = result.investment_id;
                     investmentIdElement.value = INVESTMENT_ID;
                     
-                    confirmBtn.textContent = 'Update Investment';
+                    buttonText.textContent = 'Update Investment';
                     if (cancelBtn) {
                         cancelBtn.disabled = false;
                         cancelBtn.setAttribute('data-investment-id', INVESTMENT_ID);
                     }
                 }
 
-                // *** FIX: Added 500ms delay to ensure success message is visible before reload ***
-                setTimeout(() => window.location.reload(), 500); 
+                // debug
+                console.log('Investment confirmed. Initiating page reload...');
+
+                // reload page after a short delay to show updated data
+                setTimeout(() => {
+                    window.location.reload(); 
+                }, 500);
 
             } else if (result) {
-                // This handles the explicit error messages returned by PHP (e.g., 'Insufficient balance')
                 alertMessage(result.message || 'Investment failed with an unknown error.', 'error');
             } else {
-                alertMessage('Failed to process investment due to a network or server issue.', 'error');
+                alertMessage('Failed to process investment due to a network or server issue (Empty response).', 'error');
             }
 
         } catch (error) {
             console.error('Investment transaction failed:', error);
-            // Display the specific error message from the PHP/fetch failure
             alertMessage(error.message || 'An unexpected error occurred. Check your connection or try again later.', 'error');
             
         } finally {
             confirmBtn.disabled = false;
-            confirmBtn.textContent = actionType === 'Update' ? 'Update Investment' : 'Confirm Investment';
-            // Only re-enable cancel button if an investment ID is active
+            buttonText.textContent = actionType === 'Update' ? 'Update Investment' : 'Confirm Investment';
+            loadingSpinner.style.display = 'none';
             if (cancelBtn && INVESTMENT_ID > 0) cancelBtn.disabled = false;
         }
     });
 
     cancelBtn?.addEventListener('click', () => {
-        if (typeof showConfirmation !== 'function' || typeof deleteInvestment !== 'function') {
+        if (!window.showConfirmation || !window.deleteInvestment) {
             return alertMessage('Cancellation utility functions are not available.', 'error');
         }
 
@@ -187,9 +233,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const investmentIdToCancel = cancelBtn.getAttribute('data-investment-id');
 
         if (investmentIdToCancel) {
-            showConfirmation(
+            window.showConfirmation(
                 'Are you sure you want to permanently cancel this investment? This action cannot be undone and the funds will be returned to your balance.',
-                () => deleteInvestment(investmentIdToCancel)
+                () => window.deleteInvestment(investmentIdToCancel)
             );
         } else {
             alertMessage('No active investment ID found to cancel.', 'error');
