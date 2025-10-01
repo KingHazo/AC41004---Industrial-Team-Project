@@ -1,49 +1,56 @@
 <?php
 
-include 'db.php';
+// (like user ID and user type) across multiple pages. 
+// must be called at the start
+session_start();
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+include __DIR__ . '/../sql/db.php';
+
+/*
+ wrapped the $_SERVER["REQUEST_METHOD"] check with isset() to avoid PHP warnings.
+  warning occurs if this script is run outside a web server
+*/
+
+if (isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] === "POST") {
 
     $email = htmlspecialchars(trim($_POST['email']));
-    $password = htmlspecialchars(trim($_POST['password']));
+    $password = trim($_POST['password']);
 
-    $sql_investor = "SELECT * FROM Investor WHERE Email = :email AND Password = :password";
-    $sql_business = "SELECT * FROM Business WHERE Email = :email AND Password = :password";
+    // gets user type from the toggle (hidden input)
+    $userType = isset($_POST['user_type']) ? $_POST['user_type'] : '';
 
-    // check investor table first
-    $stmt = $mysql->prepare($sql_investor);
-    $stmt->bindParam(':email', $email);
-    $stmt->bindParam(':password', $password);
-    $stmt->execute();
-    $investor = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($userType === 'investor') {
+        // investor login
+        $stmt = $mysql->prepare("SELECT * FROM Investor WHERE Email = :email");
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+        $investor = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // if a user is found in the investor table
-    if ($investor) {
-        session_start();
-        $_SESSION['userId'] = $investor['InvestorID']; // Store user ID
-        $_SESSION['userType'] = 'investor'; // Store user type
-        // Redirect to a dashboard or profile page
-        header("Location: investor_portal_home.php");
-        exit();
+        if ($investor && password_verify($password, $investor['Password'])) {
+            $_SESSION['userId'] = $investor['InvestorID'];
+            $_SESSION['userType'] = 'investor';
+            $_SESSION['logged_in'] = true;
+            header("Location: ../investor_portal/investor_portal_home.php");
+            exit();
+        }
+    } elseif ($userType === 'business') {
+        // business login
+        $stmt = $mysql->prepare("SELECT * FROM Business WHERE Email = :email");
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+        $business = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($business && password_verify($password, $business['Password'])) {
+            $_SESSION['userId'] = $business['BusinessID'];
+            $_SESSION['userType'] = 'business';
+            $_SESSION['logged_in'] = true;
+            header("Location: ../business_portal/business_dashboard.php");
+            exit();
+        }
     }
 
-    // check business acount if no investor found
-    $stmt = $mysql->prepare($sql_business);
-    $stmt->bindParam(':email', $email);
-    $stmt->bindParam(':password', $password);
-    $stmt->execute();
-    $business = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($business) {
-        session_start();
-        $_SESSION['userID'] = $business['BusinessID'];
-        $_SESSION['userType'] = 'business';
-        header("Location: businesspage.php");
-        exit();
-    }
-
-    // send an error message to log in page
-    header("Location: login.html?error=invalid_credentials");
+    // no user found
+    header("Location: ../index.php?error=invalid_credentials");
     exit();
 }
 ?>

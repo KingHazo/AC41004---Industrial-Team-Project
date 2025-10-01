@@ -1,8 +1,8 @@
 let pathToNavbar = '';
 if (window.location.pathname.includes('/login/') || window.location.pathname.includes('/about/')) {
-    pathToNavbar = '../navbar.html';
+    pathToNavbar = '../navbar.php';
 } else {
-    pathToNavbar = 'navbar.html';
+    pathToNavbar = 'navbar.php';
 }
 
 fetch(pathToNavbar)
