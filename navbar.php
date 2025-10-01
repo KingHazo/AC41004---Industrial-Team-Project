@@ -19,10 +19,12 @@ $base_url = '/AC41004---Industrial-Team-Project';
                 <?php if ($_SESSION['userType'] === 'investor'): ?>
                     <li><a class="nav-links" href="<?= $base_url ?>/investor_portal/investor_portal_home.php">Discover</a></li>
                     <li><a class="nav-links" href="<?= $base_url ?>/investor_portal/investor_portfolio.php">My Portfolio</a></li>
+                    <li><a class="nav-links" href="<?= $base_url ?>/investor_portal/investor_profile.php">My Account</a></li>
                     <li><a class="nav-links" href="<?= $base_url ?>/login/logout.php">Logout</a></li>
                 <?php elseif ($_SESSION['userType'] === 'business'): ?>
                     <li><a class="nav-links" href="<?= $base_url ?>/business_portal/business_dashboard.php">Dashboard</a></li>
                     <li><a class="nav-links" href="<?= $base_url ?>/business_portal/create_pitch.php">Create Pitch</a></li>
+                    <li><a class="nav-links" href="<?= $base_url ?>/business_portal/business_profile.php">My Account</a></li>
                     <li><a class="nav-links" href="<?= $base_url ?>/login/logout.php">Logout</a></li>
                 <?php endif; ?>
 
