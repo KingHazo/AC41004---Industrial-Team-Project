@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Account Settings</title>
+    <link rel="stylesheet" href="investor_settings.css" />
+    <link rel="stylesheet" href="/navbar.css" />
+    <link rel="stylesheet" href="/footer.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+</head>
+
+<body>
+    <!-- navbar -->
+    <div id="investor-navbar-placeholder"></div>
+
+    <main class="section">
+        <h2>Account Settings</h2>
+
+        <!-- profile -->
+        <section class="card">
+            <h3>Profile</h3>
+            <form id="profile-form" class="form-grid">
+                <div class="field">
+                    <label for="first-name">First Name</label>
+                    <input id="first-name" type="text" placeholder="e.g., Alex" required />
+                </div>
+                <div class="field">
+                    <label for="last-name">Last Name</label>
+                    <input id="last-name" type="text" placeholder="e.g., Johnson" required />
+                </div>
+                <div class="field wide">
+                    <label for="email">Email</label>
+                    <input id="email" type="email" placeholder="e.g., alex@example.com" required />
+                </div>
+                <div class="field wide">
+                    <label for="phone">Phone</label>
+                    <input id="phone" type="tel" placeholder="+44 7xxx xxxxxx" />
+                </div>
+                <div class="actions">
+                    <button type="submit" class="btn primary">Save Profile</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- security -->
+        <section class="card">
+            <h3>Security</h3>
+            <form id="password-form" class="form-grid">
+                <div class="field wide">
+                    <label for="current-password">Current Password</label>
+                    <input id="current-password" type="password" placeholder="Enter current password" required />
+                </div>
+                <div class="field">
+                    <label for="new-password">New Password</label>
+                    <input id="new-password" type="password" placeholder="Enter new password" required />
+                </div>
+                <div class="field">
+                    <label for="confirm-password">Confirm New Password</label>
+                    <input id="confirm-password" type="password" placeholder="Re-type new password" required />
+                </div>
+                <div class="actions">
+                    <button type="submit" class="btn">Change Password</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- test banking -->
+        <section class="card">
+            <h3>Payment Settings (Mock)</h3>
+            <form id="bank-form" class="form-grid">
+                <div class="field wide">
+                    <label for="account-name">Account Holder Name</label>
+                    <input id="account-name" type="text" placeholder="e.g., Alex Johnson" />
+                </div>
+                <div class="field">
+                    <label for="sort-code">Sort Code</label>
+                    <input id="sort-code" type="text" placeholder="e.g., 12-34-56" />
+                </div>
+                <div class="field">
+                    <label for="account-number">Account Number</label>
+                    <input id="account-number" type="text" placeholder="e.g., 12345678" />
+                </div>
+                <div class="field wide">
+                    <label for="payout-preference">Payout Preference</label>
+                    <select id="payout-preference">
+                        <option value="manual">Manual Withdrawals</option>
+                        <option value="auto">Auto-Deposit (when payouts arrive)</option>
+                    </select>
+                </div>
+                <div class="actions">
+                    <button type="submit" class="btn">Save Payment Settings</button>
+                </div>
+                <p class="hint">Note: This is a simulated payment setup for demo purposes only.</p>
+            </form>
+        </section>
+
+        <!-- notifications -->
+        <section class="card">
+            <h3>Notifications</h3>
+            <form id="notify-form" class="form-grid">
+                <label class="toggle wide">
+                    <input type="checkbox" id="notify-investments" checked />
+                    <span>Investment updates (funding progress, pitch close)</span>
+                </label>
+                <label class="toggle wide">
+                    <input type="checkbox" id="notify-payouts" checked />
+                    <span>Payout notifications</span>
+                </label>
+                <label class="toggle wide">
+                    <input type="checkbox" id="notify-news" />
+                    <span>Platform news & tips</span>
+                </label>
+                <div class="actions">
+                    <button type="submit" class="btn">Save Notification Settings</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card danger-zone">
+            <h3>Danger Zone</h3>
+            <p>Closing your account removes access to your portfolio. This cannot be undone.</p>
+            <button id="close-account" class="btn danger outline">Close Account</button>
+        </section>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="/load-navbar.js"></script>
+    <script src="investor_settings.js"></script>
+    <script src="/load-footer.js"></script>
+</body>
+
+</html>

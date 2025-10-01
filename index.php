@@ -1,32 +1,38 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fundify</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="navbar.css">
+    <link rel="stylesheet" href="footer.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
-<?php
-echo "AC41004 Industrial Team Project <br>";
-$name = "Drew Webster";
-echo "My name is ".$name."<br>";
+    <div id="navbar-placeholder"></div>
+    <main class="hero">
+        <div class="hero-bg bg1"></div>
+        <div class="hero-bg bg2"></div>
 
-include 'db.php';
+        <div class="hero-overlay">
+            <h1>Empowering Small Businesses, Connecting Investors</h1>
+            <p>A crowdfunding platform where businesses share ideas and investors support them.</p>
+            <div class="hero-button">
+                <button onclick="window.location.href='/login/login-business.php'">Get Started as Business</button>
+                <button onclick="window.location.href='/login/login-investor.php'">Get Started as Investor</button>
+            </div>
+        </div>
+    </main>
 
-try {
-    // test connection
-    $stmt = $mysql->query("SELECT * FROM Pitch");
+    <div id="footer-placeholder"></div>
 
-    echo "My name is ".$name."<br>";
-    echo "Displaying data from the 'pitch' table:<br>";
-
-    // error check just to make sure its connecting
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        echo " - " . htmlspecialchars($row['Title']) . "<br>";
-
-    }
-} catch (PDOException $e) {
-    echo "Error querying the database: " . $e->getMessage();
-}
-?>
-<br>
-<a href="login.html">Go to the Login Page</a>
-<a href="investor-portal-home.php">Go to the Login Page</a>
 </body>
+
+<script src="load-navbar.js"></script>
+<script src="load-footer.js"></script>
+<script src="Script.js"></script>
+
 </html>
