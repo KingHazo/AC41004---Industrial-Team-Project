@@ -1,5 +1,4 @@
 <?php
-
 // (like user ID and user type) across multiple pages. 
 // must be called at the start
 session_start();
@@ -54,3 +53,4 @@ if (isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] === "POST") 
     exit();
 }
 ?>
+

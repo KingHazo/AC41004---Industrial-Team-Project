@@ -10,7 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Fundify</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="navbar.css">
     <link rel="stylesheet" href="footer.css">
@@ -19,7 +19,6 @@ if (session_status() === PHP_SESSION_NONE) {
 
 <body>
     <?php include 'navBar.php'; ?>
-    <!-- <div id="navbar-placeholder"></div> -->
     <main class="hero">
         <div class="hero-bg bg1"></div>
         <div class="hero-bg bg2"></div>
