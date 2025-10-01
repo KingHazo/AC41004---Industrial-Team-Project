@@ -14,7 +14,6 @@ main {
     align-items: center;
 }
 
-
 .login-form {
     background: #fff;
     padding: 2rem 2.5rem;
@@ -22,7 +21,7 @@ main {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     width: 100%;
     max-width: 400px;
-    margin: 2rem 0; 
+    margin: 2rem 0;
 }
 
 .login-form h2 {
@@ -82,9 +81,6 @@ main {
 .login-form a:hover {
     text-decoration: underline;
 }
-
-
-
 
 @media (max-width: 500px) {
     .login-options {

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Investments</title>
+    <link rel="stylesheet" href="my_investments.css" />
+    <link rel="stylesheet" href="/navbar.css" />
+    <link rel="stylesheet" href="/footer.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+</head>
+
+<body>
+    <!-- navbar -->
+    <div id="investor-navbar-placeholder"></div>
+
+    <main class="section">
+        <h2>My Investments</h2>
+
+        <!-- filters -->
+        <div class="filters">
+            <button class="chip active" data-filter="all">All</button>
+            <button class="chip" data-filter="active">Active</button>
+            <button class="chip" data-filter="funded">Funded</button>
+            <button class="chip" data-filter="closed">Closed</button>
+        </div>
+
+        <!-- investments list -->
+        <div id="investments" class="investments">
+            <!-- Card -->
+            <article class="inv-card" data-status="active">
+                <div class="inv-head">
+                    <h3>EcoBottle – Smart Reusable Bottle</h3>
+                    <span class="status badge active">Active</span>
+                </div>
+
+                <div class="grid">
+                    <div class="col">
+                        <p class="muted">You invested</p>
+                        <p class="num">£2,000</p>
+                    </div>
+                    <div class="col">
+                        <p class="muted">Tier</p>
+                        <p>Silver (×1.2)</p>
+                    </div>
+                    <div class="col">
+                        <p class="muted">Shares</p>
+                        <p>2,400</p>
+                    </div>
+                    <div class="col">
+                        <p class="muted">Profit to date</p>
+                        <p class="good">£180.00</p>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-bar" style="width:60%;">£6,000 / £10,000</div>
+                </div>
+
+                <div class="actions">
+                    <button class="btn" data-action="view" data-id="1">View Details</button>
+                    <button class="btn danger outline" data-action="cancel" data-id="1">Cancel Investment</button>
+                </div>
+            </article>
+
+            <!-- Card -->
+            <article class="inv-card" data-status="funded">
+                <div class="inv-head">
+                    <h3>Startup B</h3>
+                    <span class="status badge funded">Funded</span>
+                </div>
+
+                <div class="grid">
+                    <div class="col">
+                        <p class="muted">You invested</p>
+                        <p class="num">£1,500</p>
+                    </div>
+                    <div class="col">
+                        <p class="muted">Tier</p>
+                        <p>Bronze (×1.0)</p>
+                    </div>
+                    <div class="col">
+                        <p class="muted">Shares</p>
+                        <p>1,500</p>
+                    </div>
+                    <div class="col">
+                        <p class="muted">Profit to date</p>
+                        <p class="good">£240.00</p>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-bar" style="width:100%;">£10,000 / £10,000</div>
+                </div>
+
+                <div class="actions">
+                    <button class="btn" data-action="view" data-id="2">View Details</button>
+                    <button class="btn" disabled title="Cannot cancel after funding closed">Cancel Investment</button>
+                </div>
+            </article>
+
+            <!-- Card-->
+            <article class="inv-card" data-status="closed">
+                <div class="inv-head">
+                    <h3>Startup C</h3>
+                    <span class="status badge closed">Closed</span>
+                </div>
+
+                <div class="grid">
+                    <div class="col">
+                        <p class="muted">You invested</p>
+                        <p class="num">£1,000</p>
+                    </div>
+                    <div class="col">
+                        <p class="muted">Tier</p>
+                        <p>Gold (×1.5)</p>
+                    </div>
+                    <div class="col">
+                        <p class="muted">Shares</p>
+                        <p>1,500</p>
+                    </div>
+                    <div class="col">
+                        <p class="muted">Profit to date</p>
+                        <p class="muted">—</p>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-bar" style="width:40%;">£4,000 / £10,000</div>
+                </div>
+
+                <div class="actions">
+                    <button class="btn" data-action="view" data-id="3">View Details</button>
+                    <button class="btn" disabled>Cancel Investment</button>
+                </div>
+            </article>
+        </div>
+    </main>
+
+
+    <div id="footer-placeholder"></div>
+
+     <script src="load_investor_navbar.js"></script>
+    <script src="my_investments.js"></script>
+    <script src="/load_footer.js"></script>
+</body>
+
+</html>
