@@ -1,3 +1,35 @@
+<?php
+// start the session
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// make sure user is logged in and is a business
+if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'business') {
+    header("Location: ../login/login_signup.php");
+    exit();
+}
+
+include '../sql/db.php';
+
+$businessId = $_SESSION['userId'];
+
+// fetch business info
+$stmt = $mysql->prepare("SELECT Name, Email FROM Business WHERE BusinessID = :businessId");
+$stmt->bindParam(':businessId', $businessId, PDO::PARAM_INT);
+$stmt->execute();
+$business = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if ($business) {
+    $businessName = htmlspecialchars($business['Name']);
+    $businessEmail = htmlspecialchars($business['Email']);
+} else {
+    $businessName = "Unknown Business";
+    $businessEmail = "email@example.com";
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,7 +45,7 @@
 </head>
 
 <body>
-    <div id="business-navbar-placeholder"></div>
+    <?php include '../navbar.php'; ?>
 
     <main class="section">
         <h2>Business Profile</h2>
@@ -25,9 +57,9 @@
                 <button class="btn small" id="change-logo">Change Logo</button>
             </div>
             <div class="info">
-                <h3 id="company-name">EcoBottle Ltd</h3>
+                 <h3 id="company-name"><?php echo $businessName; ?></h3>
                 <p id="company-tagline">Smart hydration, sustainable future.</p>
-                <p id="company-email">hello@ecobottle.co.uk</p>
+                <p id="company-email"><?php echo $businessEmail; ?></p>
                 <p class="muted">Joined: <span id="joined">14 Mar 2024</span></p>
             </div>
         </section>
@@ -138,11 +170,9 @@
     </main>
 
     <!-- Footer -->
-    <div id="footer-placeholder"></div>
+     <?php include '../footer.php'; ?>
 
-    <script src="load_business_navbar.js"></script>
     <script src="business_profile.js"></script>
-    <script src="../load-footer.js"></script>
 </body>
 
 </html>
