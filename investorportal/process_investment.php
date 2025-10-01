@@ -9,6 +9,7 @@ if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'investor' || !
     exit();
 }
 
+// Ensure db.php is required correctly
 require_once dirname(__DIR__) . '/db.php';
 
 if (!isset($mysql) || !($mysql instanceof PDO)) {
@@ -29,7 +30,7 @@ $investorID = $_SESSION['user_id'];
 $pitchID = isset($_POST['pitch_id']) ? (int)$_POST['pitch_id'] : 0;
 $investmentID = isset($_POST['investment_id']) ? (int)$_POST['investment_id'] : 0; // 0 for new investment
 $newAmount = isset($_POST['amount']) ? (float)$_POST['amount'] : 0.0;
-$shares = isset($_POST['shares']) ? (int)$_POST['shares'] : 0;
+$shares = isset($_POST['shares']) ? (float)$_POST['shares'] : 0.0;
 
 if ($pitchID <= 0 || $newAmount <= 0 || $shares <= 0) {
     http_response_code(400);
@@ -72,7 +73,7 @@ try {
     $oldAmount = 0.0;
     $isUpdate = false;
 
-    // --- CRITICAL FIX 1: Check for existing investment without resetting $investmentID ---
+    // Check for existing investment 
     if ($investmentID > 0) {
         $sql_check_inv = "SELECT Amount FROM Investment WHERE InvestmentID = :investmentID AND InvestorID = :investorID AND PitchID = :pitchID";
         $stmt_check_inv = $mysql->prepare($sql_check_inv);
@@ -117,7 +118,7 @@ try {
 
     if ($isUpdate) {
         $sql_inv = "
-            UPDATE Investment SET Amount = :newAmount, CalculateShare = :shares, DateMade = NOW()
+            UPDATE Investment SET Amount = :newAmount, CalculateShare = :shares, DateMade = CURDATE()
             WHERE InvestmentID = :investmentID
         ";
         $stmt_inv = $mysql->prepare($sql_inv);
@@ -125,17 +126,18 @@ try {
     } else if ($investmentID === 0) {
         $sql_inv = "
             INSERT INTO Investment (InvestorID, PitchID, Amount, CalculateShare, DateMade) 
-            VALUES (:investorID, :pitchID, :newAmount, :shares, NOW())
+            VALUES (:investorID, :pitchID, :newAmount, :shares, CURDATE())
         ";
         $stmt_inv = $mysql->prepare($sql_inv);
         $stmt_inv->bindParam(':investorID', $investorID, PDO::PARAM_INT);
         $stmt_inv->bindParam(':pitchID', $pitchID, PDO::PARAM_INT);
     } else {
-         throw new \Exception("Update failed: Investment record not found for update (ID: $investmentID). State error.");
+        throw new \Exception("Update failed: Investment record not found for update (ID: $investmentID). State error.");
     }
+
     // shared parameters
-    $stmt_inv->bindParam(':newAmount', $newAmount);
-    $stmt_inv->bindParam(':shares', $shares, PDO::PARAM_INT);
+    $stmt_inv->bindParam(':newAmount', $newAmount, PDO::PARAM_STR); 
+    $stmt_inv->bindParam(':shares', $shares, PDO::PARAM_STR);
     $stmt_inv->execute();
     
     // if new insert, get the ID
@@ -146,14 +148,14 @@ try {
     // update investor balance 
     $sql_investor = "UPDATE Investor SET InvestorBalance = InvestorBalance - :netAmountChange WHERE InvestorID = :investorID";
     $stmt_investor = $mysql->prepare($sql_investor);
-    $stmt_investor->bindParam(':netAmountChange', $netAmountChange);
+    $stmt_investor->bindParam(':netAmountChange', $netAmountChange, PDO::PARAM_STR);
     $stmt_investor->bindParam(':investorID', $investorID, PDO::PARAM_INT);
     $stmt_investor->execute();
 
     // update pitch current amount
     $sql_pitch_update = "UPDATE Pitch SET CurrentAmount = CurrentAmount + :netAmountChange WHERE PitchID = :pitchID";
     $stmt_pitch_update = $mysql->prepare($sql_pitch_update);
-    $stmt_pitch_update->bindParam(':netAmountChange', $netAmountChange);
+    $stmt_pitch_update->bindParam(':netAmountChange', $netAmountChange, PDO::PARAM_STR);
     $stmt_pitch_update->bindParam(':pitchID', $pitchID, PDO::PARAM_INT);
     $stmt_pitch_update->execute();
     
@@ -173,4 +175,12 @@ try {
     error_log("Investment Transaction Error: " . $e->getMessage());
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'A database error occurred during the investment transaction. Please check server logs for details.']);
+    
+} catch (\Exception $e) {
+    if ($mysql->inTransaction()) {
+        $mysql->rollBack();
+    }
+    error_log("Investment Logic Error: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
