@@ -19,21 +19,82 @@ function alertMessage(message, type) {
     console.log(`${icon} [${type.toUpperCase()}] Server Response: ${message}`);
 }
 
-if (typeof showConfirmation !== 'function') {
-    window.showConfirmation = function(message, callback) {
-        if (confirm(message)) { 
-            callback();
+/**
+ * show a custom confirmation modal.
+ * @param {string} message - confirmation message text.
+ * @param {function} onConfirm - execute if the user confirms.
+ */
+const showConfirmation = (message, onConfirm) => {
+    // remove any existing modal
+    const existingModal = document.getElementById('custom-confirm-modal');
+    if (existingModal) existingModal.remove();
+
+    const modalHtml = `
+        <div id="custom-confirm-modal" style="
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.6); display: flex; justify-content: center; 
+            align-items: center; z-index: 1000; font-family: 'Montserrat', sans-serif;">
+            <div style="background: white; padding: 30px; border-radius: 12px; 
+                        box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-width: 400px; width: 90%;">
+                <h4 style="margin-top: 0; color: #1f2937;">Confirm Cancellation</h4>
+                <p style="margin-bottom: 20px; color: #4b5563;">${message}</p>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button id="cancel-no" style="padding: 10px 15px; border: 1px solid #d1d5db; 
+                                border-radius: 8px; background: #f9fafb; cursor: pointer; color: #4b5563;">No, Keep It</button>
+                    <button id="cancel-yes" style="padding: 10px 15px; border: none; border-radius: 8px; 
+                                background: #ef4444; color: white; cursor: pointer;">Yes, Cancel</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    const modal = document.getElementById('custom-confirm-modal');
+
+    document.getElementById('cancel-no').onclick = () => modal.remove();
+    document.getElementById('cancel-yes').onclick = () => {
+        modal.remove();
+        onConfirm();
+    };
+};
+
+window.showConfirmation = showConfirmation; 
+
+/**
+ * Executes the API call to cancel the investment.
+ * @param {string} investmentId - ID of investment to cancel.
+ */
+const deleteInvestment = async (investmentId) => {
+    try {
+        // You're using alertMessage from the current file, which is fine
+        alertMessage('Processing cancellation...', 'success'); 
+        
+        const response = await fetch('cancel_investment.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `investment_id=${investmentId}` 
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+            alertMessage(result.message, 'success');
+            // The existing my_investments.js logic reloads the page, which is what you want.
+            // It ensures the investment list and current amount on the page are updated.
+            setTimeout(() => window.location.reload(), 1500); 
+        } else {
+            alertMessage(result.message, 'error');
         }
-    }
-}
 
-// get rid of this
-if (typeof deleteInvestment !== 'function') {
-    window.deleteInvestment = function(id) {
-        alertMessage(`Attempting to delete investment ID ${id}. (Need to implement delete logic in PHP/JS)`, 'error');
+    } catch (error) {
+        console.error('Cancellation failed:', error);
+        alertMessage('An unexpected error occurred during cancellation.', 'error');
     }
-}
-
+};
+// Attach to window scope for visibility inside the DOMContentLoaded listener
+window.deleteInvestment = deleteInvestment;
 document.addEventListener('DOMContentLoaded', () => {
     
     const pitchIdElement = document.getElementById('pitch-id');

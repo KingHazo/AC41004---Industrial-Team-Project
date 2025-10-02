@@ -138,7 +138,7 @@ try {
             <?php if (empty($recentInvestments) && !$dbError): ?>
                 <p>You have no recent investments.</p>
                 <?php if ($totalInvested === number_format(0, 2)): ?>
-                    <p style="color: blue;">(Total Invested is £0.00)</p>
+                    <!-- <p style="color: blue;">(Total Invested is £0.00)</p> -->
                 <?php endif; ?>
             <?php elseif (!empty($recentInvestments)): ?>
                 <?php foreach ($recentInvestments as $investment): 
@@ -170,7 +170,7 @@ try {
                     <div class="card-buttons">
                         <!-- PitchID is data id -->
                         <button class="view-btn" data-id="<?php echo $pitchID; ?>">View</button>
-                        <button class="cancel-btn" data-id="<?php echo $pitchID; ?>">Cancel Investment</button>
+                        <button class="cancel-btn" data-id="<?php echo $investment['InvestmentID']; ?>">Cancel Investment</button>
                     </div>
                 </div>
                 <?php endforeach; ?>
