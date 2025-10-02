@@ -18,7 +18,7 @@ $base_url = '/AC41004---Industrial-Team-Project';
                 <!-- Logged-in menu -->
                 <?php if ($_SESSION['userType'] === 'investor'): ?>
                     <li><a class="nav-links" href="<?= $base_url ?>/investor_portal/investor_portal_home.php">Discover</a></li>
-                    <li><a class="nav-links" href="<?= $base_url ?>/investor_portal/my_investments.php">My Portfolio</a></li>
+                    <li><a class="nav-links" href="<?= $base_url ?>/investor_portal/investor_dashboard.php">My Portfolio</a></li>
                     <li><a class="nav-links" href="<?= $base_url ?>/investor_portal/investor_profile.php">My Account</a></li>
                     <li><a class="nav-links" href="<?= $base_url ?>/login/logout.php">Logout</a></li>
                 <?php elseif ($_SESSION['userType'] === 'business'): ?>

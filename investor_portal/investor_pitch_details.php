@@ -82,7 +82,7 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
     <title>Pitch Details - <?php echo htmlspecialchars($pitch['Title'] ?? 'Loading...'); ?></title>
     <link rel="stylesheet" href="investor_pitch_details.css" />
     <link rel="stylesheet" href="../navbar.css" />
-    <link rel="stylesheet" href="/footer.css" />
+    <link rel="stylesheet" href="../footer.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
     rel="stylesheet" />
     <!-- INLINE STYLE FOR NEW UI ELEMENTS -->
