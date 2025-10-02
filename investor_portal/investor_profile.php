@@ -1,3 +1,47 @@
+<?php 
+// start the session
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Security check
+if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'investor') {
+    header("Location: ../login/login_signup.php");
+    exit();
+}
+
+// include database connection
+include '../sql/db.php'; 
+
+$investorID = $_SESSION['userId'];
+$investorData = [];
+
+try {
+    // get all profile data
+    $sql = "SELECT Name, Email, InvestorBalance, Address, DateOfBirth, Nationality, PreferredCurrency 
+            FROM Investor 
+            WHERE InvestorID = :investorID";
+    $stmt = $mysql->prepare($sql);
+    $stmt->bindParam(':investorID', $investorID);
+    $stmt->execute();
+    $investorData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // if data not found, redirect
+    if (!$investorData) {
+        session_destroy();
+        header("Location: ../login/login_signup.php");
+        exit();
+    }
+    
+    // Format DateOfBirth for HTML input (YYYY-MM-DD)
+    $formattedDOB = $investorData['DateOfBirth'] ? date('Y-m-d', strtotime($investorData['DateOfBirth'])) : '';
+    // Format DateOfBirth for display (e.g., 05 May 1992)
+    $displayDOB = $investorData['DateOfBirth'] ? date('d M Y', strtotime($investorData['DateOfBirth'])) : 'Not provided';
+    
+} catch (PDOException $e) {
+    error_log("Database Fetch Error: " . $e->getMessage());
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -16,24 +60,31 @@
     <!-- Navbar -->
       <?php include '../navbar.php'; ?>
 
-    <main class="section">
+     <main class="section">
         <h2>My Profile</h2>
-
-        <!-- summary -->
         <section class="card summary">
             <div class="avatar">
                 <img src="corporate-headshot.jpg" alt="Profile Photo">
+            </div>
+            
+            <div class="info">
+                <h3 id="full-name"><?php echo htmlspecialchars($investorData['Name'] ?? 'N/A'); ?></h3>
+                <p id="email"><?php echo htmlspecialchars($investorData['Email'] ?? 'N/A'); ?></p>
                 <button class="btn small" id="change-photo">Change Photo</button>
             </div>
-            <div class="info">
-                <h3 id="full-name">Alex Johnson</h3>
-                <p id="email">alex.johnson@example.com</p>
-                <p id="phone">+44 7123 456789</p>
-                <p class="joined">Joined: <span id="joined-date">12 Feb 2024</span></p>
+        </section>
+        <section class="card wallet">
+            <h3>Account Wallet</h3>
+            <div class="balance-info">
+                <p class="kpi-label">Current Balance:</p>
+                <p class="kpi-value" id="investor-balance">
+                    <?php echo htmlspecialchars($investorData['PreferredCurrency'] === 'USD' ? '$' : '£'); ?>
+                    <?php echo number_format($investorData['InvestorBalance'] ?? 0.00, 2); ?>
+                </p>
             </div>
+            <button class="btn primary small" id="add-funds-btn">Add Funds</button>
         </section>
 
-        <!-- Stats -->
         <section class="card stats">
             <h3>Investment Stats</h3>
             <div class="kpi-grid">
@@ -56,36 +107,79 @@
             </div>
         </section>
 
-        <!-- personal info -->
         <section class="card details">
             <h3>Personal Information</h3>
-            <div class="detail-row"><span class="label">Address:</span> <span id="address">Edinburgh, UK</span></div>
-            <div class="detail-row"><span class="label">Date of Birth:</span> <span id="dob">05 May 1992</span></div>
-            <div class="detail-row"><span class="label">Nationality:</span> <span id="nationality">British</span></div>
-            <div class="detail-row"><span class="label">Preferred Currency:</span> <span id="currency">GBP (£)</span>
-            </div>
-        </section>
+            <div class="detail-row"><span class="label">Address:</span> <span id="address"><?php echo htmlspecialchars($investorData['Address'] ?? 'Not provided'); ?></span></div>
+            <div class="detail-row"><span class="label">Date of Birth:</span> <span id="dob"><?php echo htmlspecialchars($displayDOB); ?></span></div>
+            <div class="detail-row"><span class="label">Nationality:</span> <span id="nationality"><?php echo htmlspecialchars($investorData['Nationality'] ?? 'Not provided'); ?></span></div>
+            <div class="detail-row"><span class="label">Preferred Currency:</span> <span id="currency"><?php echo htmlspecialchars($investorData['PreferredCurrency'] ?? 'GBP'); ?> (<?php echo htmlspecialchars($investorData['PreferredCurrency'] === 'USD' ? '$' : '£'); ?>)</span>
+        </div>
+    </section>
 
-        <!-- documents -->
-        <section class="card documents">
-            <h3>Documents</h3>
-            <ul class="doc-list">
-                <li><a href="#" target="_blank">Proof of ID.pdf</a></li>
-                <li><a href="#" target="_blank">Address Verification.pdf</a></li>
-            </ul>
-            <button class="btn small" id="upload-docs">Upload New Document</button>
-        </section>
+    <section class="card documents">
+        <h3>Documents</h3>
+        <ul class="doc-list">
+            <li><a href="#" target="_blank">Proof of ID.pdf</a></li>
+            <li><a href="#" target="_blank">Address Verification.pdf</a></li>
+        </ul>
+        <button class="btn small" id="upload-docs">Upload New Document</button>
+    </section>
 
-        <!-- account actions -->
-        <section class="card actions-card">
-            <h3>Account Actions</h3>
-            <div class="actions">
-                <button class="btn primary" id="edit-profile">Edit Profile</button>
-                <button class="btn danger outline" id="deactivate-account">Deactivate Account</button>
-            </div>
-        </section>
-    </main>
+    <section class="card actions-card">
+        <h3>Account Actions</h3>
+        <div class="actions">
+            <button class="btn primary" id="edit-profile">Edit Profile</button>
+            <button class="btn danger outline" id="deactivate-account">Deactivate Account</button>
+        </div>
+    </section>
+</main>
 
+<div id="edit-profile-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h4>Edit Personal Information</h4>
+        <form id="edit-profile-form">   
+            <div class="form-group">
+                <label for="edit-name">Full Name</label>
+                <input type="text" id="edit-name" name="name" 
+                    value="<?php echo htmlspecialchars($investorData['Name'] ?? ''); ?>" required>
+                </div>
+                <hr>
+                <div class="form-group">
+                    <label for="edit-address">Address</label>
+                    <input type="text" id="edit-address" name="address" 
+                    value="<?php echo htmlspecialchars($investorData['Address'] ?? ''); ?>">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-dob">Date of Birth</label>
+                    <input type="date" id="edit-dob" name="dob" 
+                    value="<?php echo htmlspecialchars($formattedDOB); ?>"> 
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-nationality">Nationality</label>
+                    <input type="text" id="edit-nationality" name="nationality" 
+                        value="<?php echo htmlspecialchars($investorData['Nationality'] ?? ''); ?>">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-currency">Preferred Currency</label>
+                    <select id="edit-currency" name="currency">
+                        <option value="GBP" <?php if (($investorData['PreferredCurrency'] ?? 'GBP') === 'GBP') echo 'selected'; ?>>GBP (£) - British Pound</option>
+                        <option value="USD" <?php if (($investorData['PreferredCurrency'] ?? '') === 'USD') echo 'selected'; ?>>USD ($) - US Dollar</option>
+                        <option value="EUR" <?php if (($investorData['PreferredCurrency'] ?? '') === 'EUR') echo 'selected'; ?>>EUR (€) - Euro</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn primary">Save Changes</button>
+                    <button type="button" class="btn outline close-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
     <!-- Footer -->
      <?php include '../footer.php'; ?>
     <script src="investor_profile.js"></script>

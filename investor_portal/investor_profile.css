@@ -43,6 +43,13 @@ body {
     align-items: center;
 }
 
+.info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; 
+}
+
+
 .avatar img {
     border-radius: 50%;
     width: 100px;
@@ -66,6 +73,7 @@ body {
 
 .info h3 {
     color: #0b3d91;
+    margin-bottom: 0.2rem; 
 }
 
 .joined {
