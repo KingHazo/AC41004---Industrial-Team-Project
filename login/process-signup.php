@@ -73,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['user_type'] = 'investor';
                 
                 // redirect to the investor portal
-                header("Location: ../investorportal/investor-portal-home.php");
+                header("Location: ../investorportal/investor_portal_home.php");
                 exit();
             } else {
                 header("Location: signup-investor.php?error=db_error");
@@ -108,6 +108,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 } else {
-    header("Location: /login/login.php");
+    header("Location: /login/login_signup.php");
     exit();
 }

@@ -17,7 +17,7 @@ fetch(pathToNavbar)
             logoutLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 //we have to clear the login state 
-                window.location.href = '/index.html';
+                window.location.href = '/index.php';
             });
         }
     })

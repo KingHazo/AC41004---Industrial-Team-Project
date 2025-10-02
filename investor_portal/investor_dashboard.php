@@ -3,7 +3,7 @@
 // check if the user is logged in and as an investor
 if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'investor') {
     // redirect to log in
-    header('Location: /login/login-investor.php');
+    header('Location: /login/login_signup.php');
     exit();
 }
  
@@ -11,8 +11,8 @@ require_once dirname(__DIR__) . '/db.php';
  
 // if db.php failed to connect to prevent crash
 if (!isset($mysql) || !($mysql instanceof PDO)) {
-    error_log("FATAL ERROR: \$mysql object not available in investor-portal-home.php.");
-    header('Location: /login/login-investor.php?error=db_unavail');
+    error_log("FATAL ERROR: \$mysql object not available in investor_portal_home.php.");
+    header('Location: /login/login_signup.php?error=db_unavail');
     exit();
 }
 
@@ -82,7 +82,7 @@ try {
 
 } catch (PDOException $e) {
     $dbError = "Database Query Failed: " . $e->getMessage();
-    error_log("Database Error in investor-portal-home.php: " . $dbError);
+    error_log("Database Error in investor_portal_home.php: " . $dbError);
     $totalInvested = "DB Error"; 
     $recentInvestments = [];
 }
@@ -130,7 +130,7 @@ try {
 
         <!-- quick actions -->
         <div class="actions">
-            <a class="btn primary" href="investor-portal-home.php">Browse Pitches</a>
+            <a class="btn primary" href="investor_portal_home.php">Browse Pitches</a>
             <a class="btn" href="my_investments.php">View My Investments</a>
         </div>
 

@@ -1,20 +1,18 @@
-<?php session_start();
- 
-// check if the user is logged in and as an investor
-if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'investor') {
-    // redirect to log in
-    header('Location: /login/login-investor.php');
+<?php 
+// start the session to get current business
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// make sure user is logged in and is a business
+if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'investor') {
+    header("Location: ../login/login_signup.php");
     exit();
 }
- 
-require_once dirname(__DIR__) . '/db.php';
- 
-// if db.php failed to connect to prevent crash
-if (!isset($mysql) || !($mysql instanceof PDO)) {
-    error_log("FATAL ERROR: \$mysql object not available in my_investments.php.");
-    header('Location: /login/login-investor.php?error=db_unavail');
-    exit();
-}
+
+// include database connection
+include '../sql/db.php';
+
 
 $investorID = $_SESSION['user_id'];
 $investmentsData = [];
@@ -104,15 +102,17 @@ function getPitchStatus($currentAmount, $targetAmount, $windowEndDate) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Investments</title>
     <link rel="stylesheet" href="my_investments.css" />
-    <link rel="stylesheet" href="/navbar.css" />
-    <link rel="stylesheet" href="/footer.css" />
+
+     <link rel="stylesheet" href="../footer.css" />
+    <link rel="stylesheet" href="../navbar.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
         rel="stylesheet" />
 </head>
 
 <body>
     <!-- navbar -->
-    <div id="investor-navbar-placeholder"></div>
+   
+     <?php include '../navbar.php'; ?>
 
     <main class="section">
         <h2>My Investments</h2>
@@ -190,11 +190,10 @@ function getPitchStatus($currentAmount, $targetAmount, $windowEndDate) {
     </main>
 
 
-    <div id="footer-placeholder"></div>
+     <?php include '../footer.php'; ?>
 
-    <script src="load_investor_navbar.js"></script>
     <script src="my_investments.js"></script>
-    <script src="/load-footer.js"></script>
+  
 </body>
 
 </html>

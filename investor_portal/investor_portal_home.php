@@ -1,20 +1,19 @@
 <?php session_start();
 
-// check if the user is logged in and as an investor
-if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'investor') {
-    // redirect to log in
-    header('Location: /login/login-investor.php'); 
+// start the session to get current business
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// make sure user is logged in and is a business
+if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'investor') {
+    header("Location: ../login/login_signup.php");
     exit();
 }
 
-require_once dirname(__DIR__) . '/db.php';
+// include database connection
+include '../sql/db.php';
 
-// if db.php failed to connect to prevent crash
-if (!isset($mysql) || !($mysql instanceof PDO)) {
-    error_log("FATAL ERROR: \$mysql object not available in investor-portal-home.php.");
-    header('Location: /login/login-investor.php?error=db_unavail');
-    exit();
-}
 
 ?>
 <!DOCTYPE html>
@@ -24,7 +23,7 @@ if (!isset($mysql) || !($mysql instanceof PDO)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Investor Portal Home</title>
-    <link rel="stylesheet" href="investor-portal-home.css">
+    <link rel="stylesheet" href="investor_portal_home.css">
     <link rel="stylesheet" href="../footer.css">
     <script src="https://kit.fontawesome.com/004961d7c9.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -32,7 +31,7 @@ if (!isset($mysql) || !($mysql instanceof PDO)) {
 
 <body>
 
-    <div id="investor-navbar-placeholder"></div>
+     <?php include '../navbar.php'; ?>
 
     <!-- discover new pitches section-->
     <section id="discover" class="section">
@@ -101,10 +100,10 @@ if (!isset($mysql) || !($mysql instanceof PDO)) {
         </div>
     </section>
     
-    <div id="footer-placeholder"></div>
+      <?php include '../footer.php'; ?>
     <script src="load_investor_navbar.js"></script>
     <script src="../load-footer.js"></script>
-    <script src="investor-portal-home.js"></script>
+    <script src="investor_portal_home.js"></script>
 </body>
 
 </html>

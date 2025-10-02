@@ -6,15 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Investor Profile</title>
     <link rel="stylesheet" href="investor_profile.css" />
-    <link rel="stylesheet" href="investor_navbar.css" />
     <link rel="stylesheet" href="../footer.css" />
+    <link rel="stylesheet" href="../navbar.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
         rel="stylesheet" />
 </head>
 
 <body>
     <!-- Navbar -->
-    <div id="investor-navbar-placeholder"></div>
+      <?php include '../navbar.php'; ?>
 
     <main class="section">
         <h2>My Profile</h2>
@@ -87,11 +87,8 @@
     </main>
 
     <!-- Footer -->
-    <div id="footer-placeholder"></div>
-
-    <script src="load_investor_navbar.js"></script>
+     <?php include '../footer.php'; ?>
     <script src="investor_profile.js"></script>
-    <script src="../load-footer.js"></script>
 </body>
 
 </html>
