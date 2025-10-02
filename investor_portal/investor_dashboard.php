@@ -94,8 +94,8 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Investor Dashboard</title>
     <link rel="stylesheet" href="investor_dashboard.css" />
-    <link rel="stylesheet" href="/navbar.css" />
-    <link rel="stylesheet" href="/footer.css" />
+    <link rel="stylesheet" href="../navbar.css" />
+    <link rel="stylesheet" href="../footer.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
         rel="stylesheet" />
 </head>
@@ -184,7 +184,7 @@ try {
 
     <script src="load_investor_navbar.js"></script>
     <script src="investor_dashboard.js"></script>
-    <script src="/load-footer.js"></script>
+    <script src="../load_footer.js"></script>
 </body>
 
 </html>
