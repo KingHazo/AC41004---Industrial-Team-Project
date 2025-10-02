@@ -1,22 +1,19 @@
-<?php session_start();
- 
-// check if the user is logged in and as an investor
-if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'investor') {
-    // redirect to log in
-    header('Location: /login/login_signup.php');
-    exit();
+<?php 
+// start the session to get current investor
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
- 
-require_once dirname(__DIR__) . '/db.php';
- 
-// if db.php failed to connect to prevent crash
-if (!isset($mysql) || !($mysql instanceof PDO)) {
-    error_log("FATAL ERROR: \$mysql object not available in investor_portal_home.php.");
-    header('Location: /login/login_signup.php?error=db_unavail');
+
+// make sure user is logged in and is a business
+if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'investor') {
+    header("Location: ../login/login_signup.php");
     exit();
 }
 
-$investorID = $_SESSION['user_id'];
+// include database connection
+include '../sql/db.php';
+
+$investorID = $_SESSION['userId'];
 $totalInvested = 0;
 $recentInvestments = [];
 $pitchFunding = []; // store the total amount raised per pitch

@@ -158,7 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     response = await fetch('process_investment.php', {
                         method: 'POST',
-                        // CRITICAL FIX: REMOVED Content-Type header. fetch will set it correctly.
                         body: postBody
                     });
 

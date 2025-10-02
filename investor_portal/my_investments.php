@@ -14,7 +14,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'investor') {
 include '../sql/db.php';
 
 
-$investorID = $_SESSION['user_id'];
+$investorID = $_SESSION['userId'];
 $investmentsData = [];
 $tiersByPitch = [];
 $dbError = null;

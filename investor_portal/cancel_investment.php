@@ -1,20 +1,18 @@
 <?php session_start();
-header('Content-Type: application/json');
 
-// check authentication and user type
-if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'investor' || !isset($_SESSION['user_id'])) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'Unauthorized access.']);
+// start the session to get current business
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// make sure user is logged in and is a business
+if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'investor') {
+    header("Location: ../login/login_signup.php");
     exit();
 }
 
-require_once dirname(__DIR__) . '/db.php';
-
-if (!isset($mysql) || !($mysql instanceof PDO)) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Database connection failed.']);
-    exit();
-}
+// include database connection
+include '../sql/db.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -22,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-$investorID = $_SESSION['user_id'];
+$investorID = $_SESSION['userId'];
 
 $investmentID = isset($_POST['investment_id']) ? (int)$_POST['investment_id'] : 0;
 

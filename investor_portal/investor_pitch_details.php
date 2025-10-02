@@ -21,7 +21,7 @@ if ($pitchID <= 0) {
     exit();
 }
 
-$investorID = $_SESSION['user_id'];
+$investorID = $_SESSION['userId'];
 $existingInvestment = null;
 $pitch = null;
 $investmentTiers = [];

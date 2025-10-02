@@ -1,22 +1,17 @@
 <?php 
-session_start();
-header('Content-Type: application/json');
+// start the session to get current investor
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// check user and user type
-if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'investor' || !isset($_SESSION['user_id'])) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'Unauthorized access.']);
+// make sure user is logged in and is a business
+if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'investor') {
+    header("Location: ../login/login_signup.php");
     exit();
 }
 
-// ensure db.php is required correctly
-require_once dirname(__DIR__) . '/db.php';
-
-if (!isset($mysql) || !($mysql instanceof PDO)) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Database connection failed.']);
-    exit();
-}
+// include database connection
+include '../sql/db.php';
 
 $mysql->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -26,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-$investorID = $_SESSION['user_id'];
+$investorID = $_SESSION['userId'];
 $pitchID = isset($_POST['pitch_id']) ? (int)$_POST['pitch_id'] : 0;
 $investmentID = isset($_POST['investment_id']) ? (int)$_POST['investment_id'] : 0; // 0 for new investment
 $newAmount = isset($_POST['amount']) ? (float)$_POST['amount'] : 0.0;
