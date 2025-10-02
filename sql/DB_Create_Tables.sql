@@ -43,6 +43,7 @@ CREATE TABLE Pitch (
     WindowEndDate DATE,
     PayoutFrequency VARCHAR(50), -- Quarterly or Annually etc.
 	ProfitSharePercentage DECIMAL(5, 2) NOT NULL,
+    Status ENUM('draft', 'active', 'funded', 'closed') NOT NULL DEFAULT 'draft', 
     BusinessID INT,
     FOREIGN KEY (BusinessID) REFERENCES Business(BusinessID)
 );

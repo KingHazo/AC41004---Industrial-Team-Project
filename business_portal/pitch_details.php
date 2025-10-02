@@ -20,6 +20,37 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 
 $pitchId = (int) $_GET['id'];
 
+// handle save using POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  header('Content-Type: application/json'); // <-- important!
+
+  $data = json_decode(file_get_contents('php://input'), true);
+
+  if (!$data || !isset($_SESSION['userId'])) {
+    echo json_encode(['success' => false]);
+    exit; // stop HTML rendering
+  }
+
+  $elevatorPitch = $data['elevatorPitch'];
+  $detailedPitch = $data['detailedPitch'];
+
+  $stmt = $mysql->prepare("
+        UPDATE Pitch 
+        SET ElevatorPitch = :elevatorPitch, DetailedPitch = :detailedPitch 
+        WHERE PitchID = :pitchId AND BusinessID = :businessId
+    ");
+  $stmt->bindParam(':elevatorPitch', $elevatorPitch);
+  $stmt->bindParam(':detailedPitch', $detailedPitch);
+  $stmt->bindParam(':pitchId', $pitchId);
+  $stmt->bindParam(':businessId', $_SESSION['userId']);
+  $success = $stmt->execute();
+
+  echo json_encode(['success' => $success]);
+  exit; // <- critical! stops PHP from outputting the rest of the page
+}
+
+
+
 // fetch pitch from DB
 $stmt = $mysql->prepare("SELECT * FROM Pitch WHERE PitchID = :pitchId AND BusinessID = :businessId");
 $stmt->bindParam(':pitchId', $pitchId);
@@ -30,6 +61,11 @@ $pitch = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$pitch) {
   die("Pitch not found or you do not have permission to view it.");
 }
+
+$status = $pitch['Status'];
+
+// disable edit if pitch is funded or closed
+$disableEdit = ($status === 'funded' || $status === 'closed');
 
 // calculate progress
 $progress = $pitch['TargetAmount'] > 0 ? ($pitch['CurrentAmount'] / $pitch['TargetAmount']) * 100 : 0;
@@ -61,14 +97,30 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pitch Details</title>
   <link rel="stylesheet" href="pitch_details.css">
-  <link rel="stylesheet" href="business_navbar.css">
   <link rel="stylesheet" href="../footer.css">
+  <link rel="stylesheet" href="../navbar.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
   <?php include '../navbar.php'; ?>
 
+  <div id="saveMessage" style="
+  display: none;
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #27ae60;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 1000;
+">
+    Pitch saved successfully!
+  </div>
 
   <!-- Pitch Details Section -->
   <main class="section">
@@ -77,10 +129,10 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
       <p class="status <?php echo $status; ?>">Status: <?php echo ucfirst($status); ?></p>
 
       <h3>Elevator Pitch</h3>
-      <p><?php echo nl2br(htmlspecialchars($pitch['ElevatorPitch'])); ?></p>
+      <p id="elevatorPitchText"><?php echo nl2br(htmlspecialchars($pitch['ElevatorPitch'])); ?></p>
 
       <h3>Detailed Pitch</h3>
-      <p><?php echo nl2br(htmlspecialchars($pitch['DetailedPitch'])); ?></p>
+      <p id="detailedPitchText"><?php echo nl2br(htmlspecialchars($pitch['DetailedPitch'])); ?></p>
 
       <h3>Funding Progress</h3>
       <div class="progress-container">
@@ -123,8 +175,20 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
       <?php endif; ?>
 
       <div class="card-buttons">
-        <a class="edit-btn" href="edit_pitch.php?id=<?php echo $pitch['PitchID']; ?>" <?php echo $disableEdit ? "disabled" : ""; ?>>Edit Pitch</a>
-        <button class="profit-btn" <?php echo $disableProfit ? "disabled" : ""; ?>>Declare Profit</button>
+        <button type="button" class="edit-btn" <?php echo $disableEdit ? "disabled" : ""; ?>>
+          Edit Pitch
+        </button>
+
+        <!-- added css here because it was hidden by default and the external CSS was not applying properly -->
+        <button id="saveBtn" data-pitch-id="<?php echo $pitch['PitchID']; ?>"
+          style="display: none; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; color: #fff; background: #2980b9; transition: background 0.3s ease;">
+          Save Changes
+        </button>
+
+        <form action="profit_declare.php" method="get" style="display:inline;">
+          <input type="hidden" name="id" value="<?php echo $pitch['PitchID']; ?>">
+          <button type="submit" class="profit-btn">Declare Profit</button>
+        </form>
       </div>
     </div>
   </main>
