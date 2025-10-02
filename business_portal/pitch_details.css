@@ -55,6 +55,11 @@ body {
   color: #f39c12;
 }
 
+.status.funded {
+  background: #d7d9ff;  
+  color: #0b3d91;     
+}
+
 /* Media Gallery */
 .media-gallery {
   display: flex;

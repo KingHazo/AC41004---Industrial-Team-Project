@@ -64,6 +64,8 @@ if (!$pitch) {
 
 $status = $pitch['Status'];
 
+$disableEdit = !in_array($status, ['active', 'draft']);
+
 // disable edit if pitch is funded or closed
 $disableEdit = ($status === 'funded' || $status === 'closed');
 
@@ -76,10 +78,12 @@ $disableEdit = false;
 $disableProfit = false;
 $now = date("Y-m-d");
 if ($pitch['WindowEndDate'] && $now > $pitch['WindowEndDate']) {
-  $status = "closed";
-  $disableEdit = true;
+    $status = "closed";
+    $disableEdit = true;
+} elseif ($pitch['CurrentAmount'] >= $pitch['TargetAmount'] && $pitch['TargetAmount'] > 0) {
+    $status = "funded";
 } elseif ($pitch['CurrentAmount'] > 0) {
-  $status = "active";
+    $status = "active";
 }
 
 // fetch investment tiers for this pitch
@@ -96,7 +100,7 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pitch Details</title>
-  <link rel="stylesheet" href="pitch_details.css">
+  <link rel="stylesheet" href="pitch_details.css?v=<?php echo time(); ?>"> <!--handles cache issues-->
   <link rel="stylesheet" href="../footer.css">
   <link rel="stylesheet" href="../navbar.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">

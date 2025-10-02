@@ -105,12 +105,17 @@ body {
 
 .status.draft {
   background: #fef6e0;
-  color: #f39c12;
+  color: #f38e12;
 }
 
 .status.closed {
   background: #fbeaea;
   color: #e74c3c;
+}
+
+.status.funded {
+  background: #d7d9ff;  
+  color: #0b3d91;     
 }
 
 
