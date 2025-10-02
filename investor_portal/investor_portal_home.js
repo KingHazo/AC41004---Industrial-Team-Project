@@ -1,4 +1,4 @@
-// investor-portal-home.js
+// investor_portal_home.js
 
 document.addEventListener('DOMContentLoaded', () => {
 

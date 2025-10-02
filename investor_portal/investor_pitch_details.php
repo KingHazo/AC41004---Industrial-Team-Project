@@ -4,7 +4,7 @@ session_start();
 // check if the user is logged in and as an investor
 if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'investor' || !isset($_SESSION['user_id'])) {
     // Redirect to log in
-    header('Location: /login/login-investor.php'); 
+    header('Location: /login/login_signup.php'); 
     exit();
 }
 
@@ -13,7 +13,7 @@ require_once dirname(__DIR__) . '/db.php';
 // if db.php failed to connect to prevent crash
 if (!isset($mysql) || !($mysql instanceof PDO)) {
     error_log("FATAL ERROR: \$mysql object not available in investor_pitch_details.php.");
-    header('Location: /login/login-investor.php?error=db_unavail');
+    header('Location: /login/login_signup.php?error=db_unavail');
     exit();
 }
 
@@ -21,7 +21,7 @@ if (!isset($mysql) || !($mysql instanceof PDO)) {
 $pitchID = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($pitchID <= 0) {
-    header('Location: investor-portal-home.php?error=invalid_pitch');
+    header('Location: investor_portal_home.php?error=invalid_pitch');
     exit();
 }
 
@@ -47,7 +47,7 @@ try {
     $pitch = $stmt_pitch->fetch(PDO::FETCH_ASSOC);
 
     if (!$pitch) {
-        header('Location: investor-portal-home.php?error=pitch_not_found');
+        header('Location: investor_portal_home.php?error=pitch_not_found');
         exit();
     }
     
@@ -65,7 +65,7 @@ try {
 
 } catch (PDOException $e) {
     error_log("DB Error fetching pitch details: " . $e->getMessage());
-    header('Location: investor-portal-home.php?error=db_error');
+    header('Location: investor_portal_home.php?error=db_error');
     exit();
 }
 
