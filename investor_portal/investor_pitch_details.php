@@ -1,21 +1,17 @@
 <?php 
-session_start();
+// start the session to get current business
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// check if the user is logged in and as an investor
-if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'investor' || !isset($_SESSION['user_id'])) {
-    // Redirect to log in
-    header('Location: /login/login_signup.php'); 
+// make sure user is logged in and is a business
+if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'investor') {
+    header("Location: ../login/login_signup.php");
     exit();
 }
 
-require_once dirname(__DIR__) . '/db.php';
-
-// if db.php failed to connect to prevent crash
-if (!isset($mysql) || !($mysql instanceof PDO)) {
-    error_log("FATAL ERROR: \$mysql object not available in investor_pitch_details.php.");
-    header('Location: /login/login_signup.php?error=db_unavail');
-    exit();
-}
+// include database connection
+include '../sql/db.php';
 
 // get pitch id, make an integer
 $pitchID = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -85,7 +81,7 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pitch Details - <?php echo htmlspecialchars($pitch['Title'] ?? 'Loading...'); ?></title>
     <link rel="stylesheet" href="investor_pitch_details.css" />
-    <link rel="stylesheet" href="/navbar.css" />
+    <link rel="stylesheet" href="../navbar.css" />
     <link rel="stylesheet" href="/footer.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
     rel="stylesheet" />
@@ -128,7 +124,7 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
 </head>
 
 <body>
-    <div id="investor-navbar-placeholder"></div>
+       <?php include '../navbar.php'; ?>
 
     <main class="section">
         <div class="pitch-card">
@@ -279,11 +275,8 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
         </div>
     </main>
 
-    <div src="/load-footer.js"></div>
-
-    <script src="load_investor_navbar.js"></script>
+    <?php include '../footer.php'; ?>
     <script src="investor_pitch_details.js"></script>
-    <script src="/load-footer.js"></script>
 </body>
 
 </html>
