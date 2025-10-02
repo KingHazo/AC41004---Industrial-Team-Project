@@ -161,6 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   </div>
   <?php include '../footer.php'; ?>
+  <script src="create_pitch.js"></script>
 </body>
 
 </html>

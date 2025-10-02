@@ -39,6 +39,23 @@ $pitches = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
   <?php include '../navbar.php'; ?>
 
+  <div id="saveMessage" style="
+  display: none;
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #27ae60;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 1000;
+">
+    Pitch saved successfully!
+  </div>
+
   <section id="dashboard" class="section">
     <h2>My Pitches</h2>
 
@@ -91,6 +108,21 @@ $pitches = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
   </section>
   <?php include '../footer.php'; ?>
+  <script>
+    // check URL for saved parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('saved') === '1') {
+      const popup = document.getElementById('saveMessage');
+      popup.style.display = 'block';
+      popup.style.opacity = 1;
+
+      // hide after 3 seconds
+      setTimeout(() => {
+        popup.style.opacity = 0;
+        setTimeout(() => { popup.style.display = 'none'; }, 300);
+      }, 3000);
+    }
+  </script>
 
   <script src="business_dashboard.js"></script>
 </body>

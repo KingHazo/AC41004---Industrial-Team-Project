@@ -78,12 +78,12 @@ $disableEdit = false;
 $disableProfit = false;
 $now = date("Y-m-d");
 if ($pitch['WindowEndDate'] && $now > $pitch['WindowEndDate']) {
-    $status = "closed";
-    $disableEdit = true;
+  $status = "closed";
+  $disableEdit = true;
 } elseif ($pitch['CurrentAmount'] >= $pitch['TargetAmount'] && $pitch['TargetAmount'] > 0) {
-    $status = "funded";
+  $status = "funded";
 } elseif ($pitch['CurrentAmount'] > 0) {
-    $status = "active";
+  $status = "active";
 }
 
 // fetch investment tiers for this pitch
@@ -179,16 +179,9 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
       <?php endif; ?>
 
       <div class="card-buttons">
-        <button type="button" class="edit-btn" <?php echo $disableEdit ? "disabled" : ""; ?>>
+        <a href="edit_pitch.php?id=<?php echo $pitch['PitchID']; ?>" class="edit-btn" <?php echo $disableEdit ? "style='pointer-events: none; opacity: 0.5;'" : ""; ?>>
           Edit Pitch
-        </button>
-
-        <!-- added css here because it was hidden by default and the external CSS was not applying properly -->
-        <button id="saveBtn" data-pitch-id="<?php echo $pitch['PitchID']; ?>"
-          style="display: none; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; color: #fff; background: #2980b9; transition: background 0.3s ease;">
-          Save Changes
-        </button>
-
+        </a>
         <form action="profit_declare.php" method="get" style="display:inline;">
           <input type="hidden" name="id" value="<?php echo $pitch['PitchID']; ?>">
           <button type="submit" class="profit-btn">Declare Profit</button>
@@ -197,7 +190,7 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
   </main>
   <?php include '../footer.php'; ?>
-  <script src="pitch_details.js"></script>
+  <!--<script src="pitch_details.js"></script> -->
 </body>
 
 </html>
