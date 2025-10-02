@@ -6,14 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Profit Declaration</title>
   <link rel="stylesheet" href="profit_declare.css">
-  <link rel="stylesheet" href="business_navbar.css">
   <link rel="stylesheet" href="../footer.css">
+  <link rel="stylesheet" href="../navbar.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
   <!-- Header -->
-   <div id="business-navbar-placeholder"></div>
+     <?php include '../navbar.php'; ?>
 
   <!-- Profit declaration section -->
   <main class="section">
@@ -37,9 +37,7 @@
       </form>
     </div>
   </main>
-  <div id="footer-placeholder"></div>
-   <script src="../load_footer.js"></script>
-  <script src="load_business_navbar.js"></script>
+   <?php include '../footer.php'; ?>
   <script src="profit_declare.js"></script>
 </body>
 
