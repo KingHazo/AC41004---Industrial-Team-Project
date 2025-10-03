@@ -25,6 +25,17 @@ $pitch = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$pitch) die("Pitch not found or you do not have permission.");
 
+// fetch all tags
+$allTagsStmt = $mysql->prepare("SELECT * FROM Tag ORDER BY Name ASC");
+$allTagsStmt->execute();
+$allTags = $allTagsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// fetch selected tags for this pitch
+$selectedTagStmt = $mysql->prepare("SELECT TagID FROM PitchTag WHERE PitchID=:pitchId");
+$selectedTagStmt->bindParam(':pitchId', $pitchId);
+$selectedTagStmt->execute();
+$selectedTagsIds = $selectedTagStmt->fetchAll(PDO::FETCH_COLUMN); // array of IDs
+
 // fetch investment tiers
 $stmt = $mysql->prepare("SELECT * FROM InvestmentTier WHERE PitchID=:pitchId ORDER BY Min ASC");
 $stmt->bindParam(':pitchId', $pitchId);
@@ -43,15 +54,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $target = $_POST['target'];
     $endDate = $_POST['end_date'];
     $profitShare = $_POST['profit_share'];
+    $payoutFrequency = $_POST['payout_frequency'];
 
     // update only editable fields
     $stmt = $mysql->prepare("
-        UPDATE Pitch SET
-            ElevatorPitch=:elevator,
-            DetailedPitch=:details
-            ".(!$disableOtherFields ? ", Title=:title, TargetAmount=:target, WindowEndDate=:endDate, ProfitSharePercentage=:profitShare" : "")."
-        WHERE PitchID=:pitchId AND BusinessID=:businessId
+    UPDATE Pitch SET
+        ElevatorPitch=:elevator,
+        DetailedPitch=:details
+        " . (!$disableOtherFields ? ", Title=:title, TargetAmount=:target, WindowEndDate=:endDate, ProfitSharePercentage=:profitShare, PayoutFrequency=:payoutFrequency" : "") . "
+    WHERE PitchID=:pitchId AND BusinessID=:businessId
     ");
+
     $stmt->bindParam(':elevator', $elevator);
     $stmt->bindParam(':details', $details);
     if (!$disableOtherFields) {
@@ -59,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindParam(':target', $target);
         $stmt->bindParam(':endDate', $endDate);
         $stmt->bindParam(':profitShare', $profitShare);
+        $stmt->bindParam(':payoutFrequency', $payoutFrequency);
     }
     $stmt->bindParam(':pitchId', $pitchId);
     $stmt->bindParam(':businessId', $_SESSION['userId']);
@@ -91,6 +105,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
+
+        // update tags
+        $stmt = $mysql->prepare("DELETE FROM PitchTag WHERE PitchID=:pitchId");
+        $stmt->bindParam(':pitchId', $pitchId);
+        $stmt->execute();
+
+        if (isset($_POST['tags'])) {
+            $selectedTags = array_slice($_POST['tags'], 0, 5);
+            foreach ($selectedTags as $tagId) {
+                $stmt = $mysql->prepare("INSERT INTO PitchTag (PitchID, TagID) VALUES (:pitchId, :tagId)");
+                $stmt->bindParam(':pitchId', $pitchId);
+                $stmt->bindParam(':tagId', $tagId);
+                $stmt->execute();
+            }
+        }
     }
 
     // redirect to dashboard with saved query param
@@ -101,128 +130,215 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edit Pitch</title>
-<link rel="stylesheet" href="create_pitch.css">
-<link rel="stylesheet" href="../footer.css">
-<link rel="stylesheet" href="../navbar.css">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-#saveMessage {
-  display: none;
-  position: fixed;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #27ae60;
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  z-index: 1000;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Pitch</title>
+    <link rel="stylesheet" href="create_pitch.css">
+    <link rel="stylesheet" href="edit_pitch.css">
+    <link rel="stylesheet" href="../footer.css">
+    <link rel="stylesheet" href="../navbar.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        #saveMessage {
+            display: none;
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #27ae60;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        #errorMessage {
+            display: none;
+            position: fixed;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #f13805ff;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+    </style>
 </head>
+
 <body>
-<?php include '../navbar.php'; ?>
+    <?php include '../navbar.php'; ?>
 
-<main class="section">
-<h2>Edit Pitch – <?php echo htmlspecialchars($pitch['Title']); ?></h2>
-<form class="pitch-form" method="POST" enctype="multipart/form-data">
-    <!-- Product title -->
-    <label for="title">Product Title</label>
-    <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($pitch['Title']); ?>" 
-           <?php echo $disableOtherFields ? 'readonly' : ''; ?> required>
+    <main class="section">
+        <h2>Edit Pitch – <?php echo htmlspecialchars($pitch['Title']); ?></h2>
+        <form class="pitch-form" method="POST" enctype="multipart/form-data">
+            <!-- Product title -->
+            <label for="title">Product Title</label>
+            <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($pitch['Title']); ?>"
+                <?php echo $disableOtherFields ? 'readonly' : ''; ?> required>
 
-    <!-- Elevator pitch -->
-    <label for="elevator">Elevator Pitch</label>
-    <textarea id="elevator" name="elevator" rows="2" required><?php echo htmlspecialchars($pitch['ElevatorPitch']); ?></textarea>
+            <!-- Elevator pitch -->
+            <label for="elevator">Elevator Pitch</label>
+            <textarea id="elevator" name="elevator" rows="2" required><?php echo htmlspecialchars($pitch['ElevatorPitch']); ?></textarea>
 
-    <!-- Detailed pitch -->
-    <label for="details">Detailed Pitch</label>
-    <textarea id="details" name="details" rows="5" required><?php echo htmlspecialchars($pitch['DetailedPitch']); ?></textarea>
+            <!-- Detailed pitch -->
+            <label for="details">Detailed Pitch</label>
+            <textarea id="details" name="details" rows="5" required><?php echo htmlspecialchars($pitch['DetailedPitch']); ?></textarea>
 
-    <!-- media upload -->
-    <label for="media">Upload Images/Videos</label>
-    <input type="file" id="media" name="media[]" multiple accept="image/*,video/*" 
-           <?php echo $disableOtherFields ? 'disabled' : ''; ?>>
+            <!-- media upload -->
+            <label for="media">Upload Images/Videos</label>
+            <input type="file" id="media" name="media[]" multiple accept="image/*,video/*"
+                <?php echo $disableOtherFields ? 'disabled' : ''; ?>>
 
-    <!-- Target amount -->
-    <label for="target">Target Investment Amount (£)</label>
-    <input type="number" id="target" name="target" value="<?php echo $pitch['TargetAmount']; ?>" 
-           <?php echo $disableOtherFields ? 'readonly' : ''; ?>>
+            <!-- Tags -->
+            <h3>Tags</h3>
+            <?php if ($status === 'draft'): ?>
+                <div class="dropdown">
+                    <button type="button" class="dropbtn">Select Tags (max 5)</button>
+                    <div class="dropdown-content">
+                        <?php foreach ($allTags as $tag): ?>
+                            <label class="checkbox">
+                                <input type="checkbox" name="tags[]" value="<?php echo $tag['TagID']; ?>"
+                                    onchange="limitTags(this)"
+                                    <?php echo in_array($tag['TagID'], $selectedTagsIds) ? 'checked' : ''; ?>>
+                                <?php echo htmlspecialchars($tag['Name']); ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <p class="note">Select up to 5 tags.</p>
+                <div id="errorMessage">Maximum of 5 Tags!</div>
+            <?php else: ?>
+                <div class="tags-container">
+                    <?php if (!empty($selectedTagsIds)): ?>
+                        <?php
+                        foreach ($allTags as $tag) {
+                            if (in_array($tag['TagID'], $selectedTagsIds)) {
+                                echo '<span class="tag">' . htmlspecialchars($tag['Name']) . '</span> ';
+                            }
+                        }
+                        ?>
+                    <?php else: ?>
+                        <p>No tags added for this pitch.</p>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
 
-    <!-- investment window end date -->
-    <label for="end-date">Investment Window End Date</label>
-    <input type="date" id="end-date" name="end_date" value="<?php echo $pitch['WindowEndDate']; ?>" 
-           <?php echo $disableOtherFields ? 'readonly' : ''; ?>>
+            <!-- Target amount -->
+            <label for="target">Target Investment Amount (£)</label>
+            <input type="number" id="target" name="target" value="<?php echo $pitch['TargetAmount']; ?>"
+                <?php echo $disableOtherFields ? 'readonly' : ''; ?>>
 
-    <!-- Profit share -->
-    <label for="profit-share">Investor Profit Share %</label>
-    <input type="number" id="profit-share" name="profit_share" min="1" max="100" value="<?php echo $pitch['ProfitSharePercentage']; ?>" 
-           <?php echo $disableOtherFields ? 'readonly' : ''; ?>>
+            <!-- investment window end date -->
+            <label for="end-date">Investment Window End Date</label>
+            <input type="date" id="end-date" name="end_date" value="<?php echo $pitch['WindowEndDate']; ?>"
+                <?php echo $disableOtherFields ? 'readonly' : ''; ?>>
 
-    <!-- investment tiers -->
-    <div class="tiers">
-        <h3>Investment Tiers</h3>
-        <?php foreach ($tiers as $tier): ?>
-        <div class="tier-row">
-            <input type="text" name="tier_name[]" value="<?php echo htmlspecialchars($tier['Name']); ?>" <?php echo $disableOtherFields ? 'readonly' : ''; ?>>
-            <input type="number" name="tier_min[]" value="<?php echo $tier['Min']; ?>" <?php echo $disableOtherFields ? 'readonly' : ''; ?>>
-            <input type="number" name="tier_max[]" value="<?php echo $tier['Max']; ?>" <?php echo $disableOtherFields ? 'readonly' : ''; ?>>
-            <input type="number" step="0.1" name="tier_multiplier[]" value="<?php echo $tier['Multiplier']; ?>" <?php echo $disableOtherFields ? 'readonly' : ''; ?>>
+            <!-- Profit share -->
+            <label for="profit-share">Investor Profit Share %</label>
+            <input type="number" id="profit-share" name="profit_share" min="1" max="100" value="<?php echo $pitch['ProfitSharePercentage']; ?>"
+                <?php echo $disableOtherFields ? 'readonly' : ''; ?>>
+
+            <!-- Payout Frequency -->
+            <label>Payout Frequency</label>
+            <div class="payout-toggle">
+                <button type="button"
+                    class="toggle-btn <?php echo ($pitch['PayoutFrequency'] === 'Quarterly') ? 'active' : ''; ?>"
+                    data-value="Quarterly"
+                    <?php echo $status !== 'draft' ? 'disabled style="cursor:not-allowed;opacity:0.6;"' : ''; ?>>
+                    Quarterly
+                </button>
+                <button type="button"
+                    class="toggle-btn <?php echo ($pitch['PayoutFrequency'] === 'Annually') ? 'active' : ''; ?>"
+                    data-value="Annually"
+                    <?php echo $status !== 'draft' ? 'disabled style="cursor:not-allowed;opacity:0.6;"' : ''; ?>>
+                    Annually
+                </button>
+            </div>
+            <input type="hidden" name="payout_frequency" id="payout_frequency" value="<?php echo htmlspecialchars($pitch['PayoutFrequency']); ?>" required>
+
+            <!-- investment tiers -->
+            <div class="tiers">
+                <h3>Investment Tiers</h3>
+                <?php foreach ($tiers as $tier): ?>
+                    <div class="tier-row">
+                        <input type="text" name="tier_name[]" value="<?php echo htmlspecialchars($tier['Name']); ?>" <?php echo $disableOtherFields ? 'readonly' : ''; ?>>
+                        <input type="number" name="tier_min[]" value="<?php echo $tier['Min']; ?>" <?php echo $disableOtherFields ? 'readonly' : ''; ?>>
+                        <input type="number" name="tier_max[]" value="<?php echo $tier['Max']; ?>" <?php echo $disableOtherFields ? 'readonly' : ''; ?>>
+                        <input type="number" step="0.1" name="tier_multiplier[]" value="<?php echo $tier['Multiplier']; ?>" <?php echo $disableOtherFields ? 'readonly' : ''; ?>>
+                    </div>
+                <?php endforeach; ?>
+                <?php if (!$disableOtherFields): ?>
+                    <div class="tier-row">
+                        <input type="text" name="tier_name[]" placeholder="Tier Name">
+                        <input type="number" name="tier_min[]" placeholder="Min (£)">
+                        <input type="number" name="tier_max[]" placeholder="Max (£)">
+                        <input type="number" step="0.1" name="tier_multiplier[]" placeholder="Multiplier">
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <div class="form-buttons">
+                <button type="button" class="ai-btn">Run AI Analysis</button>
+                <button type="submit" class="submit-btn">Save Changes</button>
+            </div>
+        </form>
+    </main>
+
+    <div id="saveMessage">Pitch saved successfully!</div>
+
+    <!-- AI analysis modal-->
+    <div id="ai-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h3>AI Pitch Analysis</h3>
+            <p class="rag-score"><strong>Score:</strong> <span id="rag">Amber</span></p>
+            <ul id="ai-feedback">
+                <li>Your elevator pitch is clear.</li>
+                <li>Add more details about market size.</li>
+                <li>Consider simplifying revenue projections.</li>
+            </ul>
+            <div class="modal-buttons">
+                <button id="reanalyse" class="ai-btn">Apply Feedback & Re-run</button>
+                <button id="submit-anyway" class="submit-btn">Submit Anyway</button>
+            </div>
         </div>
-        <?php endforeach; ?>
-        <?php if (!$disableOtherFields): ?>
-        <div class="tier-row">
-            <input type="text" name="tier_name[]" placeholder="Tier Name">
-            <input type="number" name="tier_min[]" placeholder="Min (£)">
-            <input type="number" name="tier_max[]" placeholder="Max (£)">
-            <input type="number" step="0.1" name="tier_multiplier[]" placeholder="Multiplier">
-        </div>
-        <?php endif; ?>
     </div>
 
-    <div class="form-buttons">
-        <button type="button" class="ai-btn">Run AI Analysis</button>
-        <button type="submit" class="submit-btn">Save Changes</button>
-    </div>
-</form>
-</main>
+    <?php include '../footer.php'; ?>
+    <script src="edit_pitch.js?v=<?php echo time(); ?>"></script>
+    <script>
+        // show popup if redirected with saved=1
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('saved') === '1') {
+            const msg = document.getElementById('saveMessage');
+            msg.style.display = 'block';
+            setTimeout(() => msg.style.display = 'none', 3000);
+        }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropBtn = document.querySelector('.dropbtn');
+            const dropdown = document.querySelector('.dropdown-content');
 
-<div id="saveMessage">Pitch saved successfully!</div>
+            dropBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // prevent closing immediately
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            });
 
-<!-- AI analysis modal-->
-<div id="ai-modal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h3>AI Pitch Analysis</h3>
-        <p class="rag-score"><strong>Score:</strong> <span id="rag">Amber</span></p>
-        <ul id="ai-feedback">
-            <li>Your elevator pitch is clear.</li>
-            <li>Add more details about market size.</li>
-            <li>Consider simplifying revenue projections.</li>
-        </ul>
-        <div class="modal-buttons">
-            <button id="reanalyse" class="ai-btn">Apply Feedback & Re-run</button>
-            <button id="submit-anyway" class="submit-btn">Submit Anyway</button>
-        </div>
-    </div>
-</div>
-
-<?php include '../footer.php'; ?>
-
-<script>
-// show popup if redirected with saved=1
-const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get('saved') === '1') {
-    const msg = document.getElementById('saveMessage');
-    msg.style.display = 'block';
-    setTimeout(() => msg.style.display = 'none', 3000);
-}
-</script>
+            // Close dropdown if clicking outside
+            document.addEventListener('click', () => {
+                dropdown.style.display = 'none';
+            });
+        });
+    </script>
 </body>
+
 </html>

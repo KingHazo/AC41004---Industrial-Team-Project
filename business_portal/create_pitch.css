@@ -185,3 +185,88 @@ body {
   gap: 10px;
   margin-top: 1rem;
 }
+
+
+/* tags containers */
+.dropdown {
+  position: relative;
+  display: inline-block;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.dropbtn {
+  background-color: #000000;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  min-width: 180px;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #fff;
+  min-width: 220px;
+  max-height: 200px; /* scroll if too many items */
+  overflow-y: auto;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.2);
+  padding: 10px;
+  z-index: 10;
+  border-radius: 6px;
+  transition: opacity 0.2s ease;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.checkbox input[type="checkbox"] {
+  margin-right: 8px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.dropdown-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown-content::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 3px;
+}
+
+.checkbox label {
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+/*style for the payout frequency buttons*/
+.payout-toggle {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.toggle-btn {
+    padding: 8px 20px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.toggle-btn.active {
+    background: #000000;
+    color: #fff;
+    border-color: #fbfbfb;
+}

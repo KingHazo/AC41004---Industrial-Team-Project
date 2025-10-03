@@ -41,11 +41,37 @@ if (submitAnywayBtn) {
   });
 }
 
-// Dummy form submission
-const form = document.querySelector('.pitch-form');
-if (form) {
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    alert("Pitch submitted successfully (test mode).");
-  });
+
+//function to limit the tags
+function limitTags(checkbox) {
+  const checkboxes = document.querySelectorAll('input[name="tags[]"]');
+  const checked = Array.from(checkboxes).filter(cb => cb.checked);
+
+  if (checked.length > 5) {
+    checkbox.checked = false; // uncheck the last one
+    const msg = document.getElementById('errorMessage');
+    msg.style.display = 'block';
+    setTimeout(() => {
+      msg.style.display = 'none';
+    }, 3000);
+  }
 }
+
+document.querySelectorAll('.dropdown-content').forEach(drop => {
+  drop.addEventListener('click', function(event) {
+    event.stopPropagation(); // prevents the click from bubbling up
+  });
+});
+
+
+//selects payout frequency
+document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        // remove active class from all
+        document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+        // add active to clicked
+        btn.classList.add('active');
+        // set hidden input value
+        document.getElementById('payout_frequency').value = btn.dataset.value;
+    });
+});

@@ -12,6 +12,11 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'business') {
 // include database connection
 include '../sql/db.php';
 
+// fetch tags
+$tagStmt = $mysql->prepare("SELECT * FROM Tag ORDER BY Name ASC");
+$tagStmt->execute();
+$tags = $tagStmt->fetchAll(PDO::FETCH_ASSOC);
+
 // handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $businessId = $_SESSION['userId'];
@@ -21,19 +26,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $target = $_POST['target'];
   $endDate = $_POST['end_date'];
   $profitShare = $_POST['profit_share'];
+  $payoutFrequency = isset($_POST['payout_frequency']) ? $_POST['payout_frequency'] : null;
 
   // insert pitch
-  $stmt = $mysql->prepare("INSERT INTO Pitch (Title, ElevatorPitch, DetailedPitch, TargetAmount, WindowEndDate, ProfitSharePercentage, BusinessID) VALUES (:title, :elevator, :details, :target, :endDate, :profitShare, :businessId)");
+  $stmt = $mysql->prepare("INSERT INTO Pitch (Title, ElevatorPitch, DetailedPitch, TargetAmount, WindowEndDate, ProfitSharePercentage, PayoutFrequency, BusinessID) 
+VALUES (:title, :elevator, :details, :target, :endDate, :profitShare, :payoutFrequency, :businessId)");
   $stmt->bindParam(':title', $title);
   $stmt->bindParam(':elevator', $elevator);
   $stmt->bindParam(':details', $details);
   $stmt->bindParam(':target', $target);
   $stmt->bindParam(':endDate', $endDate);
   $stmt->bindParam(':profitShare', $profitShare);
+  $stmt->bindParam(':payoutFrequency', $payoutFrequency);
   $stmt->bindParam(':businessId', $businessId);
   $stmt->execute();
 
   $pitchId = $mysql->lastInsertId(); // get the inserted PitchID
+
+  // insert selected tags
+  if (isset($_POST['tags'])) {
+    $selectedTags = array_slice($_POST['tags'], 0, 5); // max 5 tags
+    foreach ($selectedTags as $tagId) {
+      $stmt = $mysql->prepare("INSERT INTO PitchTag (PitchID, TagID) VALUES (:pitchId, :tagId)");
+      $stmt->bindParam(':pitchId', $pitchId);
+      $stmt->bindParam(':tagId', $tagId);
+      $stmt->execute();
+    }
+  }
 
   // insert investment tiers
   if (isset($_POST['tier_name'])) {
@@ -69,10 +88,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Create New Pitch</title>
-  <link rel="stylesheet" href="create_pitch.css">
+  <link rel="stylesheet" href="create_pitch.css?v=<?php echo time(); ?>">
   <link rel="stylesheet" href="../footer.css">
   <link rel="stylesheet" href="../navbar.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    #errorMessage {
+      display: none;
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #f13805ff;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+    }
+  </style>
 </head>
 
 <body>
@@ -100,6 +135,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <label for="media">Upload Images/Videos</label>
       <input type="file" id="media" name="media[]" multiple accept="image/*,video/*">
 
+      <!-- dropdown container for tags -->
+      <div class="dropdown">
+        <button type="button" class="dropbtn">Select Tags (max 5)</button>
+        <div class="dropdown-content">
+          <?php foreach ($tags as $tag): ?>
+            <label class="checkbox">
+              <input type="checkbox" name="tags[]" value="<?php echo $tag['TagID']; ?>" onchange="limitTags(this)">
+              <?php echo htmlspecialchars($tag['Name']); ?>
+            </label>
+          <?php endforeach; ?>
+        </div>
+      </div>
+      <p class="note">Select up to 5 tags.</p>
+
       <!-- Target amount -->
       <label for="target">Target Investment Amount (£)</label>
       <input type="number" id="target" name="target" placeholder="e.g., 10000" required>
@@ -111,6 +160,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <!-- Profit share -->
       <label for="profit-share">Investor Profit Share %</label>
       <input type="number" id="profit-share" name="profit_share" min="1" max="100" placeholder="e.g., 20" required>
+
+      <!-- Payout Frequency -->
+      <label>Payout Frequency</label>
+      <div class="payout-toggle">
+        <button type="button" class="toggle-btn selected" data-value="Quarterly">Quarterly</button>
+        <button type="button" class="toggle-btn" data-value="Annually">Annually</button>
+      </div>
+      <input type="hidden" name="payout_frequency" id="payout_frequency" value="Quarterly" required>
 
       <!-- investment tiers -->
       <div class="tiers">
@@ -143,6 +200,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
   </main>
 
+  <div id="errorMessage">Maximum of 5 Tags!</div>
+
   <!-- ai analysis -->
   <div id="ai-modal" class="modal">
     <div class="modal-content">
@@ -161,7 +220,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   </div>
   <?php include '../footer.php'; ?>
-  <script src="create_pitch.js"></script>
+  <script src="create_pitch.js?v=<?php echo time(); ?>"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const dropBtn = document.querySelector('.dropbtn');
+      const dropdown = document.querySelector('.dropdown-content');
+
+      dropBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // prevent closing immediately
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+      });
+
+      // Close dropdown if clicking outside
+      document.addEventListener('click', () => {
+        dropdown.style.display = 'none';
+      });
+    });
+  </script>
+
 </body>
 
 </html>
