@@ -34,6 +34,29 @@ try {
         $totalInvested = number_format(0, 2);
     }
 
+    // calc total ROI
+    $sql_returns = "SELECT SUM(ROI) AS TotalReturns FROM Investment WHERE InvestorID = :investorID";
+    $stmt_returns = $mysql->prepare($sql_returns);
+    $stmt_returns->bindParam(':investorID', $investorID);
+    $stmt_returns->execute();
+    $result_returns = $stmt_returns->fetch(PDO::FETCH_ASSOC);
+    $rawTotalReturns = $result_returns['TotalReturns'] ?? 0.00;
+    $totalReturns = number_format($rawTotalReturns, 2);
+
+    // how many active pitches
+    $sql_active_count = "
+        SELECT COUNT(DISTINCT T1.PitchID) AS ActiveCount 
+        FROM Investment T1 
+        INNER JOIN Pitch T2 ON T1.PitchID = T2.PitchID 
+        WHERE T1.InvestorID = :investorID 
+        AND T2.CurrentAmount < T2.TargetAmount 
+        AND T2.WindowEndDate >= CURDATE()
+    ";
+    $stmt_active_count = $mysql->prepare($sql_active_count);
+    $stmt_active_count->bindParam(':investorID', $investorID);
+    $stmt_active_count->execute();
+    $activePitchesCount = $stmt_active_count->fetchColumn();
+
     // find 3 most recent investments
     $sql_investments = "
         SELECT 
@@ -115,13 +138,11 @@ try {
             </div>
             <div class="kpi-card">
                 <p class="kpi-label">Returns Received</p>
-                <!-- PLACEHOLDER -->
-                <p class="kpi-value">£676,767</p>
+                <p class="kpi-value">£<?php echo htmlspecialchars($totalReturns); ?></p>
             </div>
             <div class="kpi-card">
                 <p class="kpi-label">Active Investments</p>
-                <!-- PLACEHOLDER -->
-                <p class="kpi-value">676,767</p>
+                <p class="kpi-value"><?php echo htmlspecialchars($activePitchesCount); ?></p>
             </div>
         </div>
 
