@@ -43,3 +43,20 @@ INSERT INTO Media (FilePath, PitchID) VALUES
 INSERT INTO ProfitDistribution (PitchID, Profit, DistributionDate) VALUES
 (1, 5000.00, '2025-10-15'),
 (2, 3000.00, '2025-10-15');
+
+--example tags
+INSERT INTO Tag (Name) VALUES
+('Eco-Friendly'),
+('Low Risk'),
+('High Risk'),
+('Technology'),
+('Healthcare'),
+('Food & Beverage'),
+('Education'),
+('Sustainable'),
+('FinTech'),
+('Real Estate'),
+('Consumer Goods'),
+('Renewable Energy'),
+('Social Impact'),
+('Startup');
