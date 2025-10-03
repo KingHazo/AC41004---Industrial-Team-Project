@@ -55,6 +55,11 @@ body {
   color: #f39c12;
 }
 
+.status.funded {
+  background: #d7d9ff;  
+  color: #0b3d91;     
+}
+
 /* Media Gallery */
 .media-gallery {
   display: flex;
@@ -116,27 +121,29 @@ body {
 
 .edit-btn,
 .profit-btn {
-  border: none;
-  padding: 10px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  color: #fff;
-  transition: background 0.3s ease;
+    display: inline-block;
+    padding: 5px 15px;      
+    border-radius: 6px;
+    font-size: 0.9rem;     
+    font-weight: 600;
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
 }
 
 .edit-btn {
-  background: #f39c12;
+    background-color: #f39c12;
 }
 
 .edit-btn:hover {
-  background: #d68910;
+    background-color: #d68910;
 }
 
 .profit-btn {
-  background: #27ae60;
+    background-color: #27ae60;
 }
 
 .profit-btn:hover {
-  background: #1e8449;
+    background-color: #1e8449;
 }

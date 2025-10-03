@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
 
         // set session for auto login
-        $_SESSION['userID'] = $mysql->lastInsertId();
+        $_SESSION['userId'] = $mysql->lastInsertId();
         $_SESSION['userType'] = $type;
         $_SESSION['logged_in'] = true;
 
