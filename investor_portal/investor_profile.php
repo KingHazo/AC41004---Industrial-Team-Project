@@ -31,12 +31,57 @@ try {
         header("Location: ../login/login_signup.php");
         exit();
     }
+
+     // what money symbol to use
+    $currencySymbol = htmlspecialchars($investorData['PreferredCurrency'] === 'USD' ? '$' : '£');
+
     
     // format DateOfBirth for HTML input YYYY-MM-DD
     $formattedDOB = $investorData['DateOfBirth'] ? date('Y-m-d', strtotime($investorData['DateOfBirth'])) : '';
     // format DateOfBirth for display 05 May 1992
     $displayDOB = $investorData['DateOfBirth'] ? date('d M Y', strtotime($investorData['DateOfBirth'])) : 'Not provided';
     
+
+    // calculate total invested
+    $sql_invested = "SELECT SUM(Amount) AS TotalInvested FROM Investment WHERE InvestorID = :investorID";
+    $stmt_invested = $mysql->prepare($sql_invested);
+    $stmt_invested->bindParam(':investorID', $investorID);
+    $stmt_invested->execute();
+    $result_invested = $stmt_invested->fetch(PDO::FETCH_ASSOC);
+    $totalInvested = $result_invested['TotalInvested'] ?? 0.00;
+    
+    // total roi
+    $sql_returned = "SELECT SUM(ROI) AS TotalReturned FROM Investment WHERE InvestorID = :investorID";
+    $stmt_returned = $mysql->prepare($sql_returned);
+    $stmt_returned->bindParam(':investorID', $investorID);
+    $stmt_returned->execute();
+    $result_returned = $stmt_returned->fetch(PDO::FETCH_ASSOC);
+    $totalReturned = $result_returned['TotalReturned'] ?? 0.00;
+
+    // active pitches
+    $sql_active = "SELECT COUNT(DISTINCT T1.PitchID) AS ActiveCount 
+                   FROM Investment T1 
+                   INNER JOIN Pitch T2 ON T1.PitchID = T2.PitchID 
+                   WHERE T1.InvestorID = :investorID 
+                   AND T2.CurrentAmount < T2.TargetAmount 
+                   AND T2.WindowEndDate >= CURDATE()"; // still open
+    $stmt_active = $mysql->prepare($sql_active);
+    $stmt_active->bindParam(':investorID', $investorID);
+    $stmt_active->execute();
+    $activePitchesCount = $stmt_active->fetchColumn();
+
+    // closed pitches
+    $sql_closed = "SELECT COUNT(DISTINCT T1.PitchID) AS ClosedCount 
+                   FROM Investment T1 
+                   INNER JOIN Pitch T2 ON T1.PitchID = T2.PitchID 
+                   WHERE T1.InvestorID = :investorID 
+                   AND (T2.CurrentAmount >= T2.TargetAmount OR T2.WindowEndDate < CURDATE())";
+    $stmt_closed = $mysql->prepare($sql_closed);
+    $stmt_closed->bindParam(':investorID', $investorID);
+    $stmt_closed->execute();
+    $closedPitchesCount = $stmt_closed->fetchColumn();
+
+
 } catch (PDOException $e) {
     error_log("Database Fetch Error: " . $e->getMessage());
 }
@@ -92,19 +137,27 @@ try {
             <div class="kpi-grid">
                 <div class="kpi-card">
                     <p class="kpi-label">Total Invested</p>
-                    <p class="kpi-value" id="stat-invested">£9,500</p>
+                    <p class="kpi-value" id="stat-invested">
+                        <?php echo $currencySymbol; ?><?php echo number_format($totalInvested, 2); ?>
+                    </p>
                 </div>
                 <div class="kpi-card">
                     <p class="kpi-label">Total Returns</p>
-                    <p class="kpi-value good" id="stat-returns">£1,320</p>
+                    <p class="kpi-value good" id="stat-returns">
+                        <?php echo $currencySymbol; ?><?php echo number_format($totalReturned, 2); ?>
+                    </p>
                 </div>
                 <div class="kpi-card">
                     <p class="kpi-label">Active Pitches</p>
-                    <p class="kpi-value" id="stat-active">3</p>
+                    <p class="kpi-value" id="stat-active">
+                        <?php echo htmlspecialchars($activePitchesCount); ?>
+                    </p>
                 </div>
                 <div class="kpi-card">
                     <p class="kpi-label">Closed Pitches</p>
-                    <p class="kpi-value" id="stat-closed">5</p>
+                    <p class="kpi-value" id="stat-closed">
+                        <?php echo htmlspecialchars($closedPitchesCount); ?>
+                    </p>
                 </div>
             </div>
         </section>

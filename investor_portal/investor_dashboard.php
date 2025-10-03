@@ -101,7 +101,7 @@ try {
 </head>
 
 <body>
-    <div id="investor-navbar-placeholder"></div>
+     <?php include '../navbar.php'; ?>
 
     <main class="section">
         
@@ -182,7 +182,7 @@ try {
 
     <div id="footer-placeholder"></div>
 
-    <script src="load_investor_navbar.js"></script>
+    
     <script src="investor_dashboard.js"></script>
     <script src="../load_footer.js"></script>
 </body>
