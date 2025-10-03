@@ -32,7 +32,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $totalProfit = floatval($_POST['profit']);
     $distributableProfit = ($totalProfit * $investorSharePercent) / 100;
 
-    // store in ProfitDistribution table
+    // fetch all investments for this pitch
+    $stmt = $mysql->prepare("
+        SELECT i.InvestorID, i.Amount, t.Multiplier
+        FROM Investment i
+        INNER JOIN InvestmentTier t
+            ON i.Amount BETWEEN t.Min AND t.Max AND t.PitchID = i.PitchID
+        WHERE i.PitchID = :pitchId
+    ");
+    $stmt->bindParam(':pitchId', $pitchId);
+    $stmt->execute();
+    $investors = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // calculate total shares
+    $totalShares = 0;
+    $investorShares = [];
+    foreach ($investors as $inv) {
+        $shares = $inv['Amount'] * $inv['Multiplier'];
+        $investorShares[$inv['InvestorID']] = $shares;
+        $totalShares += $shares;
+    }
+
+    // avoid division by zero
+    if ($totalShares > 0) {
+        $profitPerShare = $distributableProfit / $totalShares;
+
+        // distribute profit to each investor and update their balance
+        foreach ($investorShares as $investorId => $shares) {
+            $profitForInvestor = $shares * $profitPerShare;
+
+            // update Investor balance
+            $stmt = $mysql->prepare("UPDATE Investor SET InvestorBalance = InvestorBalance + :profit WHERE InvestorID = :investorId");
+            $stmt->bindParam(':profit', $profitForInvestor);
+            $stmt->bindParam(':investorId', $investorId);
+            $stmt->execute();
+        }
+    }
+
+    // store total distributable profit in ProfitDistribution table
     $stmt = $mysql->prepare("INSERT INTO ProfitDistribution (PitchID, Profit, DistributionDate) VALUES (:pitchId, :profit, NOW())");
     $stmt->bindParam(':pitchId', $pitchId);
     $stmt->bindParam(':profit', $distributableProfit);
@@ -117,8 +154,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             distributableField.value = `£${(profit * investorShare / 100).toFixed(2)}`;
         });
     }
-
-    //TODO: distribute to investors as well
 
     // show popup if there's a success message
     const successMessage = "<?php echo $successMessage; ?>";
