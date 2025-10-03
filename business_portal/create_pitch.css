@@ -223,11 +223,6 @@ body {
   transition: opacity 0.2s ease;
 }
 
-.dropdown:hover .dropdown-content {
-  display: block;
-}
-
-
 .checkbox {
   display: flex;
   align-items: center;

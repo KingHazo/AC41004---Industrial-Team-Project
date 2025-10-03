@@ -89,6 +89,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <link rel="stylesheet" href="../footer.css">
   <link rel="stylesheet" href="../navbar.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    #errorMessage {
+      display: none;
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #f13805ff;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+    }
+  </style>
 </head>
 
 <body>
@@ -118,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <!-- dropdown container for tags -->
       <div class="dropdown">
-        <button class="dropbtn">Select Tags (max 5)</button>
+        <button type="button" class="dropbtn">Select Tags (max 5)</button>
         <div class="dropdown-content">
           <?php foreach ($tags as $tag): ?>
             <label class="checkbox">
@@ -173,6 +189,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
   </main>
 
+  <div id="errorMessage">Maximum of 5 Tags!</div>
+
   <!-- ai analysis -->
   <div id="ai-modal" class="modal">
     <div class="modal-content">
@@ -191,7 +209,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   </div>
   <?php include '../footer.php'; ?>
- <script src="create_pitch.js?v=<?php echo time(); ?>"></script>
+  <script src="create_pitch.js?v=<?php echo time(); ?>"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const dropBtn = document.querySelector('.dropbtn');
+      const dropdown = document.querySelector('.dropdown-content');
+
+      dropBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // prevent closing immediately
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+      });
+
+      // Close dropdown if clicking outside
+      document.addEventListener('click', () => {
+        dropdown.style.display = 'none';
+      });
+    });
+  </script>
 
 </body>
 

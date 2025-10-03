@@ -41,14 +41,24 @@ if (submitAnywayBtn) {
   });
 }
 
-//checks for the tag limit
+
+//function to limit the tags
 function limitTags(checkbox) {
-  const max = 5;
   const checkboxes = document.querySelectorAll('input[name="tags[]"]');
-  let checkedCount = 0;
-  checkboxes.forEach(cb => { if(cb.checked) checkedCount++; });
-  if (checkedCount > max) {
-    checkbox.checked = false;
-    alert('Maximum 5 tags allowed.');
+  const checked = Array.from(checkboxes).filter(cb => cb.checked);
+
+  if (checked.length > 5) {
+    checkbox.checked = false; // uncheck the last one
+    const msg = document.getElementById('errorMessage');
+    msg.style.display = 'block';
+    setTimeout(() => {
+      msg.style.display = 'none';
+    }, 3000);
   }
 }
+
+document.querySelectorAll('.dropdown-content').forEach(drop => {
+  drop.addEventListener('click', function(event) {
+    event.stopPropagation(); // prevents the click from bubbling up
+  });
+});
