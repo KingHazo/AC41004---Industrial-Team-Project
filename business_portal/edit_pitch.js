@@ -18,3 +18,27 @@ document.querySelectorAll('.dropdown-content').forEach(drop => {
     event.stopPropagation(); // prevents the click from bubbling up
   });
 });
+
+
+
+//selects payout frequency
+document.addEventListener('DOMContentLoaded', () => {
+    const payoutButtons = document.querySelectorAll('.toggle-btn');
+    const hiddenInput = document.getElementById('payout_frequency');
+
+    // set hidden input to active when the page loads
+    const activeBtn = document.querySelector('.toggle-btn.active');
+    if (activeBtn) hiddenInput.value = activeBtn.dataset.value;
+
+    // only add click listeners if the buttons are not disabled
+    payoutButtons.forEach(btn => {
+        if (!btn.disabled) {
+            btn.addEventListener('click', () => {
+                payoutButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                hiddenInput.value = btn.dataset.value;
+            });
+        }
+    });
+});
+

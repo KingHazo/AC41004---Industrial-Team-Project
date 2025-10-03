@@ -54,15 +54,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $target = $_POST['target'];
     $endDate = $_POST['end_date'];
     $profitShare = $_POST['profit_share'];
+    $payoutFrequency = $_POST['payout_frequency'];
 
     // update only editable fields
     $stmt = $mysql->prepare("
-        UPDATE Pitch SET
-            ElevatorPitch=:elevator,
-            DetailedPitch=:details
-            " . (!$disableOtherFields ? ", Title=:title, TargetAmount=:target, WindowEndDate=:endDate, ProfitSharePercentage=:profitShare" : "") . "
-        WHERE PitchID=:pitchId AND BusinessID=:businessId
+    UPDATE Pitch SET
+        ElevatorPitch=:elevator,
+        DetailedPitch=:details
+        " . (!$disableOtherFields ? ", Title=:title, TargetAmount=:target, WindowEndDate=:endDate, ProfitSharePercentage=:profitShare, PayoutFrequency=:payoutFrequency" : "") . "
+    WHERE PitchID=:pitchId AND BusinessID=:businessId
     ");
+
     $stmt->bindParam(':elevator', $elevator);
     $stmt->bindParam(':details', $details);
     if (!$disableOtherFields) {
@@ -70,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindParam(':target', $target);
         $stmt->bindParam(':endDate', $endDate);
         $stmt->bindParam(':profitShare', $profitShare);
+        $stmt->bindParam(':payoutFrequency', $payoutFrequency);
     }
     $stmt->bindParam(':pitchId', $pitchId);
     $stmt->bindParam(':businessId', $_SESSION['userId']);
@@ -242,6 +245,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label for="profit-share">Investor Profit Share %</label>
             <input type="number" id="profit-share" name="profit_share" min="1" max="100" value="<?php echo $pitch['ProfitSharePercentage']; ?>"
                 <?php echo $disableOtherFields ? 'readonly' : ''; ?>>
+
+            <!-- Payout Frequency -->
+            <label>Payout Frequency</label>
+            <div class="payout-toggle">
+                <button type="button"
+                    class="toggle-btn <?php echo ($pitch['PayoutFrequency'] === 'Quarterly') ? 'active' : ''; ?>"
+                    data-value="Quarterly"
+                    <?php echo $status !== 'draft' ? 'disabled style="cursor:not-allowed;opacity:0.6;"' : ''; ?>>
+                    Quarterly
+                </button>
+                <button type="button"
+                    class="toggle-btn <?php echo ($pitch['PayoutFrequency'] === 'Annually') ? 'active' : ''; ?>"
+                    data-value="Annually"
+                    <?php echo $status !== 'draft' ? 'disabled style="cursor:not-allowed;opacity:0.6;"' : ''; ?>>
+                    Annually
+                </button>
+            </div>
+            <input type="hidden" name="payout_frequency" id="payout_frequency" value="<?php echo htmlspecialchars($pitch['PayoutFrequency']); ?>" required>
 
             <!-- investment tiers -->
             <div class="tiers">
