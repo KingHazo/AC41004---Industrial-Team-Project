@@ -147,3 +147,19 @@ body {
 .profit-btn:hover {
     background-color: #1e8449;
 }
+
+/* tags */
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.tag {
+  background-color: #070707;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}

@@ -62,6 +62,17 @@ if (!$pitch) {
   die("Pitch not found or you do not have permission to view it.");
 }
 
+// fetch tags for this pitch
+$tagStmt = $mysql->prepare("
+    SELECT t.Name 
+    FROM Tag t
+    INNER JOIN PitchTag pt ON t.TagID = pt.TagID
+    WHERE pt.PitchID = :pitchId
+");
+$tagStmt->bindParam(':pitchId', $pitchId);
+$tagStmt->execute();
+$tags = $tagStmt->fetchAll(PDO::FETCH_COLUMN); // get an array of tag names
+
 $status = $pitch['Status'];
 
 $disableEdit = !in_array($status, ['active', 'draft']);
@@ -137,6 +148,17 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
 
       <h3>Detailed Pitch</h3>
       <p id="detailedPitchText"><?php echo nl2br(htmlspecialchars($pitch['DetailedPitch'])); ?></p>
+
+      <h3>Tags</h3>
+      <?php if ($tags): ?>
+        <div class="tags-container">
+          <?php foreach ($tags as $tagName): ?>
+            <span class="tag"><?php echo htmlspecialchars($tagName); ?></span>
+          <?php endforeach; ?>
+        </div>
+      <?php else: ?>
+        <p>No tags added for this pitch.</p>
+      <?php endif; ?>
 
       <h3>Funding Progress</h3>
       <div class="progress-container">
