@@ -13,6 +13,11 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'business') {
 // include database connection
 include '../sql/db.php';
 
+if (!$mysql) {
+    die("Database connection failed.");
+}
+
+
 // get pitch ID from URL
 if (!isset($_GET['id']) || empty($_GET['id'])) {
   die("Pitch ID is missing.");
@@ -86,7 +91,7 @@ $disableEdit = ($status === 'funded' || $status === 'closed');
 $progress = $pitch['TargetAmount'] > 0 ? ($pitch['CurrentAmount'] / $pitch['TargetAmount']) * 100 : 0;
 
 // determine status
-$status = "draft";
+$status = $pitch['Status']; // <-- take real status from DB
 $disableEdit = false;
 $disableProfit = false;
 $now = date("Y-m-d");
@@ -209,6 +214,12 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
         <a href="edit_pitch.php?id=<?php echo $pitch['PitchID']; ?>" class="edit-btn" <?php echo $disableEdit ? "style='pointer-events: none; opacity: 0.5;'" : ""; ?>>
           Edit Pitch
         </a>
+        <?php if ($status === 'draft'): ?>
+          <form action="submit_pitch.php" method="post" style="display:inline;">
+            <input type="hidden" name="pitchId" value="<?php echo $pitch['PitchID']; ?>">
+            <button type="submit" class="submit-btn">Submit Pitch</button>
+          </form>
+        <?php endif; ?>
         <form action="profit_declare.php" method="get" style="display:inline;">
           <input type="hidden" name="id" value="<?php echo $pitch['PitchID']; ?>">
           <button type="submit" class="profit-btn">Declare Profit</button>

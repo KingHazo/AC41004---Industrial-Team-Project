@@ -145,7 +145,7 @@ body {
 }
 
 .view-btn,
-.edit-btn,
+.submit-btn,
 .profit-btn {
   border: none;
   padding: 10px 15px;
@@ -188,4 +188,12 @@ body {
 .profit-btn:disabled {
   background: #ddd;
   cursor: not-allowed;
+}
+
+.submit-btn {
+    background-color: #4cd810;
+}
+
+.submit-btn:hover {
+    background-color: #55c848;
 }

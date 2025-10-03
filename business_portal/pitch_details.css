@@ -120,9 +120,10 @@ body {
 }
 
 .edit-btn,
-.profit-btn {
+.profit-btn,
+.submit-btn {
     display: inline-block;
-    padding: 5px 15px;      
+    padding: 12px 20px;   
     border-radius: 6px;
     font-size: 0.9rem;     
     font-weight: 600;
@@ -130,11 +131,22 @@ body {
     text-decoration: none;
     cursor: pointer;
     transition: background 0.3s ease;
+    border: none;
+    outline: none;
 }
 
 .edit-btn {
     background-color: #f39c12;
 }
+
+.submit-btn {
+    background-color: #4cd810;
+}
+
+.submit-btn:hover {
+    background-color: #55c848;
+}
+
 
 .edit-btn:hover {
     background-color: #d68910;
