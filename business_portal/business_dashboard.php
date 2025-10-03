@@ -14,7 +14,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'business') {
 include '../sql/db.php';
 
 if (!$mysql) {
-    die("Database connection failed.");
+  die("Database connection failed.");
 }
 
 // get the current business ID
@@ -81,30 +81,34 @@ $pitches = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // if status is active, check if funding window ended
         if (($status === 'active' || $status === 'draft') && $pitch['WindowEndDate'] && $now > $pitch['WindowEndDate']) {
-            $status = 'closed';
-            $disableEdit = true;
+          $status = 'closed';
+          $disableEdit = true;
 
-            // update in database so it stays consistent
-            $stmtUpdate = $mysql->prepare("
+          // update in database so it stays consistent
+          $stmtUpdate = $mysql->prepare("
                 UPDATE Pitch
                 SET Status = 'closed'
                 WHERE PitchID = :pitchId AND BusinessID = :businessId
             ");
-            $stmtUpdate->bindParam(':pitchId', $pitch['PitchID'], PDO::PARAM_INT);
-            $stmtUpdate->bindParam(':businessId', $businessId, PDO::PARAM_INT);
-            $stmtUpdate->execute();
+          $stmtUpdate->bindParam(':pitchId', $pitch['PitchID'], PDO::PARAM_INT);
+          $stmtUpdate->bindParam(':businessId', $businessId, PDO::PARAM_INT);
+          $stmtUpdate->execute();
         }
 
         // if pitch is funded or closed, disable edit
         if ($status === 'funded' || $status === 'closed') {
-            $disableEdit = true;
+          $disableEdit = true;
         }
         ?>
         <div class="card">
           <h3><?php echo htmlspecialchars($pitch['Title']); ?></h3>
           <p>Status: <span class="status <?php echo $status; ?>"><?php echo ucfirst($status); ?></span></p>
           <div class="progress-container">
-            <div class="progress-bar" style="width: <?php echo $progress; ?>%;"><?php echo number_format($pitch['CurrentAmount'], 2); ?> / <?php echo number_format($pitch['TargetAmount'], 2); ?></div>
+            <div class="progress-bar" style="width: <?php echo $progress; ?>%;"></div>
+            <div class="progress-text">
+              £<?php echo number_format($pitch['CurrentAmount'], 2); ?> /
+              £<?php echo number_format($pitch['TargetAmount'], 2); ?>
+            </div>
           </div>
           <div class="card-buttons">
             <form action="pitch_details.php" method="get" style="display:inline;">
@@ -113,17 +117,17 @@ $pitches = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </form>
 
             <?php if ($status === 'funded'): ?>
-            <form action="profit_declare.php" method="get" style="display:inline;">
-              <input type="hidden" name="id" value="<?php echo $pitch['PitchID']; ?>">
-              <button type="submit" class="profit-btn">Declare Profit</button>
-            </form>
+              <form action="profit_declare.php" method="get" style="display:inline;">
+                <input type="hidden" name="id" value="<?php echo $pitch['PitchID']; ?>">
+                <button type="submit" class="profit-btn">Declare Profit</button>
+              </form>
             <?php endif; ?>
 
             <?php if ($status === 'draft'): ?>
-            <form action="submit_pitch.php" method="post" style="display:inline;">
-              <input type="hidden" name="pitchId" value="<?php echo $pitch['PitchID']; ?>">
-              <button type="submit" class="submit-btn">Submit Pitch</button>
-            </form>
+              <form action="submit_pitch.php" method="post" style="display:inline;">
+                <input type="hidden" name="pitchId" value="<?php echo $pitch['PitchID']; ?>">
+                <button type="submit" class="submit-btn">Submit Pitch</button>
+              </form>
             <?php endif; ?>
           </div>
         </div>
