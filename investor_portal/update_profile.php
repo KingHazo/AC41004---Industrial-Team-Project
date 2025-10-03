@@ -29,13 +29,7 @@ $dob = $_POST['dob'] ?? '';
 $nationality = trim($_POST['nationality'] ?? '');
 $currency = trim($_POST['currency'] ?? '');
 
-// validation 
-if (empty($name)) {
-    echo json_encode(['success' => false, 'message' => 'Full Name is required.']);
-    exit();
-}
-
-// the SQL update statement
+// the sql update statement
 $sql = "UPDATE Investor SET 
             Address = :address, 
             DateOfBirth = :dob, 

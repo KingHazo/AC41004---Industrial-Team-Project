@@ -109,39 +109,75 @@ try {
 
         <section class="card details">
             <h3>Personal Information</h3>
-            <div class="detail-row"><span class="label">Address:</span> <span id="address"><?php echo htmlspecialchars($investorData['Address'] ?? 'Not provided'); ?></span></div>
-            <div class="detail-row"><span class="label">Date of Birth:</span> <span id="dob"><?php echo htmlspecialchars($displayDOB); ?></span></div>
-            <div class="detail-row"><span class="label">Nationality:</span> <span id="nationality"><?php echo htmlspecialchars($investorData['Nationality'] ?? 'Not provided'); ?></span></div>
-            <div class="detail-row"><span class="label">Preferred Currency:</span> <span id="currency"><?php echo htmlspecialchars($investorData['PreferredCurrency'] ?? 'GBP'); ?> (<?php echo htmlspecialchars($investorData['PreferredCurrency'] === 'USD' ? '$' : '£'); ?>)</span>
-        </div>
-    </section>
+            
+            <div id="display-details">
+                <div class="detail-row"><span class="label">Address:</span> <span id="display-address"><?php echo htmlspecialchars($investorData['Address'] ?? 'Not provided'); ?></span></div>
+                <div class="detail-row"><span class="label">Date of Birth:</span> <span id="display-dob"><?php echo htmlspecialchars($displayDOB); ?></span></div>
+                <div class="detail-row"><span class="label">Nationality:</span> <span id="display-nationality"><?php echo htmlspecialchars($investorData['Nationality'] ?? 'Not provided'); ?></span></div>
+                <div class="detail-row"><span class="label">Preferred Currency:</span> <span id="display-currency"><?php echo htmlspecialchars($investorData['PreferredCurrency'] ?? 'GBP'); ?> (<?php echo htmlspecialchars($investorData['PreferredCurrency'] === 'USD' ? '$' : '£'); ?>)</span></div>
+                
+                <button class="btn small primary" id="edit-details-btn">Edit Details</button>
+            </div>
 
-    <section class="card documents">
-        <h3>Documents</h3>
-        <ul class="doc-list">
-            <li><a href="#" target="_blank">Proof of ID.pdf</a></li>
-            <li><a href="#" target="_blank">Address Verification.pdf</a></li>
-        </ul>
-        <button class="btn small" id="upload-docs">Upload New Document</button>
-    </section>
+            <form id="inline-edit-form" style="display:none;">
+                
+                <div class="form-group detail-row">
+                    <label class="label" for="edit-address-inline">Address</label>
+                    <input type="text" id="edit-address-inline" name="address" value="<?php echo htmlspecialchars($investorData['Address'] ?? ''); ?>">
+                </div>
 
-    <section class="card actions-card">
-        <h3>Account Actions</h3>
-        <div class="actions">
-            <button class="btn primary" id="edit-profile">Edit Profile</button>
-            <button class="btn danger outline" id="deactivate-account">Deactivate Account</button>
-        </div>
-    </section>
-</main>
+                <div class="form-group detail-row">
+                    <label class="label" for="edit-dob-inline">Date of Birth</label>
+                    <input type="date" id="edit-dob-inline" name="dob" value="<?php echo htmlspecialchars($formattedDOB); ?>"> 
+                </div>
 
-<div id="edit-profile-modal" class="modal" style="display:none;">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h4>Edit Personal Information</h4>
-        <form id="edit-profile-form">   
-            <div class="form-group">
-                <label for="edit-name">Full Name</label>
-                <input type="text" id="edit-name" name="name" 
+                <div class="form-group detail-row">
+                    <label class="label" for="edit-nationality-inline">Nationality</label>
+                    <input type="text" id="edit-nationality-inline" name="nationality" value="<?php echo htmlspecialchars($investorData['Nationality'] ?? ''); ?>">
+                </div>
+
+                <div class="form-group detail-row">
+                    <label class="label" for="edit-currency-inline">Preferred Currency</label>
+                    <select id="edit-currency-inline" name="currency">
+                        <option value="GBP" <?php if (($investorData['PreferredCurrency'] ?? 'GBP') === 'GBP') echo 'selected'; ?>>GBP (£)</option>
+                        <option value="USD" <?php if (($investorData['PreferredCurrency'] ?? '') === 'USD') echo 'selected'; ?>>USD ($)</option>
+                        <option value="EUR" <?php if (($investorData['PreferredCurrency'] ?? '') === 'EUR') echo 'selected'; ?>>EUR (€)</option>
+                    </select>
+                </div>
+
+                <div class="form-actions" style="margin-top: 15px;">
+                    <button type="submit" class="btn primary small">Save Changes</button>
+                    <button type="button" class="btn outline small" id="cancel-edit-btn">Cancel</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card documents">
+            <h3>Documents</h3>
+            <ul class="doc-list">
+                <li><a href="#" target="_blank">Proof of ID.pdf</a></li>
+                <li><a href="#" target="_blank">Address Verification.pdf</a></li>
+            </ul>
+            <button class="btn small" id="upload-docs">Upload New Document</button>
+        </section>
+
+        <section class="card actions-card">
+            <h3>Account Actions</h3>
+            <div class="actions">
+                <!-- <button class="btn primary" id="edit-profile">Edit Profile</button> -->
+                <button class="btn danger outline" id="deactivate-account">Deactivate Account</button>
+            </div>
+        </section>
+    </main>
+    
+    <div id="edit-profile-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h4>Edit Personal Information</h4>
+            <form id="edit-profile-form">   
+                <div class="form-group">
+                    <label for="edit-name">Full Name</label>
+                    <input type="text" id="edit-name" name="name" 
                     value="<?php echo htmlspecialchars($investorData['Name'] ?? ''); ?>" required>
                 </div>
                 <hr>
@@ -177,6 +213,35 @@ try {
                     <button type="button" class="btn outline close-btn">Cancel</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div id="deposit-modal" class="modal-overlay">
+        <div class="modal-content card">
+            <h3>Deposit Funds</h3>
+            
+            <div class="form-grid">
+                
+                <div class="field wide">
+                    <label for="bank-account-number">Account Number</label>
+                    <input type="text" id="bank-account-number" placeholder="12345678" required>
+                </div>
+                
+                <div class="field wide">
+                    <label for="bank-holder-name">Holder Name</label>
+                    <input type="text" id="bank-holder-name" placeholder="Name" required>
+                </div>
+                
+                <div class="field wide">
+                    <label for="deposit-amount">Deposit Amount (£)</span></label>
+                    <input type="number" id="deposit-amount" min="100" placeholder="e.g., 500.00" required>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <button class="btn" id="cancel-deposit-btn">Cancel</button>
+                <button class="btn primary" id="confirm-deposit-btn">Deposit</button>
+            </div>
         </div>
     </div>
     
