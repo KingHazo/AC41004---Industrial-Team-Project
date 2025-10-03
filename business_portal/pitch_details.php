@@ -74,6 +74,8 @@ $tagStmt->execute();
 $tags = $tagStmt->fetchAll(PDO::FETCH_COLUMN); // get an array of tag names
 
 $status = $pitch['Status'];
+$payoutFrequency = $pitch['PayoutFrequency'];
+
 
 $disableEdit = !in_array($status, ['active', 'draft']);
 
@@ -171,6 +173,9 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
 
       <h3>Investor Profit Share</h3>
       <p><strong><?php echo htmlspecialchars($pitch['ProfitSharePercentage']); ?>%</strong></p>
+
+      <h3>Payout Frequency</h3>
+      <p><strong><?php echo htmlspecialchars($pitch['PayoutFrequency']); ?></strong></p>
 
       <h3>Investment Tiers</h3>
       <?php if ($tiers): ?>
