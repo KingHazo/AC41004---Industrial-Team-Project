@@ -12,6 +12,11 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'business') {
 // include database connection
 include '../sql/db.php';
 
+// fetch tags
+$tagStmt = $mysql->prepare("SELECT * FROM Tag ORDER BY Name ASC");
+$tagStmt->execute();
+$tags = $tagStmt->fetchAll(PDO::FETCH_ASSOC);
+
 // handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $businessId = $_SESSION['userId'];
@@ -34,6 +39,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $stmt->execute();
 
   $pitchId = $mysql->lastInsertId(); // get the inserted PitchID
+
+  // insert selected tags
+  if (isset($_POST['tags'])) {
+    $selectedTags = array_slice($_POST['tags'], 0, 5); // max 5 tags
+    foreach ($selectedTags as $tagId) {
+      $stmt = $mysql->prepare("INSERT INTO PitchTag (PitchID, TagID) VALUES (:pitchId, :tagId)");
+      $stmt->bindParam(':pitchId', $pitchId);
+      $stmt->bindParam(':tagId', $tagId);
+      $stmt->execute();
+    }
+  }
 
   // insert investment tiers
   if (isset($_POST['tier_name'])) {
@@ -69,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Create New Pitch</title>
-  <link rel="stylesheet" href="create_pitch.css">
+  <link rel="stylesheet" href="create_pitch.css?v=<?php echo time(); ?>">
   <link rel="stylesheet" href="../footer.css">
   <link rel="stylesheet" href="../navbar.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -99,6 +115,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <!-- media upload -->
       <label for="media">Upload Images/Videos</label>
       <input type="file" id="media" name="media[]" multiple accept="image/*,video/*">
+
+      <!-- dropdown container for tags -->
+      <div class="dropdown">
+        <button class="dropbtn">Select Tags (max 5)</button>
+        <div class="dropdown-content">
+          <?php foreach ($tags as $tag): ?>
+            <label class="checkbox">
+              <input type="checkbox" name="tags[]" value="<?php echo $tag['TagID']; ?>" onchange="limitTags(this)">
+              <?php echo htmlspecialchars($tag['Name']); ?>
+            </label>
+          <?php endforeach; ?>
+        </div>
+      </div>
+      <p class="note">Select up to 5 tags.</p>
 
       <!-- Target amount -->
       <label for="target">Target Investment Amount (£)</label>
@@ -161,7 +191,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   </div>
   <?php include '../footer.php'; ?>
-  <script src="create_pitch.js"></script>
+ <script src="create_pitch.js?v=<?php echo time(); ?>"></script>
+
 </body>
 
 </html>

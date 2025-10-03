@@ -41,11 +41,14 @@ if (submitAnywayBtn) {
   });
 }
 
-// Dummy form submission
-const form = document.querySelector('.pitch-form');
-if (form) {
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    alert("Pitch submitted successfully (test mode).");
-  });
+//checks for the tag limit
+function limitTags(checkbox) {
+  const max = 5;
+  const checkboxes = document.querySelectorAll('input[name="tags[]"]');
+  let checkedCount = 0;
+  checkboxes.forEach(cb => { if(cb.checked) checkedCount++; });
+  if (checkedCount > max) {
+    checkbox.checked = false;
+    alert('Maximum 5 tags allowed.');
+  }
 }
