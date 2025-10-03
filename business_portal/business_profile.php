@@ -12,6 +12,11 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'business') {
 
 include '../sql/db.php';
 
+if (!$mysql) {
+  die("Database connection failed.");
+}
+
+
 $businessId = $_SESSION['userId'];
 
 // fetch business info
