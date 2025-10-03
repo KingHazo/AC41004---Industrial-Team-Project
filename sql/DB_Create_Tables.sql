@@ -96,3 +96,21 @@ CREATE TABLE Bank (
     HolderName VARCHAR(255) NOT NULL,
     Balance DECIMAL(10,2) default 0.00
 );
+
+-- Keep a list of all the tags available
+CREATE TABLE Tag (
+    TagID INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(50) NOT NULL UNIQUE
+);
+
+-- Links tags to pitches
+CREATE TABLE PitchTag (
+    PitchID INT,
+    TagID INT,
+    PRIMARY KEY (PitchID, TagID),
+    FOREIGN KEY (PitchID) REFERENCES Pitch(PitchID) ON DELETE CASCADE,
+    FOREIGN KEY (TagID) REFERENCES Tag(TagID) ON DELETE CASCADE
+);
+
+-- Index for faster filtering by tag
+CREATE INDEX idx_tagid ON PitchTag(TagID);
