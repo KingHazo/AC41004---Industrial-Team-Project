@@ -25,109 +25,177 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // placeholder button
     document.getElementById('change-photo')?.addEventListener('click', () => {
-        alert('Photo upload coming soon');
+        alertMessage('Photo upload coming soon', 'info');
     });
     
     // placegolder button
     document.getElementById('upload-docs')?.addEventListener('click', () => {
-        alert('Document uploader coming soon');
-    });
+        alertMessage('Document uploader coming soon', 'info');
+    }); 
     
     // placeholder button
     document.getElementById('deactivate-account')?.addEventListener('click', () => {
-        if (confirm('Are you sure you want to deactivate your account? This cannot be undone.')) {
-            alert('Account deactivated');
-            window.location.href = '../login.html';
-        }
+        alertMessage('Please contact support to deactivate your account securely.', 'info');
     });
 
-    // add funds stuff
-    const addFundsBtn = document.getElementById('add-funds-btn');
-    const modal = document.getElementById('deposit-modal');
-    const cancelBtn = document.getElementById('cancel-deposit-btn');
-    const confirmBtn = document.getElementById('confirm-deposit-btn');
     const balanceElement = document.getElementById('investor-balance'); 
 
+    const addFundsBtn = document.getElementById('add-funds-btn');
+    const depositModal = document.getElementById('deposit-modal');
+    const cancelDepositBtn = document.getElementById('cancel-deposit-btn');
+    const confirmDepositBtn = document.getElementById('confirm-deposit-btn');
+
+    const withdrawFundsBtn = document.getElementById('withdraw-funds-btn');
+    const withdrawalModal = document.getElementById('withdrawal-modal');
+    const cancelWithdrawalBtn = document.getElementById('cancel-withdrawal-btn');
+    const confirmWithdrawalBtn = document.getElementById('confirm-withdrawal-btn');
+    
     // function to format currency
     const formatCurrency = (value, symbol) => {
         const parts = value.toFixed(2).split('.');
         parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        return `${symbol} ${parts.join('.')}`;
+        return `${symbol}${symbol !== '' && symbol !== ' ' ? ' ' : ''}${parts.join('.')}`;
     };
 
-    // to open the modal (pop up)
-    addFundsBtn?.addEventListener('click', () => {
-        modal.style.display = 'flex';
-    });
+    const getCurrentBalanceDetails = () => {
+        const text = balanceElement.textContent.trim();
+        const currencySymbol = text.match(/([£$€])/)?.[0] || '£';
+        const currentBalanceText = text.replace(/[^0-9.-]+/g, '').replace(/,/g, '');
+        const currentBalance = parseFloat(currentBalanceText);
+        return { currentBalance, currencySymbol };
+    };
 
-    // close the modal
-    const closeModal = () => {
+    // generic function to close and clear a modal
+    const closeModal = (modal) => {
+        if (modal === depositModal) {
+            document.getElementById('bank-account-number').value = '';
+            document.getElementById('bank-holder-name').value = '';
+            document.getElementById('deposit-amount').value = '';
+        } else if (modal === withdrawalModal) {
+            document.getElementById('withdraw-bank-account-number').value = '';
+            document.getElementById('withdraw-bank-holder-name').value = '';
+            document.getElementById('withdrawal-amount').value = '';
+        }
         modal.style.display = 'none';
-        document.getElementById('bank-account-number').value = '';
-        document.getElementById('bank-holder-name').value = '';
-        document.getElementById('deposit-amount').value = '';
     };
 
-    // close modal with ancel
-    cancelBtn?.addEventListener('click', closeModal);
-
-    // close modal by clicking outside
-    modal?.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            closeModal();
+    addFundsBtn?.addEventListener('click', () => {
+        depositModal.style.display = 'flex';
+    });
+    cancelDepositBtn?.addEventListener('click', () => closeModal(depositModal));
+    depositModal?.addEventListener('click', (e) => {
+        if (e.target === depositModal) {
+            closeModal(depositModal);
         }
     });
 
-    confirmBtn?.addEventListener('click', async () => {
-    const accountNumber = document.getElementById('bank-account-number').value.trim();
-    const holderName = document.getElementById('bank-holder-name').value.trim();
-    const amount = parseFloat(document.getElementById('deposit-amount').value);
+    confirmDepositBtn?.addEventListener('click', async () => {
+        const accountNumber = document.getElementById('bank-account-number').value.trim();
+        const holderName = document.getElementById('bank-holder-name').value.trim();
+        const amount = parseFloat(document.getElementById('deposit-amount').value);
+        const { currencySymbol } = getCurrentBalanceDetails();
 
-    if (!accountNumber || !holderName || isNaN(amount) || amount <= 0) {
-        alertMessage('Please enter a valid account number, holder name, and deposit amount.', 'error');
-        return;
-    }
-
-    const currencySymbol = balanceElement.textContent.trim().charAt(0); // Get symbol before fetch
-
-    try {
-        const depositData = {
-            accountNumber: accountNumber,
-            holderName: holderName,
-            amount: amount
-        };
-
-        const response = await fetch('process_deposit.php', { // Adjust path if needed
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(depositData)
-        });
-
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-            
-            const currentBalanceText = balanceElement.textContent.trim().replace(/[£$,]/g, '').replace(/,/g, '');
-            const currentBalance = parseFloat(currentBalanceText);
-            const newInvestorBalance = currentBalance + amount;
-            
-            balanceElement.textContent = formatCurrency(newInvestorBalance, currencySymbol);
-
-            alertMessage(`Transaction successful. Deposited ${formatCurrency(amount, currencySymbol)}. New Investor Balance: ${formatCurrency(newInvestorBalance, currencySymbol)}.`, 'success');
-            
-            closeModal();
-
-        } else {
-            alertMessage(`Deposit failed: ${result.message || 'Unknown server error.'}`, 'error');
+        if (!accountNumber || !holderName || isNaN(amount) || amount <= 0) {
+            alertMessage('Please enter a valid account number, holder name, and deposit amount.', 'error');
+            return;
         }
 
-    } catch (error) {
-        console.error('Fetch error:', error);
-        alertMessage('Network error. Could not connect to the server.', 'error');
-    }
-});
+        try {
+            const depositData = {
+                accountNumber: accountNumber,
+                holderName: holderName,
+                amount: amount
+            };
+
+            const response = await fetch('process_deposit.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(depositData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                
+                const { currentBalance } = getCurrentBalanceDetails();
+                const newInvestorBalance = currentBalance + amount;
+                
+                balanceElement.textContent = formatCurrency(newInvestorBalance, currencySymbol);
+
+                alertMessage(`Transaction successful. Deposited ${formatCurrency(amount, currencySymbol)}. New Investor Balance: ${formatCurrency(newInvestorBalance, currencySymbol)}.`, 'success');
+                
+                closeModal(depositModal);
+
+            } else {
+                alertMessage(`Deposit failed: ${result.message || 'Unknown server error.'}`, 'error');
+            }
+
+        } catch (error) {
+            console.error('Fetch error:', error);
+            alertMessage('Network error. Could not connect to the server.', 'error');
+        }
+    });
+    
+    withdrawFundsBtn?.addEventListener('click', () => {
+        withdrawalModal.style.display = 'flex';
+    });
+    cancelWithdrawalBtn?.addEventListener('click', () => closeModal(withdrawalModal));
+    withdrawalModal?.addEventListener('click', (e) => {
+        if (e.target === withdrawalModal) {
+            closeModal(withdrawalModal);
+        }
+    });
+
+    confirmWithdrawalBtn?.addEventListener('click', async () => {
+        const accountNumber = document.getElementById('withdraw-bank-account-number').value.trim();
+        const holderName = document.getElementById('withdraw-bank-holder-name').value.trim();
+        const amount = parseFloat(document.getElementById('withdrawal-amount').value);
+        const { currentBalance, currencySymbol } = getCurrentBalanceDetails();
+
+        if (!accountNumber || !holderName || isNaN(amount) || amount <= 0) {
+            alertMessage('Please enter a valid account number, holder name, and withdrawal amount.', 'error');
+            return;
+        }
+        
+        if (amount > currentBalance) {
+            alertMessage('Withdrawal failed: Insufficient funds in Investor Balance.', 'error');
+            return;
+        }
+
+        try {
+            const withdrawalData = {
+                accountNumber: accountNumber,
+                holderName: holderName,
+                amount: amount
+            };
+
+            const response = await fetch('process_withdrawal.php', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(withdrawalData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                
+                const newInvestorBalance = currentBalance - amount;
+                
+                balanceElement.textContent = formatCurrency(newInvestorBalance, currencySymbol);
+
+                alertMessage(`Transaction successful. Withdrew ${formatCurrency(amount, currencySymbol)}. New Investor Balance: ${formatCurrency(newInvestorBalance, currencySymbol)}.`, 'success');
+                
+                closeModal(withdrawalModal);
+
+            } else {
+                alertMessage(`Withdrawal failed: ${result.message || 'Unknown server error.'}`, 'error');
+            }
+
+        } catch (error) {
+            console.error('Withdrawal fetch error:', error);
+            alertMessage('Network error. Could not connect to the server.', 'error');
+        }
+    });
 
     const switchToEditMode = () => {
         displaySection.style.display = 'none';
@@ -156,7 +224,6 @@ document.addEventListener('DOMContentLoaded', () => {
         saveButton.textContent = 'Saving...';
 
         const formData = new URLSearchParams(new FormData(editForm));
-        const nameField = document.getElementById('full-name');
 
         try {
             const response = await fetch('update_profile.php', {
@@ -171,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result.success) {
                 alertMessage(result.message, 'success');
-                // Reload the page to display the new data
+                // reload the page to display the new data
                 setTimeout(() => window.location.reload(), 500);
 
             } else {

@@ -82,7 +82,10 @@ try {
                     <?php echo number_format($investorData['InvestorBalance'] ?? 0.00, 2); ?>
                 </p>
             </div>
-            <button class="btn primary small" id="add-funds-btn">Add Funds</button>
+            <div class="flex space-x-2 mt-4">
+                <button class="btn primary small" id="add-funds-btn">Add Funds</button>
+                <button class="btn danger outline small" id="withdraw-funds-btn">Withdraw Funds</button>
+            </div>
         </section>
 
         <section class="card stats">
@@ -241,6 +244,35 @@ try {
             <div class="actions">
                 <button class="btn" id="cancel-deposit-btn">Cancel</button>
                 <button class="btn primary" id="confirm-deposit-btn">Deposit</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="withdrawal-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content card">
+            <h3>Withdraw Funds</h3>
+            
+            <div class="form-grid">
+                
+                <div class="field wide">
+                    <label for="withdraw-bank-account-number">Account Number</label>
+                    <input type="text" id="withdraw-bank-account-number" placeholder="12345678" required>
+                </div>
+                
+                <div class="field wide">
+                    <label for="withdraw-bank-holder-name">Holder Name</label>
+                    <input type="text" id="withdraw-bank-holder-name" placeholder="Name" required>
+                </div>
+                
+                <div class="field wide">
+                    <label for="withdrawal-amount">Amount (£)</span></label>
+                    <input type="number" id="withdrawal-amount" min="1" placeholder="e.g., 100.00" required>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <button class="btn" id="cancel-withdrawal-btn">Cancel</button>
+                <button class="btn primary danger" id="confirm-withdrawal-btn">Withdraw</button>
             </div>
         </div>
     </div>
