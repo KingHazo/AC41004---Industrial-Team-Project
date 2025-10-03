@@ -249,3 +249,24 @@ body {
   cursor: pointer;
   font-size: 0.85rem;
 }
+
+/*style for the payout frequency buttons*/
+.payout-toggle {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.toggle-btn {
+    padding: 8px 20px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.toggle-btn.active {
+    background: #000000;
+    color: #fff;
+    border-color: #fbfbfb;
+}

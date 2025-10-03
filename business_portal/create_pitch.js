@@ -62,3 +62,16 @@ document.querySelectorAll('.dropdown-content').forEach(drop => {
     event.stopPropagation(); // prevents the click from bubbling up
   });
 });
+
+
+//selects payout frequency
+document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        // remove active class from all
+        document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+        // add active to clicked
+        btn.classList.add('active');
+        // set hidden input value
+        document.getElementById('payout_frequency').value = btn.dataset.value;
+    });
+});

@@ -26,15 +26,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $target = $_POST['target'];
   $endDate = $_POST['end_date'];
   $profitShare = $_POST['profit_share'];
+  $payoutFrequency = isset($_POST['payout_frequency']) ? $_POST['payout_frequency'] : null;
 
   // insert pitch
-  $stmt = $mysql->prepare("INSERT INTO Pitch (Title, ElevatorPitch, DetailedPitch, TargetAmount, WindowEndDate, ProfitSharePercentage, BusinessID) VALUES (:title, :elevator, :details, :target, :endDate, :profitShare, :businessId)");
+  $stmt = $mysql->prepare("INSERT INTO Pitch (Title, ElevatorPitch, DetailedPitch, TargetAmount, WindowEndDate, ProfitSharePercentage, PayoutFrequency, BusinessID) 
+VALUES (:title, :elevator, :details, :target, :endDate, :profitShare, :payoutFrequency, :businessId)");
   $stmt->bindParam(':title', $title);
   $stmt->bindParam(':elevator', $elevator);
   $stmt->bindParam(':details', $details);
   $stmt->bindParam(':target', $target);
   $stmt->bindParam(':endDate', $endDate);
   $stmt->bindParam(':profitShare', $profitShare);
+  $stmt->bindParam(':payoutFrequency', $payoutFrequency);
   $stmt->bindParam(':businessId', $businessId);
   $stmt->execute();
 
@@ -157,6 +160,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <!-- Profit share -->
       <label for="profit-share">Investor Profit Share %</label>
       <input type="number" id="profit-share" name="profit_share" min="1" max="100" placeholder="e.g., 20" required>
+
+      <!-- Payout Frequency -->
+      <label>Payout Frequency</label>
+      <div class="payout-toggle">
+        <button type="button" class="toggle-btn selected" data-value="Quarterly">Quarterly</button>
+        <button type="button" class="toggle-btn" data-value="Annually">Annually</button>
+      </div>
+      <input type="hidden" name="payout_frequency" id="payout_frequency" value="Quarterly" required>
 
       <!-- investment tiers -->
       <div class="tiers">
