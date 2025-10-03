@@ -34,6 +34,29 @@ try {
         $totalInvested = number_format(0, 2);
     }
 
+    // calc total ROI
+    $sql_returns = "SELECT SUM(ROI) AS TotalReturns FROM Investment WHERE InvestorID = :investorID";
+    $stmt_returns = $mysql->prepare($sql_returns);
+    $stmt_returns->bindParam(':investorID', $investorID);
+    $stmt_returns->execute();
+    $result_returns = $stmt_returns->fetch(PDO::FETCH_ASSOC);
+    $rawTotalReturns = $result_returns['TotalReturns'] ?? 0.00;
+    $totalReturns = number_format($rawTotalReturns, 2);
+
+    // how many active pitches
+    $sql_active_count = "
+        SELECT COUNT(DISTINCT T1.PitchID) AS ActiveCount 
+        FROM Investment T1 
+        INNER JOIN Pitch T2 ON T1.PitchID = T2.PitchID 
+        WHERE T1.InvestorID = :investorID 
+        AND T2.CurrentAmount < T2.TargetAmount 
+        AND T2.WindowEndDate >= CURDATE()
+    ";
+    $stmt_active_count = $mysql->prepare($sql_active_count);
+    $stmt_active_count->bindParam(':investorID', $investorID);
+    $stmt_active_count->execute();
+    $activePitchesCount = $stmt_active_count->fetchColumn();
+
     // find 3 most recent investments
     $sql_investments = "
         SELECT 
@@ -101,7 +124,7 @@ try {
 </head>
 
 <body>
-    <div id="investor-navbar-placeholder"></div>
+     <?php include '../navbar.php'; ?>
 
     <main class="section">
         
@@ -115,13 +138,11 @@ try {
             </div>
             <div class="kpi-card">
                 <p class="kpi-label">Returns Received</p>
-                <!-- PLACEHOLDER -->
-                <p class="kpi-value">£676,767</p>
+                <p class="kpi-value">£<?php echo htmlspecialchars($totalReturns); ?></p>
             </div>
             <div class="kpi-card">
                 <p class="kpi-label">Active Investments</p>
-                <!-- PLACEHOLDER -->
-                <p class="kpi-value">676,767</p>
+                <p class="kpi-value"><?php echo htmlspecialchars($activePitchesCount); ?></p>
             </div>
         </div>
 
@@ -138,7 +159,7 @@ try {
             <?php if (empty($recentInvestments) && !$dbError): ?>
                 <p>You have no recent investments.</p>
                 <?php if ($totalInvested === number_format(0, 2)): ?>
-                    <p style="color: blue;">(Total Invested is £0.00)</p>
+                    <!-- <p style="color: blue;">(Total Invested is £0.00)</p> -->
                 <?php endif; ?>
             <?php elseif (!empty($recentInvestments)): ?>
                 <?php foreach ($recentInvestments as $investment): 
@@ -170,7 +191,7 @@ try {
                     <div class="card-buttons">
                         <!-- PitchID is data id -->
                         <button class="view-btn" data-id="<?php echo $pitchID; ?>">View</button>
-                        <button class="cancel-btn" data-id="<?php echo $pitchID; ?>">Cancel Investment</button>
+                        <button class="cancel-btn" data-id="<?php echo $investment['InvestmentID']; ?>">Cancel Investment</button>
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -182,7 +203,7 @@ try {
 
     <div id="footer-placeholder"></div>
 
-    <script src="load_investor_navbar.js"></script>
+    
     <script src="investor_dashboard.js"></script>
     <script src="../load_footer.js"></script>
 </body>
