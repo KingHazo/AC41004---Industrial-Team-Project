@@ -4,7 +4,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Security check
 if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'investor') {
     header("Location: ../login/login_signup.php");
     exit();
@@ -33,9 +32,9 @@ try {
         exit();
     }
     
-    // Format DateOfBirth for HTML input (YYYY-MM-DD)
+    // format DateOfBirth for HTML input YYYY-MM-DD
     $formattedDOB = $investorData['DateOfBirth'] ? date('Y-m-d', strtotime($investorData['DateOfBirth'])) : '';
-    // Format DateOfBirth for display (e.g., 05 May 1992)
+    // format DateOfBirth for display 05 May 1992
     $displayDOB = $investorData['DateOfBirth'] ? date('d M Y', strtotime($investorData['DateOfBirth'])) : 'Not provided';
     
 } catch (PDOException $e) {
