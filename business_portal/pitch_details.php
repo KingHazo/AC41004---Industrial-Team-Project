@@ -14,7 +14,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'business') {
 include '../sql/db.php';
 
 if (!$mysql) {
-    die("Database connection failed.");
+  die("Database connection failed.");
 }
 
 
@@ -220,10 +220,12 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
             <button type="submit" class="submit-btn">Submit Pitch</button>
           </form>
         <?php endif; ?>
-        <form action="profit_declare.php" method="get" style="display:inline;">
-          <input type="hidden" name="id" value="<?php echo $pitch['PitchID']; ?>">
-          <button type="submit" class="profit-btn">Declare Profit</button>
-        </form>
+        <?php if ($status === 'funded'): ?>
+          <form action="profit_declare.php" method="get" style="display:inline;">
+            <input type="hidden" name="id" value="<?php echo $pitch['PitchID']; ?>">
+            <button type="submit" class="profit-btn">Declare Profit</button>
+          </form>
+        <?php endif; ?>
       </div>
     </div>
   </main>

@@ -112,10 +112,12 @@ $pitches = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <button type="submit" class="view-btn">View</button>
             </form>
 
+            <?php if ($status === 'funded'): ?>
             <form action="profit_declare.php" method="get" style="display:inline;">
               <input type="hidden" name="id" value="<?php echo $pitch['PitchID']; ?>">
               <button type="submit" class="profit-btn">Declare Profit</button>
             </form>
+            <?php endif; ?>
 
             <?php if ($status === 'draft'): ?>
             <form action="submit_pitch.php" method="post" style="display:inline;">
