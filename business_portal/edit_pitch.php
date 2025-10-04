@@ -11,6 +11,10 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'business') {
 
 include '../sql/db.php';
 
+if (!$mysql) {
+    die("Database connection failed.");
+}
+
 // get PitchID from GET
 $pitchId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if (!$pitchId) die("Pitch ID missing.");

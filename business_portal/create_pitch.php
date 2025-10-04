@@ -104,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -129,7 +130,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <!-- Elevator pitch -->
             <label for="elevator">Elevator Pitch</label>
-            <textarea id="elevator" name="elevator" rows="2" placeholder="Short summary of your idea" required></textarea>
+            <textarea id="elevator" name="elevator" rows="2" placeholder="Short summary of your idea"
+                required></textarea>
 
             <!-- Detailed pitch -->
             <label for="details">Detailed Pitch</label>
@@ -147,7 +149,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="dropdown-content">
                     <?php foreach ($tags as $tag): ?>
                         <label class="checkbox">
-                            <input type="checkbox" name="tags[]" value="<?php echo $tag['TagID']; ?>" onchange="limitTags(this)">
+                            <input type="checkbox" name="tags[]" value="<?php echo $tag['TagID']; ?>"
+                                onchange="limitTags(this)">
                             <?php echo htmlspecialchars($tag['Name']); ?>
                         </label>
                     <?php endforeach; ?>
@@ -165,7 +168,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <!-- Profit share -->
             <label for="profit-share">Investor Profit Share %</label>
-            <input type="number" id="profit-share" name="profit_share" min="1" max="100" placeholder="e.g., 20" required>
+            <input type="number" id="profit-share" name="profit_share" min="1" max="100" placeholder="e.g., 20"
+                required>
+
+            <!-- Payout Frequency -->
+            <label>Payout Frequency</label>
+            <div class="payout-toggle">
+                <button type="button" class="toggle-btn selected" data-value="Quarterly">Quarterly</button>
+                <button type="button" class="toggle-btn" data-value="Annually">Annually</button>
+            </div>
+            <input type="hidden" name="payout_frequency" id="payout_frequency" value="Quarterly" required>
 
             <!-- Investment tiers -->
             <div class="tiers">
@@ -192,8 +204,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <!-- Buttons -->
             <div class="form-buttons">
-                <input type="hidden" name="status" id="status" value="draft">
                 <button type="button" class="ai-btn">Run AI Analysis</button>
+                <input type="hidden" name="status" id="status" value="draft">
+                <button type="submit" class="draft-btn" onclick="document.getElementById('status').value='draft';">
+                    Save as Draft
+                </button>
                 <button type="submit" class="submit-btn" onclick="document.getElementById('status').value='active';">
                     Submit Pitch
                 </button>
@@ -256,4 +271,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </script>
 </body>
+
 </html>
