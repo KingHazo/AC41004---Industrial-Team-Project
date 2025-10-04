@@ -18,7 +18,7 @@ if (session_status() === PHP_SESSION_NONE) {
 </head>
 
 <body>
-    <?php include 'navBar.php'; ?>
+    <?php include 'navbar.php'; ?>
     <main class="hero">
         <div class="hero-bg bg1"></div>
         <div class="hero-bg bg2"></div>
@@ -43,9 +43,6 @@ if (session_status() === PHP_SESSION_NONE) {
 
 </body>
 
-
-<script src="load_navbar.js"></script>
-<script src="load_footer.js"></script>
 <script src="Script.js"></script>
 
 </html>

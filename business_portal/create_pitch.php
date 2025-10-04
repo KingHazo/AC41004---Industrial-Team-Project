@@ -12,6 +12,10 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'business') {
 // include database connection
 include '../sql/db.php';
 
+if (!$mysql) {
+  die("Database connection failed.");
+}
+
 // fetch tags
 $tagStmt = $mysql->prepare("SELECT * FROM Tag ORDER BY Name ASC");
 $tagStmt->execute();
@@ -27,10 +31,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $endDate = $_POST['end_date'];
   $profitShare = $_POST['profit_share'];
   $payoutFrequency = isset($_POST['payout_frequency']) ? $_POST['payout_frequency'] : null;
+  $status = isset($_POST['status']) ? $_POST['status'] : 'draft';
 
   // insert pitch
-  $stmt = $mysql->prepare("INSERT INTO Pitch (Title, ElevatorPitch, DetailedPitch, TargetAmount, WindowEndDate, ProfitSharePercentage, PayoutFrequency, BusinessID) 
-VALUES (:title, :elevator, :details, :target, :endDate, :profitShare, :payoutFrequency, :businessId)");
+  $stmt = $mysql->prepare("
+        INSERT INTO Pitch 
+        (Title, ElevatorPitch, DetailedPitch, TargetAmount, WindowEndDate, ProfitSharePercentage, PayoutFrequency, BusinessID, Status)
+        VALUES 
+        (:title, :elevator, :details, :target, :endDate, :profitShare, :payoutFrequency, :businessId, :status)
+    ");
   $stmt->bindParam(':title', $title);
   $stmt->bindParam(':elevator', $elevator);
   $stmt->bindParam(':details', $details);
@@ -39,6 +48,7 @@ VALUES (:title, :elevator, :details, :target, :endDate, :profitShare, :payoutFre
   $stmt->bindParam(':profitShare', $profitShare);
   $stmt->bindParam(':payoutFrequency', $payoutFrequency);
   $stmt->bindParam(':businessId', $businessId);
+  $stmt->bindParam(':status', $status);
   $stmt->execute();
 
   $pitchId = $mysql->lastInsertId(); // get the inserted PitchID
@@ -63,23 +73,32 @@ VALUES (:title, :elevator, :details, :target, :endDate, :profitShare, :payoutFre
 
     for ($i = 0; $i < count($tierNames); $i++) {
       if (!empty($tierNames[$i])) {
-        $stmt = $mysql->prepare("INSERT INTO InvestmentTier (Name, Min, Max, Multiplier, PitchID, SharePercentage) VALUES (:name, :min, :max, :multiplier, :pitchId, :share)");
+        $stmt = $mysql->prepare("
+                    INSERT INTO InvestmentTier 
+                    (Name, Min, Max, Multiplier, PitchID, SharePercentage) 
+                    VALUES (:name, :min, :max, :multiplier, :pitchId, :share)
+                ");
         $stmt->bindParam(':name', $tierNames[$i]);
         $stmt->bindParam(':min', $tierMins[$i]);
         $stmt->bindParam(':max', $tierMaxs[$i]);
         $stmt->bindParam(':multiplier', $tierMultipliers[$i]);
         $stmt->bindParam(':pitchId', $pitchId);
-        $stmt->bindParam(':share', $profitShare); // assuming same profit share
+        $stmt->bindParam(':share', $profitShare);
         $stmt->execute();
       }
     }
   }
 
-  // redirect after success
-  header("Location: business_dashboard.php?success=1");
+  // redirect based on status
+  if ($status === 'active') {
+    header("Location: pitch_details.php?id=$pitchId&msg=submitted");
+  } else {
+    header("Location: business_dashboard.php?success=1");
+  }
   exit();
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -118,6 +137,7 @@ VALUES (:title, :elevator, :details, :target, :endDate, :profitShare, :payoutFre
   <main class="section">
     <h2>Create New Pitch</h2>
     <form class="pitch-form" method="POST" enctype="multipart/form-data">
+
       <!-- Product title -->
       <label for="title">Product Title</label>
       <input type="text" id="title" name="title" placeholder="Enter product title" required>
@@ -194,9 +214,16 @@ VALUES (:title, :elevator, :details, :target, :endDate, :profitShare, :payoutFre
 
       <!-- buttons -->
       <div class="form-buttons">
-        <button type="button" class="ai-btn">Run AI Analysis</button>
-        <button type="submit" class="submit-btn">Submit Pitch</button>
+        <input type="hidden" name="status" id="status" value="draft">
+        <button type="submit" class="draft-btn" onclick="document.getElementById('status').value='draft';">
+          Save as Draft
+        </button>
+        <button type="submit" class="submit-btn" onclick="document.getElementById('status').value='active';">
+          Submit Pitch
+        </button>
       </div>
+
+
     </form>
   </main>
 

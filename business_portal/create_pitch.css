@@ -92,7 +92,7 @@ body {
   background: #d68910;
 }
 
-.submit-btn {
+.draft-btn {
   background: #0b3d91;
   color: #fff;
   border: none;
@@ -103,9 +103,25 @@ body {
   transition: background 0.3s ease;
 }
 
-.submit-btn:hover {
-  background: #072a61;
+.draft-btn:hover {
+  background: #183b72;
 }
+
+.submit-btn {
+  background-color: #4cd810;
+  color: #fff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #55c848;
+}
+
 
 /* ===== Modal Overlay ===== */
 .modal {

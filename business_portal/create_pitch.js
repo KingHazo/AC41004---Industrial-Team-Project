@@ -75,3 +75,9 @@ document.querySelectorAll('.toggle-btn').forEach(btn => {
         document.getElementById('payout_frequency').value = btn.dataset.value;
     });
 });
+
+//to change the status from draft to status
+function submitPitch(status) {
+    document.getElementById('status').value = status;
+    document.querySelector('.pitch-form').submit();
+}

@@ -120,6 +120,7 @@ body {
 
 
 .progress-container {
+  position: relative; 
   background: #ecf0f1;
   border-radius: 10px;
   overflow: hidden;
@@ -129,13 +130,28 @@ body {
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #169e5f, #075116);
-  text-align: center;
-  color: #fff;
-  font-size: 0.8rem;
-  line-height: 20px;
+  background: linear-gradient(90deg, #4CAF50, #4CAF50);
+  width: 0; 
   transition: width 1s ease-in-out;
+  border-radius: 10px 0 0 10px;
 }
+
+/* text over the progress bar */
+.progress-text {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #333; 
+  pointer-events: none;
+}
+
 
 
 .card-buttons {
@@ -145,7 +161,7 @@ body {
 }
 
 .view-btn,
-.edit-btn,
+.submit-btn,
 .profit-btn {
   border: none;
   padding: 10px 15px;
@@ -188,4 +204,12 @@ body {
 .profit-btn:disabled {
   background: #ddd;
   cursor: not-allowed;
+}
+
+.submit-btn {
+    background-color: #4cd810;
+}
+
+.submit-btn:hover {
+    background-color: #55c848;
 }

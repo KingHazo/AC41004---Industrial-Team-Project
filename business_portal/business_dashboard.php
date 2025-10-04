@@ -13,6 +13,10 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'business') {
 // include database connection
 include '../sql/db.php';
 
+if (!$mysql) {
+  die("Database connection failed.");
+}
+
 // get the current business ID
 $businessId = $_SESSION['userId'];
 
@@ -69,25 +73,39 @@ $pitches = $stmt->fetchAll(PDO::FETCH_ASSOC);
         // calculate progress percentage
         $progress = $pitch['TargetAmount'] > 0 ? ($pitch['CurrentAmount'] / $pitch['TargetAmount']) * 100 : 0;
 
-        // determine status
-        $status = "draft";
+        // determine status from database
+        $status = $pitch['Status'];
         $disableEdit = false;
         $disableProfit = false;
         $now = date("Y-m-d");
-        if ($pitch['WindowEndDate'] && $now > $pitch['WindowEndDate']) {
-          $status = "closed";
+
+        // if status is active, check if funding window ended
+        if (($status === 'active' || $status === 'draft') && $pitch['WindowEndDate'] && $now > $pitch['WindowEndDate']) {
+          $status = 'closed';
           $disableEdit = true;
-        } elseif ($pitch['CurrentAmount'] >= $pitch['TargetAmount'] && $pitch['TargetAmount'] > 0) {
-          $status = "funded";
-        } elseif ($pitch['CurrentAmount'] > 0) {
-          $status = "active";
+
+          // update in database so it stays consistent
+          $stmtUpdate = $mysql->prepare("
+                UPDATE Pitch
+                SET Status = 'closed'
+                WHERE PitchID = :pitchId AND BusinessID = :businessId
+            ");
+          $stmtUpdate->bindParam(':pitchId', $pitch['PitchID'], PDO::PARAM_INT);
+          $stmtUpdate->bindParam(':businessId', $businessId, PDO::PARAM_INT);
+          $stmtUpdate->execute();
+        }
+
+        // if pitch is funded or closed, disable edit
+        if ($status === 'funded' || $status === 'closed') {
+          $disableEdit = true;
         }
         ?>
         <div class="card">
           <h3><?php echo htmlspecialchars($pitch['Title']); ?></h3>
           <p>Status: <span class="status <?php echo $status; ?>"><?php echo ucfirst($status); ?></span></p>
           <div class="progress-container">
-            <div class="progress-bar" style="width: <?php echo $progress; ?>%;">
+            <div class="progress-bar" style="width: <?php echo $progress; ?>%;"></div>
+            <div class="progress-text">
               £<?php echo number_format($pitch['CurrentAmount'], 2); ?> /
               £<?php echo number_format($pitch['TargetAmount'], 2); ?>
             </div>
@@ -98,16 +116,26 @@ $pitches = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <button type="submit" class="view-btn">View</button>
             </form>
 
-            <form action="profit_declare.php" method="get" style="display:inline;">
-              <input type="hidden" name="id" value="<?php echo $pitch['PitchID']; ?>">
-              <button type="submit" class="profit-btn">Declare Profit</button>
-            </form>
+            <?php if ($status === 'funded'): ?>
+              <form action="profit_declare.php" method="get" style="display:inline;">
+                <input type="hidden" name="id" value="<?php echo $pitch['PitchID']; ?>">
+                <button type="submit" class="profit-btn">Declare Profit</button>
+              </form>
+            <?php endif; ?>
+
+            <?php if ($status === 'draft'): ?>
+              <form action="submit_pitch.php" method="post" style="display:inline;">
+                <input type="hidden" name="pitchId" value="<?php echo $pitch['PitchID']; ?>">
+                <button type="submit" class="submit-btn">Submit Pitch</button>
+              </form>
+            <?php endif; ?>
           </div>
         </div>
       <?php endforeach; ?>
     </div>
   </section>
   <?php include '../footer.php'; ?>
+
   <script>
     // check URL for saved parameter
     const urlParams = new URLSearchParams(window.location.search);
@@ -126,6 +154,5 @@ $pitches = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   <script src="business_dashboard.js"></script>
 </body>
-
 
 </html>
