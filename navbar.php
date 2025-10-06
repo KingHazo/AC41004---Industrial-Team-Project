@@ -25,6 +25,7 @@ $base_url = '/AC41004---Industrial-Team-Project';
             border-bottom: 1px solid rgba(0, 0, 0, 0.06);
             font-family: 'Montserrat', sans-serif;
             position: relative;
+            flex-shrink: 0;
         }
 
         .logo {
@@ -52,7 +53,7 @@ $base_url = '/AC41004---Industrial-Team-Project';
 
         .nav-links {
             text-decoration: none;
-            color: #333;
+            color: #000;
             transition: color 0.2s;
         }
 
