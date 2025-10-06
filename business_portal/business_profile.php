@@ -107,21 +107,6 @@ if ($business) {
             </div>
         </section>
 
-        <!-- Team members -->
-        <section class="card">
-            <h3>Team Members</h3>
-            <ul class="team-list" id="team-list">
-                <li><strong>Alex Johnson</strong> — CEO</li>
-                <li><strong>Sara Patel</strong> — COO</li>
-                <li><strong>Jamie Lee</strong> — Head of Product</li>
-            </ul>
-            <div class="inline">
-                <input id="team-name" type="text" placeholder="Full name" />
-                <input id="team-role" type="text" placeholder="Role (e.g CEO)" />
-                <button class="btn" id="add-team">Add Member</button>
-            </div>
-        </section>
-
         <!-- Banking -->
         <section class="card">
             <h3>Banking (Mock)</h3>
