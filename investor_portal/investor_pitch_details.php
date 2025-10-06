@@ -221,6 +221,10 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
             </table>
 
             <!-- invest form -->
+            <?php 
+                $shouldShowInvestCard = $isInvestable;
+                if ($shouldShowInvestCard): 
+            ?>
             <div class="invest-card">
                 <h3><?php echo $existingInvestment ? 'Update Your Investment' : 'Invest Now'; ?></h3>
                 <form id="invest-form" class="invest-form">
@@ -272,6 +276,26 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
                     <p class="hint">You can update or cancel your investment while the funding window is open</p>
                 </form>
             </div>
+            <?php else: 
+                $blockReason = '';
+                if ($isFunded && $isClosed) {
+                    $blockReason = 'This pitch is fully funded and the investment window has closed.';
+                } elseif ($isFunded) {
+                    $blockReason = 'This pitch has reached its target funding amount and is now fully funded.';
+                } elseif ($isClosed) {
+                    $blockReason = 'The investment window for this pitch closed on ' . date('d M Y', strtotime($pitch['WindowEndDate'])) . '. Further investments or updates are not possible.';
+                }
+            ?>
+            <div class="invest-card invest-status-message">
+                <h3>Investment Unavailable</h3>
+                <p><?php echo nl2br(htmlspecialchars($blockReason)); ?></p>
+                <?php if ($existingInvestment): ?>
+                <p class="hint" style="margin-top: 1rem; color: #555;">
+                    You hold an existing investment of £<?php echo number_format($existingInvestment['Amount']); ?>. This investment is now locked and cannot be updated or canceled.
+                </p>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
         </div>
     </main>
 

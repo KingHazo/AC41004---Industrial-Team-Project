@@ -136,6 +136,19 @@ body {
     color: #2c3e50;
 }
 
+.card .meta {
+    display: flex; 
+    flex-direction: column;
+    gap: 4px; 
+    margin-top: 5px; 
+}
+
+.card .meta .profit-share,
+.card .meta .invested {
+    width: 100%;
+}
+
+
 /* progress */
 .progress-container {
     background: #ecf0f1;
@@ -155,19 +168,12 @@ body {
     transition: width 1s ease-in-out;
 }
 
-/* Meta */
-.meta {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
 
 .profit-share {
     font-size: .9rem;
     background: #ecf0f1;
     padding: 5px 10px;
     border-radius: 5px;
-    display: inline-block;
     color: #2c3e50;
 }
 

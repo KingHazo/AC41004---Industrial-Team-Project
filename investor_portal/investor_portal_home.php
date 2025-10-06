@@ -14,6 +14,19 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'investor') {
 // include database connection
 include '../sql/db.php';
 
+$selected_tag_id = filter_input(INPUT_GET, 'tag_id', FILTER_VALIDATE_INT) ?? 0;
+
+$all_tags = [];
+$all_tags[] = ['TagID' => 0, 'Name' => 'All']; 
+
+try {
+    $tag_sql = "SELECT TagID, Name FROM Tag ORDER BY Name";
+    $tag_stmt = $mysql->query($tag_sql);
+    $db_tags = $tag_stmt->fetchAll(PDO::FETCH_ASSOC);
+    $all_tags = array_merge($all_tags, $db_tags);
+} catch (PDOException $e) {
+    error_log("Tag Load Query Error: " . $e->getMessage());
+}
 
 ?>
 <!DOCTYPE html>
@@ -42,18 +55,44 @@ include '../sql/db.php';
                 <i class="fa-solid fa-filter"></i>
             </button>
         </div>
-        <div class="active-filters">
-            <span class="filter-tag">Eco Friendly</span>
-            <span class="filter-tag">High Risk</span>
-            <span class="filter-tag">Low Risk</span>
+
+        <div class="tag-filters-container">
+            <div class="active-filters" id="pitch-tags">
+                <?php foreach ($all_tags as $tag): 
+                    if (!is_array($tag) || !isset($tag['TagID']) || !isset($tag['Name'])) {
+                        error_log("Skipping malformed tag data: " . var_export($tag, true));
+                        continue;
+                    }
+                    
+                    $is_selected = ($tag['TagID'] == $selected_tag_id) ? ' selected' : '';
+                ?>
+                    <button class="filter-tag<?php echo $is_selected; ?>" data-tag="<?php echo htmlspecialchars($tag['TagID']); ?>">
+                        <?php echo htmlspecialchars($tag['Name']); ?>
+                    </button>
+                <?php endforeach; ?>
+            </div>
         </div>
 
         <div class="pitches">
             <?php
             try {
-                // select all pitches
-                $sql = "SELECT PitchID, Title, ElevatorPitch, CurrentAmount, TargetAmount, ProfitSharePercentage FROM Pitch";
-                $stmt = $mysql->query($sql);
+                $sql = "SELECT p.PitchID, p.Title, p.ElevatorPitch, p.CurrentAmount, p.TargetAmount, p.ProfitSharePercentage 
+                        FROM Pitch p";
+                
+                if ($selected_tag_id > 0) {
+                    $sql .= " JOIN PitchTag pt ON p.PitchID = pt.PitchID 
+                              WHERE pt.TagID = :tag_id";
+                }
+                
+                $sql .= " ORDER BY p.PitchID DESC";
+
+                $stmt = $mysql->prepare($sql);
+
+                if ($selected_tag_id > 0) {
+                    $stmt->bindParam(':tag_id', $selected_tag_id, PDO::PARAM_INT);
+                }
+
+                $stmt->execute();
  
                 // make a card for each pitch
                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
