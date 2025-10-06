@@ -41,16 +41,23 @@ body {
 
 .summary {
     display: flex;
-    gap: 20px;
     align-items: center;
+    gap: 30px;
+    justify-content: flex-start;  
+    text-align: left;             
 }
 
 .logo-wrap img {
-    border-radius: 12px;
+    border-radius: 50%;
     width: 100px;
     height: 100px;
     object-fit: cover;
 }
+
+.info {
+    flex: 1;                     
+}
+
 
 .btn.small {
     padding: 6px 10px;
