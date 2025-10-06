@@ -2,6 +2,36 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    const tagContainer = document.getElementById('pitch-tags');
+    
+    // tag filtering logic
+    if (tagContainer) {
+        tagContainer.addEventListener('click', (event) => {
+            const button = event.target.closest('.filter-tag');
+            
+            if (button) {
+                console.log("Filter button clicked:", button.textContent.trim());
+
+                const tagId = button.getAttribute('data-tag'); 
+                
+                const url = new URL(window.location.href);
+                
+                if (tagId === '0') {
+                    url.searchParams.delete('tag_id');
+                    console.log("Setting filter to: All (URL param deleted)");
+                } else {
+                    url.searchParams.set('tag_id', tagId);
+                    console.log("Setting filter to TagID:", tagId);
+                }
+                
+                console.log("Navigating to:", url.toString());
+                window.location.href = url.toString();
+            }
+        });
+    } else {
+        console.error("Tag container #pitch-tags not found.");
+    }
+
     // all buttons
     const moreBtns = document.querySelectorAll('.more-btn');
 
