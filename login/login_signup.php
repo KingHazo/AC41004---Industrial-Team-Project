@@ -96,7 +96,7 @@
     </main>
 
     <?php include '../footer.php'; ?>
-    <script src="login_signup.js"></script>
+     <script src="login_signup.js?v=<?php echo time(); ?>"></script>
 </body>
 
 </html>
