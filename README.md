@@ -17,5 +17,5 @@ To design and implement a scalable crowdfunding style investment platform where 
 - Ahmed Youssef (2507690
 
 ## Fundify User Manual
-**A link to the Fundify User Manual can be found here:** https://drive.google.com/file/d/1K4igY1_E1X4D-bGG-4tbUMe7tUtWS_wM/view?usp=sharing
+**A link to the Fundify User Manual can be found [here](https://drive.google.com/file/d/1K4igY1_E1X4D-bGG-4tbUMe7tUtWS_wM/view?usp=sharing)**
 
