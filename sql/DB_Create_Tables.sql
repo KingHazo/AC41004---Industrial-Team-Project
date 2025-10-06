@@ -3,6 +3,8 @@
 -- CREATE DATABASE AC41004_DB;
 
 -- Testing
+DROP TABLE IF EXISTS PitchTag;
+DROP TABLE IF EXISTS Tag;
 DROP TABLE IF EXISTS Investment;
 DROP TABLE IF EXISTS InvestmentTier;
 DROP TABLE IF EXISTS Media;
@@ -43,7 +45,6 @@ CREATE TABLE Pitch (
     WindowEndDate DATE,
     PayoutFrequency VARCHAR(50), -- Quarterly or Annually etc.
 	ProfitSharePercentage DECIMAL(5, 2) NOT NULL,
-    Status ENUM('draft', 'active', 'funded', 'closed') NOT NULL DEFAULT 'draft', 
     BusinessID INT,
     FOREIGN KEY (BusinessID) REFERENCES Business(BusinessID)
 );
@@ -114,3 +115,9 @@ CREATE TABLE PitchTag (
 
 -- Index for faster filtering by tag
 CREATE INDEX idx_tagid ON PitchTag(TagID);
+
+ALTER TABLE Investor
+ADD COLUMN Address VARCHAR(255),
+ADD COLUMN DateOfBirth DATE,
+ADD COLUMN Nationality VARCHAR(100),
+ADD COLUMN PreferredCurrency VARCHAR(50);
