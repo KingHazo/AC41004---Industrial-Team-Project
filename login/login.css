@@ -16,12 +16,12 @@ main {
 
 .login-form {
     background: #fff;
-    padding: 2rem 2.5rem;
+    padding: 2rem;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     width: 100%;
     max-width: 400px;
-    margin: 2rem 0;
+    margin: 1rem;
 }
 
 .login-form h2 {
@@ -44,6 +44,7 @@ main {
     border: 1px solid #ccc;
     border-radius: 6px;
     font-size: 1rem;
+      box-sizing: border-box;
 }
 
 .login-form input:focus {
