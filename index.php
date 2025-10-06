@@ -11,10 +11,11 @@ if (session_status() === PHP_SESSION_NONE) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fundify</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="navbar.css">
+    <link rel="stylesheet" href="navbar.css?v=<?php echo time(); ?>"> <!--handles cache issues-->
+    <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>"> <!--handles cache issues-->
     <link rel="stylesheet" href="footer.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
 </head>
 
 <body class="home">
@@ -46,12 +47,14 @@ if (session_status() === PHP_SESSION_NONE) {
     <section class="section info-cards">
         <article class="card">
             <h3>Transparent Profit Sharing</h3>
-            <p>Clear tiers, visible funding progress, and simple profit splits. Investors know exactly how returns are calculated.</p>
+            <p>Clear tiers, visible funding progress, and simple profit splits. Investors know exactly how returns are
+                calculated.</p>
         </article>
 
         <article class="card">
             <h3>AI-Assisted Pitches</h3>
-            <p>Founders get instant suggestions to improve clarity, market fit, and financial storytelling before going live.</p>
+            <p>Founders get instant suggestions to improve clarity, market fit, and financial storytelling before going
+                live.</p>
         </article>
     </section>
 
@@ -59,7 +62,8 @@ if (session_status() === PHP_SESSION_NONE) {
         <h2>About Fundify</h2>
         <p>
             Fundify connects bold local businesses with community investors. We focus on transparency: real targets,
-            clear timelines, and profit-sharing that everyone understands. Whether you’re launching a product or backing one,
+            clear timelines, and profit-sharing that everyone understands. Whether you’re launching a product or backing
+            one,
             Fundify keeps the journey simple and fair.
         </p>
     </section>
@@ -67,6 +71,21 @@ if (session_status() === PHP_SESSION_NONE) {
     <?php include 'footer.php'; ?>
 
     <script src="Script.js"></script>
+
+    <!--chnages the colour of the nav links if the hamburger menu is toggled-->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            window.addEventListener('menuToggled', (e) => {
+                const isOpen = e.detail.isOpen;
+                const navLinks = document.querySelectorAll('.nav-links');
+
+                navLinks.forEach(link => {
+                    link.style.setProperty('color', isOpen ? '#000' : '#fff', 'important');
+                });
+            });
+        });
+
+    </script>
 </body>
 
 </html>
