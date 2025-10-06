@@ -85,7 +85,7 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
     <link rel="stylesheet" href="../footer.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
     rel="stylesheet" />
-    <!-- INLINE STYLE FOR NEW UI ELEMENTS -->
+
     <style>
         .spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
@@ -195,11 +195,11 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
                             $mult = number_format((float)$tier['Multiplier'], 1);
                             $share = number_format((float)$tier['SharePercentage'], 1);
 
-                            // display values for the table
-                            $maxDisplay = $max >= 9999999 ? $min . '+' : number_format($max);
-                            $maxAttr = $max >= 9999999 ? $max : $max; 
+                            $isUnlimited = $max >= 9999999;
                             
-                            $maxTableCell = $max >= 9999999 ? '—' : number_format($max);
+                            $maxTableCell = $isUnlimited ? 'No Limit' : number_format($max);
+                            
+                            $maxAttr = $max;
                         ?>
                             <tr data-tier="<?php echo htmlspecialchars($tier['Name']); ?>" 
                                 data-min="<?php echo htmlspecialchars($tier['Min']); ?>" 

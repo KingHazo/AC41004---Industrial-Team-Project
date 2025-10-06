@@ -116,7 +116,7 @@ try {
                 <p class="kpi-value">£<?php echo htmlspecialchars($totalInvested); ?></p>
             </div>
             <div class="kpi-card">
-                <p class="kpi-label">Returns Received</p>
+                <p class="kpi-label">Return on Investments</p>
                 <p class="kpi-value">£<?php echo htmlspecialchars($totalReturns); ?></p>
             </div>
             <div class="kpi-card">
