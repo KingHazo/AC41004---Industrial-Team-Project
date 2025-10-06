@@ -157,7 +157,7 @@ function getPitchStatus($currentAmount, $targetAmount, $windowEndDate) {
 
                     <div class="grid">
                         <div class="col">
-                            <p class="muted">You invested</p>
+                            <p class="muted">Invested</p>
                             <p class="num">£<?php echo $investedAmount; ?></p>
                         </div>
                         <div class="col">
@@ -169,7 +169,7 @@ function getPitchStatus($currentAmount, $targetAmount, $windowEndDate) {
                             <p><?php echo $shares; ?></p>
                         </div>
                         <div class="col">
-                            <p class="muted">Profit to date</p>
+                            <p class="muted">ROI</p>
                             <p class="<?php echo $profitClass; ?>">£<?php echo $profitToDate; ?></p>
                         </div>
                     </div>
