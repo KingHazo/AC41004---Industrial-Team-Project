@@ -175,3 +175,22 @@ body {
   border-radius: 12px;
   font-size: 0.85rem;
 }
+
+
+.media-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.pitch-image {
+  max-width: 200px;
+  border-radius: 6px;
+}
+
+.pitch-video {
+  max-width: 300px;
+  border-radius: 6px;
+}
+

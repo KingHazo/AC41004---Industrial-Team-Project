@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // base URL for correct paths
-$base_url = '/AC41004---Industrial-Team-Project';
+$base_url = 'http://fundify.us-east-1.elasticbeanstalk.com';
 ?>
 <!DOCTYPE html>
 <html lang="en">

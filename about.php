@@ -12,7 +12,7 @@
 </head>
 
 <body>
-    <?php include 'navBar.php'; ?>
+    <?php include 'navbar.php'; ?>
     <h1>work in progress...</h1>
     <main>
 

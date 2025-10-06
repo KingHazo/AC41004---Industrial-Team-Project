@@ -23,13 +23,17 @@ CREATE TABLE Business (
     Email VARCHAR(255) NOT NULL UNIQUE
 );
 
--- Investor user type
+-- Investor users
 CREATE TABLE Investor (
     InvestorID INT PRIMARY KEY AUTO_INCREMENT,
     Name VARCHAR(255) NOT NULL,
     Password VARCHAR(255) NOT NULL,
     Email VARCHAR(255) NOT NULL UNIQUE,
     InvestorBalance DECIMAL(10,2) DEFAULT 0.00
+    Address VARCHAR(255),
+    DateOfBirth DATE,
+    Nationality VARCHAR(100),
+    PreferredCurrency VARCHAR(50);
 );
 
 -- Pitch that bussinesses can create (NEED TO HAVE SAVED MEDIA IMAGES/VIDEOS)

@@ -1,28 +1,50 @@
 <?php
-// start session and check login
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+error_log("✅ Script loaded");
+
+// Start session
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// check if user is logged in as a business
+// Check login
 if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'business') {
     header("Location: ../login/login_signup.php");
     exit();
 }
 
-// include database connection
+// Database connection
 include '../sql/db.php';
-
 if (!$mysql) {
     die("Database connection failed.");
 }
 
-// fetch tags from DB
+// Include GCP
+require __DIR__ . '/../vendor/autoload.php';
+use Google\Cloud\Storage\StorageClient;
+
+// Initialize GCP Storage using JSON file in root
+try {
+    $storage = new StorageClient([
+        'projectId' => 'fundify-474122',
+        'keyFilePath' => __DIR__ . '/../fundify-474122.json' // path to JSON credentials
+    ]);
+
+    $bucket = $storage->bucket('fundify-media-bucket');
+
+} catch (Exception $e) {
+    error_log("GCP init error: " . $e->getMessage());
+    die("Could not initialize Google Cloud Storage");
+}
+
+// Fetch tags
 $tagStmt = $mysql->prepare("SELECT * FROM Tag ORDER BY Name ASC");
 $tagStmt->execute();
 $tags = $tagStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// handle form submission
+// Handle POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $businessId = $_SESSION['userId'];
     $title = htmlspecialchars($_POST['title']);
@@ -31,68 +53,94 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $target = $_POST['target'];
     $endDate = $_POST['end_date'];
     $profitShare = $_POST['profit_share'];
-    $payoutFrequency = isset($_POST['payout_frequency']) ? $_POST['payout_frequency'] : null;
-    $status = isset($_POST['status']) ? $_POST['status'] : 'draft';
+    $payoutFrequency = $_POST['payout_frequency'] ?? null;
+    $status = $_POST['status'] ?? 'draft';
 
-    // insert new pitch
+    // Insert pitch
     $stmt = $mysql->prepare("
         INSERT INTO Pitch 
-        (Title, ElevatorPitch, DetailedPitch, TargetAmount, WindowEndDate, ProfitSharePercentage, 
-        PayoutFrequency, BusinessID, Status)
+        (Title, ElevatorPitch, DetailedPitch, TargetAmount, WindowEndDate, ProfitSharePercentage, PayoutFrequency, BusinessID, Status)
         VALUES 
-        (:title, :elevator, :details, :target, :endDate, :profitShare, 
-        :payoutFrequency, :businessId, :status)
+        (:title, :elevator, :details, :target, :endDate, :profitShare, :payoutFrequency, :businessId, :status)
     ");
-    $stmt->bindParam(':title', $title);
-    $stmt->bindParam(':elevator', $elevator);
-    $stmt->bindParam(':details', $details);
-    $stmt->bindParam(':target', $target);
-    $stmt->bindParam(':endDate', $endDate);
-    $stmt->bindParam(':profitShare', $profitShare);
-    $stmt->bindParam(':payoutFrequency', $payoutFrequency);
-    $stmt->bindParam(':businessId', $businessId);
-    $stmt->bindParam(':status', $status);
-    $stmt->execute();
+    $stmt->execute([
+        ':title' => $title,
+        ':elevator' => $elevator,
+        ':details' => $details,
+        ':target' => $target,
+        ':endDate' => $endDate,
+        ':profitShare' => $profitShare,
+        ':payoutFrequency' => $payoutFrequency,
+        ':businessId' => $businessId,
+        ':status' => $status
+    ]);
 
-    $pitchId = $mysql->lastInsertId(); // get inserted pitch ID
+    $pitchId = $mysql->lastInsertId();
 
-    // insert selected tags (max 5)
-    if (isset($_POST['tags'])) {
-        $selectedTags = array_slice($_POST['tags'], 0, 5);
-        foreach ($selectedTags as $tagId) {
-            $stmt = $mysql->prepare("INSERT INTO PitchTag (PitchID, TagID) VALUES (:pitchId, :tagId)");
-            $stmt->bindParam(':pitchId', $pitchId);
-            $stmt->bindParam(':tagId', $tagId);
-            $stmt->execute();
-        }
-    }
+    // Upload media files (if any)
+    if (!empty($_FILES['media']['name'][0])) {
+        foreach ($_FILES['media']['tmp_name'] as $index => $tmpName) {
+            $error = $_FILES['media']['error'][$index];
+            if ($error !== UPLOAD_ERR_OK) {
+                error_log("Upload error index $index: $error");
+                continue;
+            }
 
-    // insert investment tiers
-    if (isset($_POST['tier_name'])) {
-        $tierNames = $_POST['tier_name'];
-        $tierMins = $_POST['tier_min'];
-        $tierMaxs = $_POST['tier_max'];
-        $tierMultipliers = $_POST['tier_multiplier'];
+            $originalName = basename($_FILES['media']['name'][$index]);
+            $fileName = uniqid() . '_' . $originalName;
 
-        for ($i = 0; $i < count($tierNames); $i++) {
-            if (!empty($tierNames[$i])) {
-                $stmt = $mysql->prepare("
-                    INSERT INTO InvestmentTier 
-                    (Name, Min, Max, Multiplier, PitchID, SharePercentage) 
-                    VALUES (:name, :min, :max, :multiplier, :pitchId, :share)
-                ");
-                $stmt->bindParam(':name', $tierNames[$i]);
-                $stmt->bindParam(':min', $tierMins[$i]);
-                $stmt->bindParam(':max', $tierMaxs[$i]);
-                $stmt->bindParam(':multiplier', $tierMultipliers[$i]);
-                $stmt->bindParam(':pitchId', $pitchId);
-                $stmt->bindParam(':share', $profitShare);
-                $stmt->execute();
+            try {
+                $object = $bucket->upload(fopen($tmpName, 'r'), ['name' => $fileName]);
+                $publicUrl = "https://storage.googleapis.com/{$bucket->name()}/{$fileName}";
+                error_log("Uploaded to GCP: $fileName");
+
+                // Insert into Media table
+                $stmt = $mysql->prepare("INSERT INTO Media (FilePath, PitchID) VALUES (:filePath, :pitchId)");
+                $stmt->execute([
+                    ':filePath' => $publicUrl,
+                    ':pitchId' => $pitchId
+                ]);
+
+            } catch (Exception $e) {
+                error_log("GCP upload error: " . $e->getMessage());
             }
         }
     }
 
-    // redirect after submission
+    // Insert selected tags (max 5)
+    if (!empty($_POST['tags'])) {
+        $selectedTags = array_slice($_POST['tags'], 0, 5);
+        $stmt = $mysql->prepare("INSERT INTO PitchTag (PitchID, TagID) VALUES (:pitchId, :tagId)");
+        foreach ($selectedTags as $tagId) {
+            $stmt->execute([
+                ':pitchId' => $pitchId,
+                ':tagId' => $tagId
+            ]);
+        }
+    }
+
+    // Insert investment tiers
+    if (!empty($_POST['tier_name'])) {
+        $stmt = $mysql->prepare("
+            INSERT INTO InvestmentTier 
+            (Name, Min, Max, Multiplier, PitchID, SharePercentage) 
+            VALUES (:name, :min, :max, :multiplier, :pitchId, :share)
+        ");
+        for ($i = 0; $i < count($_POST['tier_name']); $i++) {
+            if (empty($_POST['tier_name'][$i])) continue;
+
+            $stmt->execute([
+                ':name' => $_POST['tier_name'][$i],
+                ':min' => $_POST['tier_min'][$i],
+                ':max' => $_POST['tier_max'][$i],
+                ':multiplier' => $_POST['tier_multiplier'][$i],
+                ':pitchId' => $pitchId,
+                ':share' => $profitShare
+            ]);
+        }
+    }
+
+    // Redirect
     if ($status === 'active') {
         header("Location: pitch_details.php?id=$pitchId&msg=submitted");
     } else {
@@ -101,6 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">

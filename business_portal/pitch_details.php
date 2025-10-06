@@ -67,6 +67,13 @@ if (!$pitch) {
   die("Pitch not found or you do not have permission to view it.");
 }
 
+// fetch media files for this pitch
+$mediaStmt = $mysql->prepare("SELECT FilePath FROM Media WHERE PitchID = :pitchId ORDER BY MediaID ASC");
+$mediaStmt->bindParam(':pitchId', $pitchId);
+$mediaStmt->execute();
+$mediaFiles = $mediaStmt->fetchAll(PDO::FETCH_COLUMN); // get array of URLs
+
+
 // fetch tags for this pitch
 $tagStmt = $mysql->prepare("
     SELECT t.Name 
@@ -165,6 +172,24 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
       <?php else: ?>
         <p>No tags added for this pitch.</p>
+      <?php endif; ?>
+
+      <h3>Media</h3>
+      <?php if ($mediaFiles): ?>
+        <div class="media-container">
+          <?php foreach ($mediaFiles as $fileUrl): ?>
+            <?php if (preg_match('/\.(jpg|jpeg|png|gif)$/i', $fileUrl)): ?>
+              <img src="<?php echo htmlspecialchars($fileUrl); ?>" alt="Pitch Media" class="pitch-image">
+            <?php elseif (preg_match('/\.(mp4|webm|ogg)$/i', $fileUrl)): ?>
+              <video controls class="pitch-video">
+                <source src="<?php echo htmlspecialchars($fileUrl); ?>">
+                Your browser does not support the video tag.
+              </video>
+            <?php endif; ?>
+          <?php endforeach; ?>
+        </div>
+      <?php else: ?>
+        <p>No media uploaded for this pitch.</p>
       <?php endif; ?>
 
       <h3>Funding Progress</h3>
