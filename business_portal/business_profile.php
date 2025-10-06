@@ -13,7 +13,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'business') {
 include '../sql/db.php';
 
 if (!$mysql) {
-  die("Database connection failed.");
+    die("Database connection failed.");
 }
 
 
@@ -53,20 +53,17 @@ if ($business) {
     <?php include '../navbar.php'; ?>
 
     <main class="section">
-        <h2>Business Profile</h2>
-
-        <!-- summary -->
+        <h2>My Account</h2>
         <section class="card summary">
-            <div class="logo-wrap">
-                <img src="bottle.jpg" alt="Company Logo" />
-                <button class="btn small" id="change-logo">Change Logo</button>
+            <div class="avatar">
+                <img src="bottle.jpg" alt="Company Logo">
             </div>
             <div class="info">
-                 <h3 id="company-name"><?php echo $businessName; ?></h3>
-                <p id="company-tagline">Smart hydration, sustainable future.</p>
-                <p id="company-email"><?php echo $businessEmail; ?></p>
-                <p class="muted">Joined: <span id="joined">14 Mar 2024</span></p>
+                <h3 id="company-name"><?php echo htmlspecialchars($businessName ?? 'N/A'); ?></h3>
+                <p id="company-email"><?php echo htmlspecialchars($businessEmail ?? 'N/A'); ?></p>
+                <button class="btn small" id="change-logo">Change Logo</button>
             </div>
+
         </section>
 
         <!-- company details -->
@@ -175,7 +172,7 @@ if ($business) {
     </main>
 
     <!-- Footer -->
-     <?php include '../footer.php'; ?>
+    <?php include '../footer.php'; ?>
 
     <script src="business_profile.js"></script>
 </body>
