@@ -98,18 +98,18 @@ $now = date("Y-m-d");
 
 // fully funded takes priority
 if ($pitch['CurrentAmount'] >= $pitch['TargetAmount'] && $pitch['TargetAmount'] > 0) {
-    $status = "funded";
-    $disableEdit = true; 
-} 
+  $status = "funded";
+  $disableEdit = true;
+}
 // funding window closed but not fully funded
 elseif ($pitch['WindowEndDate'] && $now > $pitch['WindowEndDate']) {
-    $status = "closed";
-    $disableEdit = true;
-} 
+  $status = "closed";
+  $disableEdit = true;
+}
 // otherwise active
 elseif ($pitch['CurrentAmount'] > 0) {
-    $status = "active";
-} 
+  $status = "active";
+}
 
 // fetch investment tiers for this pitch
 $tierStmt = $mysql->prepare("SELECT * FROM InvestmentTier WHERE PitchID = :pitchId ORDER BY Min ASC");
@@ -162,6 +162,35 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
 
       <h3>Detailed Pitch</h3>
       <p id="detailedPitchText"><?php echo nl2br(htmlspecialchars($pitch['DetailedPitch'])); ?></p>
+
+      <!-- Slideshow container for images-->
+      <!-- https://www.w3schools.com/howto/howto_js_slideshow.asp-->
+      <div class="slideshow-container">
+
+        <!-- Full-width images with number and caption text -->
+        <div class="mySlides fade">
+          <img src="../investor_portal/image1.jpg" style="width:100%">
+        </div>
+
+        <div class="mySlides fade">
+          <img src="../investor_portal/image2.jpg" style="width:100%">
+        </div>
+
+        <div class="mySlides fade">
+          <img src="../investor_portal/image3.jpg" style="width:100%">
+        </div>
+
+        <!-- Next and previous buttons -->
+        <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+        <a class="next" onclick="plusSlides(1)">&#10095;</a>
+      </div>
+
+      <!-- The dots/circles -->
+      <div style="text-align:center">
+        <span class="dot" onclick="currentSlide(1)"></span>
+        <span class="dot" onclick="currentSlide(2)"></span>
+        <span class="dot" onclick="currentSlide(3)"></span>
+      </div>
 
       <h3>Tags</h3>
       <?php if ($tags): ?>
@@ -235,7 +264,7 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
   </main>
   <?php include '../footer.php'; ?>
-  <!--<script src="pitch_details.js"></script> -->
+  <script src="pitch_details.js?v=<?php echo time(); ?>"></script>
 </body>
 
 </html>
