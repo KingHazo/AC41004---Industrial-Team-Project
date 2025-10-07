@@ -36,7 +36,7 @@ $pitches = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <title>Business Dashboard</title>
   <link rel="stylesheet" href="business_dashboard.css?v=<?php echo time(); ?>"> <!--handles cache issues-->
   <link rel="stylesheet" href="../navbar.css">
-   <link rel="stylesheet" href="../footer.css?v=<?php echo time(); ?>"> 
+  <link rel="stylesheet" href="../footer.css?v=<?php echo time(); ?>">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
@@ -77,29 +77,52 @@ $pitches = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $status = $pitch['Status'];
         $disableEdit = false;
         $disableProfit = false;
-        $now = date("Y-m-d");
+        // use timestamps for comparison
+        $now = time();
+        $windowEnd = isset($pitch['WindowEndDate']) ? strtotime($pitch['WindowEndDate']) : 0;
 
-        // if status is active, check if funding window ended
-        if (($status === 'active' || $status === 'draft') && $pitch['WindowEndDate'] && $now > $pitch['WindowEndDate']) {
+        $status = strtolower($pitch['Status']); // start with DB status
+
+        // fully funded takes priority
+        if ($pitch['CurrentAmount'] >= $pitch['TargetAmount'] && $pitch['TargetAmount'] > 0) {
+          $status = 'funded';
+          $disableEdit = true;
+        }
+
+        // funding window closed but not fully funded
+        elseif (isset($pitch['WindowEndDate']) && strtotime($pitch['WindowEndDate']) < time()) {
           $status = 'closed';
           $disableEdit = true;
 
-          // update in database so it stays consistent
-          $stmtUpdate = $mysql->prepare("
-                UPDATE Pitch
-                SET Status = 'closed'
-                WHERE PitchID = :pitchId AND BusinessID = :businessId
-            ");
-          $stmtUpdate->bindParam(':pitchId', $pitch['PitchID'], PDO::PARAM_INT);
-          $stmtUpdate->bindParam(':businessId', $businessId, PDO::PARAM_INT);
-          $stmtUpdate->execute();
+          // optionally update in DB
+          if ($pitch['Status'] !== 'closed') {
+            $stmtUpdate = $mysql->prepare("
+            UPDATE Pitch
+            SET Status = 'closed'
+            WHERE PitchID = :pitchId AND BusinessID = :businessId
+        ");
+            $stmtUpdate->bindParam(':pitchId', $pitch['PitchID'], PDO::PARAM_INT);
+            $stmtUpdate->bindParam(':businessId', $businessId, PDO::PARAM_INT);
+            $stmtUpdate->execute();
+          }
         }
 
-        // if pitch is funded or closed, disable edit
+        // keep active if DB says active
+        elseif ($pitch['Status'] === 'active') {
+          $status = 'active';
+        }
+
+        // else draft
+        else {
+          $status = 'draft';
+        }
+
+
+        // disable edit for funded or closed pitches (already set above)
         if ($status === 'funded' || $status === 'closed') {
           $disableEdit = true;
         }
-        ?>
+      ?>
         <div class="card">
           <h3><?php echo htmlspecialchars($pitch['Title']); ?></h3>
           <p>Status: <span class="status <?php echo $status; ?>"><?php echo ucfirst($status); ?></span></p>
@@ -147,7 +170,9 @@ $pitches = $stmt->fetchAll(PDO::FETCH_ASSOC);
       // hide after 3 seconds
       setTimeout(() => {
         popup.style.opacity = 0;
-        setTimeout(() => { popup.style.display = 'none'; }, 300);
+        setTimeout(() => {
+          popup.style.display = 'none';
+        }, 300);
       }, 3000);
     }
   </script>

@@ -113,6 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -123,88 +124,133 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
+
 <body>
 
-<?php include '../navbar.php'; ?>
+    <?php include '../navbar.php'; ?>
 
-<main class="section">
-    <h2>Edit Pitch – <?php echo htmlspecialchars($pitch['Title']); ?></h2>
-    <form class="pitch-form" method="POST" enctype="multipart/form-data">
-        <label for="title">Product Title</label>
-        <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($pitch['Title']); ?>" <?php echo $disableOtherFields ? 'readonly' : ''; ?>>
+    <main class="section">
+        <h2>Edit Pitch – <?php echo htmlspecialchars($pitch['Title']); ?></h2>
+        <form class="pitch-form" method="POST" enctype="multipart/form-data">
 
-        <label for="elevator">Elevator Pitch</label>
-        <textarea id="elevator" name="elevator" rows="2"><?php echo htmlspecialchars($pitch['ElevatorPitch']); ?></textarea>
+            <!-- Display Status -->
+            <p class="status <?php echo $status; ?>">Status: <?php echo ucfirst($status); ?></p>
 
-        <label for="details">Detailed Pitch</label>
-        <textarea id="details" name="details" rows="5"><?php echo htmlspecialchars($pitch['DetailedPitch']); ?></textarea>
+            <label for="title">Product Title</label>
+            <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($pitch['Title']); ?>" <?php echo $disableOtherFields ? 'readonly style="background:#eee;cursor:not-allowed;"' : ''; ?>>
 
-        <label for="media">Upload Images/Videos</label>
-        <input type="file" id="media" name="media[]" multiple accept="image/*,video/*" <?php echo $disableOtherFields ? 'disabled' : ''; ?>>
 
-        <!-- Tags -->
-        <div class="dropdown">
-            <button type="button" class="dropbtn">Select Tags (max 5)</button>
-            <div class="dropdown-content">
-                <?php foreach ($allTags as $tag): ?>
-                    <label>
-                        <input type="checkbox" name="tags[]" value="<?php echo $tag['TagID']; ?>"
-                            <?php echo in_array($tag['TagID'], $selectedTagsIds) ? 'checked' : ''; ?>>
-                        <?php echo htmlspecialchars($tag['Name']); ?>
-                    </label>
+            <label for="elevator">Elevator Pitch</label>
+            <textarea id="elevator" name="elevator" rows="2"><?php echo htmlspecialchars($pitch['ElevatorPitch']); ?></textarea>
+
+            <label for="details">Detailed Pitch</label>
+            <textarea id="details" name="details" rows="5"><?php echo htmlspecialchars($pitch['DetailedPitch']); ?></textarea>
+
+            <label for="media">Upload Images/Videos</label>
+            <input type="file" id="media" name="media[]" multiple accept="image/*,video/*" <?php echo $disableOtherFields ? 'disabled' : ''; ?>>
+
+            <!-- Tags -->
+
+            <h3>Tags</h3>
+            <?php if ($status === 'draft'): ?>
+                <div class="dropdown">
+                    <button type="button" class="dropbtn">Select Tags (max 5)</button>
+                    <div class="dropdown-content">
+                        <?php foreach ($allTags as $tag): ?>
+                            <label class="checkbox">
+                                <input type="checkbox" name="tags[]" value="<?php echo $tag['TagID']; ?>"
+                                    <?php echo in_array($tag['TagID'], $selectedTagsIds) ? 'checked' : ''; ?>
+                                    onchange="limitTags(this)">
+                                <?php echo htmlspecialchars($tag['Name']); ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <p class="note">Select up to 5 tags.</p>
+            <?php else: ?>
+                <?php if ($selectedTagsIds): ?>
+                    <div class="tags-container">
+                        <?php
+                        foreach ($allTags as $tag) {
+                            if (in_array($tag['TagID'], $selectedTagsIds)) {
+                                echo '<span class="tag">' . htmlspecialchars($tag['Name']) . '</span> ';
+                            }
+                        }
+                        ?>
+                    </div>
+                <?php else: ?>
+                    <p>No tags assigned for this pitch.</p>
+                <?php endif; ?>
+            <?php endif; ?>
+
+
+            <label for="target">Target Investment (£)</label>
+            <input type="number" id="target" name="target" value="<?php echo $pitch['TargetAmount']; ?>" <?php echo $disableOtherFields ? 'readonly style="background:#eee;cursor:not-allowed;"' : ''; ?>>
+
+            <label for="end-date">Investment Window End Date</label>
+            <input type="date" id="end-date" name="end_date" value="<?php echo $pitch['WindowEndDate']; ?>" <?php echo $disableOtherFields ? 'readonly style="background:#eee;cursor:not-allowed;"' : ''; ?>>
+
+            <label for="profit-share">Investor Profit Share %</label>
+            <input type="number" id="profit-share" name="profit_share" min="1" max="100" value="<?php echo $pitch['ProfitSharePercentage']; ?>" <?php echo $disableOtherFields ? 'readonly style="background:#eee;cursor:not-allowed;"' : ''; ?>>
+
+            <?php
+            $payout = $pitch['PayoutFrequency'] ?? 'Quarterly'; // fallback
+            ?>
+            <label>Payout Frequency</label>
+            <div class="payout-toggle">
+                <button type="button" class="toggle-btn <?php echo $payout === 'Quarterly' ? 'active' : ''; ?>"
+                    data-value="Quarterly" <?php echo $status !== 'draft' ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''; ?>>Quarterly</button>
+                <button type="button" class="toggle-btn <?php echo $payout === 'Annually' ? 'active' : ''; ?>"
+                    data-value="Annually" <?php echo $status !== 'draft' ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''; ?>>Annually</button>
+            </div>
+            <input type="hidden" name="payout_frequency" id="payout_frequency" value="<?php echo $payout; ?>" required>
+
+
+            <div class="tiers">
+                <h3>Investment Tiers</h3>
+                <?php foreach ($tiers as $tier): ?>
+                    <div class="tier-row">
+                        <input type="text" name="tier_name[]" value="<?php echo htmlspecialchars($tier['Name']); ?>" <?php echo $disableOtherFields ? 'readonly style="background:#eee;cursor:not-allowed;"' : ''; ?>>
+                        <input type="number" name="tier_min[]" value="<?php echo $tier['Min']; ?>" <?php echo $disableOtherFields ? 'readonly style="background:#eee;cursor:not-allowed;"' : ''; ?>>
+                        <input type="number" name="tier_max[]" value="<?php echo $tier['Max']; ?>" <?php echo $disableOtherFields ? 'readonly style="background:#eee;cursor:not-allowed;"' : ''; ?>>
+                        <input type="number" step="0.1" name="tier_multiplier[]" value="<?php echo $tier['Multiplier']; ?>" <?php echo $disableOtherFields ? 'readonly style="background:#eee;cursor:not-allowed;"' : ''; ?>>
+                    </div>
                 <?php endforeach; ?>
             </div>
-        </div>
 
-        <label for="target">Target Investment (£)</label>
-        <input type="number" id="target" name="target" value="<?php echo $pitch['TargetAmount']; ?>">
+            <div class="form-buttons">
+                <?php if ($status === 'draft'): ?>
+                    <button type="button" class="ai-btn">Run AI Analysis</button>
+                <?php endif; ?>
+                <button type="submit" class="submit-btn">Save Changes</button>
+            </div>
 
-        <label for="end-date">Investment Window End Date</label>
-        <input type="date" id="end-date" name="end_date" value="<?php echo $pitch['WindowEndDate']; ?>">
+        </form>
+    </main>
 
-        <label for="profit-share">Investor Profit Share %</label>
-        <input type="number" id="profit-share" name="profit_share" min="1" max="100" value="<?php echo $pitch['ProfitSharePercentage']; ?>">
+    <!-- AI Modal -->
+    <div id="ai-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>AI Pitch Analysis</h3>
+                <span class="close-btn">&times;</span>
+            </div>
 
-        <div class="tiers">
-            <h3>Investment Tiers</h3>
-            <?php foreach ($tiers as $tier): ?>
-                <div class="tier-row">
-                    <input type="text" name="tier_name[]" value="<?php echo htmlspecialchars($tier['Name']); ?>">
-                    <input type="number" name="tier_min[]" value="<?php echo $tier['Min']; ?>">
-                    <input type="number" name="tier_max[]" value="<?php echo $tier['Max']; ?>">
-                    <input type="number" step="0.1" name="tier_multiplier[]" value="<?php echo $tier['Multiplier']; ?>">
-                </div>
-            <?php endforeach; ?>
-        </div>
-
-        <div class="form-buttons">
-            <button type="button" class="ai-btn">Run AI Analysis</button>
-            <button type="submit" class="submit-btn">Save Changes</button>
-        </div>
-    </form>
-</main>
-
-<!-- AI Modal -->
-<div id="ai-modal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>AI Pitch Analysis</h3>
-            <span class="close-btn">&times;</span>
-        </div>
-
-        <p class="rag-score"><strong>Score:</strong> <span id="rag">Analyzing...</span></p>
-        <div id="ai-feedback"></div>
-        <div class="modal-buttons">
-            <button id="apply-all" class="ai-btn">Apply All & Re-run</button>
-            <button id="submit-anyway" class="submit-btn">Submit Anyway</button>
+            <p class="rag-score"><strong>Score:</strong> <span id="rag">Analyzing...</span></p>
+            <div id="ai-feedback"></div>
+            <div class="modal-buttons">
+                <button id="apply-all" class="ai-btn">Apply All & Re-run</button>
+                <button id="submit-anyway" class="submit-btn">Submit Anyway</button>
+            </div>
         </div>
     </div>
-</div>
 
-<?php include '../footer.php'; ?>
+    <?php include '../footer.php'; ?>
 
-<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-<script src="create_pitch.js?v=<?php echo time(); ?>"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="create_pitch.js?v=<?php echo time(); ?>"></script>
+    <script src="edit_pitch.js?v=<?php echo time(); ?>"></script>
 
 </body>
+
 </html>

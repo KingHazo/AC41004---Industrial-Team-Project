@@ -58,7 +58,19 @@ body {
 .section h2 {
     margin-bottom: 20px;
     color: #2c3e50;
+    font-size: 1.5rem;
+    font-weight: 600;
+
+    /* handles long titles gracefully */
+    display: -webkit-box;
+    -webkit-line-clamp: 4; /* show max 4 lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    max-width: 100%;
 }
+
 
 .pitch-form {
     background: #fff;
@@ -90,6 +102,17 @@ body {
     outline: none;
     box-shadow: 0 0 5px rgba(11, 61, 145, 0.3);
 }
+
+.pitch-form input[readonly],
+.pitch-form input:disabled,
+.pitch-form textarea[readonly],
+.pitch-form textarea:disabled,
+.pitch-form select:disabled {
+    background: #eee;       
+    cursor: not-allowed;     
+    pointer-events: none;
+}   
+
 
 .tiers {
     margin-top: 1rem;
@@ -493,4 +516,49 @@ body {
     background: #000000;
     color: #fff;
     border-color: #fbfbfb;
+}
+
+
+.status {
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  width: fit-content;
+}
+
+.status.active {
+  background: #e0f7ec;
+  color: #27ae60;
+}
+
+.status.closed {
+  background: #fbeaea;
+  color: #e74c3c;
+}
+
+.status.draft {
+  background: #fff6e0;
+  color: #f39c12;
+}
+
+.status.funded {
+  background: #d7d9ff;
+  color: #0b3d91;
+}
+
+/* tags */
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.tag {
+  background-color: #070707;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
 }
