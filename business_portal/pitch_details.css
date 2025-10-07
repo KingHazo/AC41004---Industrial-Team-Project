@@ -26,11 +26,31 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-width: 0;
 }
 
 .pitch-card h2 {
-  color: #2c3e50;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;      /* limit to 3 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
 }
+
+#elevatorPitchText,
+#detailedPitchText {
+  white-space: pre-wrap;       
+  word-break: break-word;     
+  overflow-wrap: break-word;   
+  max-width: 100%;             
+  line-height: 1.1;
+  font-size: 0.95rem;
+  color: #444;
+  margin-bottom: 1rem;
+}
+
+
 
 .status {
   font-weight: bold;
@@ -56,8 +76,8 @@ body {
 }
 
 .status.funded {
-  background: #d7d9ff;  
-  color: #0b3d91;     
+  background: #d7d9ff;
+  color: #0b3d91;
 }
 
 /* Media Gallery */
@@ -75,7 +95,9 @@ body {
 }
 
 /* Progress Bar */
+
 .progress-container {
+  position: relative;
   background: #ecf0f1;
   border-radius: 10px;
   overflow: hidden;
@@ -85,41 +107,62 @@ body {
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #169e5f, #075116);
-  text-align: center;
-  color: #fff;
-  font-size: 0.8rem;
-  line-height: 20px;
+  background: linear-gradient(90deg, #4CAF50, #4CAF50);
+  width: 0;
   transition: width 1s ease-in-out;
+  border-radius: 10px 0 0 10px;
+}
+
+/* text over the progress bar */
+.progress-text {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #333;
+  pointer-events: none;
+
+  /* force single line display */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* tiers table */
 .tiers-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
 }
 
 .tiers-table th,
 .tiers-table td {
-    border: 1px solid #ddd;
-    padding: 5px;
-    text-align: center;
+  border: 1px solid #ddd;
+  padding: 5px;
+  text-align: center;
 }
 
 .tiers-table th {
-    background: #f4f6f7;
-    color: #2c3e50;
+  background: #f4f6f7;
+  color: #2c3e50;
 }
 
 @media (max-width: 768px) {
-    .tiers-table th:nth-child(4) span {
-        display: none; /* hide full text */
-    }
+  .tiers-table th:nth-child(4) span {
+    display: none;
+    /* hide full text */
+  }
 
-    .tiers-table th:nth-child(4)::after {
-        content: "Mltp"; /* show shortened text */
-    }
+  .tiers-table th:nth-child(4)::after {
+    content: "Mltp";
+    /* show shortened text */
+  }
 }
 
 
@@ -134,42 +177,49 @@ body {
 .edit-btn,
 .profit-btn,
 .submit-btn {
-    display: inline-block;
-    padding: 12px 20px;   
-    border-radius: 6px;
-    font-size: 0.9rem;     
-    font-weight: 600;
-    color: #fff;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    border: none;
-    outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  border: none;
+  outline: none;
+  text-align: center;
+
+  /* shadow and depth */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);  
+    transition: all 0.3s ease;    
 }
 
 .edit-btn {
-    background-color: #f39c12;
+  background-color: #f39c12;
 }
 
 .submit-btn {
-    background-color: #4cd810;
+  background-color: #4cd810;
 }
 
 .submit-btn:hover {
-    background-color: #55c848;
+  background-color: #55c848;
 }
 
 
 .edit-btn:hover {
-    background-color: #d68910;
+  background-color: #d68910;
 }
 
 .profit-btn {
-    background-color: #27ae60;
+  background-color: #27ae60;
 }
 
 .profit-btn:hover {
-    background-color: #1e8449;
+  background-color: #1e8449;
 }
 
 /* tags */
@@ -189,20 +239,104 @@ body {
 }
 
 
-.media-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 20px;
+/* Slideshow container */
+.slideshow-container {
+  max-width: 100%;
+  position: relative;
+  margin: auto;
 }
 
-.pitch-image {
-  max-width: 200px;
-  border-radius: 6px;
+/* Hide the images by default */
+.mySlides {
+  display: none;
+  max-width: 100%;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-.pitch-video {
-  max-width: 300px;
-  border-radius: 6px;
+/* Next & previous buttons */
+.prev,
+.next {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  width: auto;
+  margin-top: -22px;
+  padding: 16px;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  transition: 0.6s ease;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
 }
 
+/* image slideshow/carousel styling*/
+
+/* Position the "next button" to the right */
+.next {
+  right: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+/* On hover, add a black background color with a little bit see-through */
+.prev:hover,
+.next:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* The dots/bullets/indicators */
+.dot {
+  cursor: pointer;
+  height: 5px;
+  width: 5px;
+  margin: 0 2px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.6s ease;
+}
+
+.active,
+.dot:hover {
+  background-color: #717171;
+}
+
+/* Fading animation */
+.fade {
+  animation-name: fade;
+  animation-duration: 1.5s;
+}
+
+@keyframes fade {
+  from {
+    opacity: .4
+  }
+
+  to {
+    opacity: 1
+  }
+}
+
+/* Smaller screens: reduce slide height */
+@media (max-width: 1023px) {
+  .mySlides {
+    height: 150px;
+  }
+
+  .slideshow-container {
+    max-width: 90%;
+  }
+}
+
+/* Desktop: bigger slides */
+@media (min-width: 1024px) {
+  .slideshow-container {
+    max-width: 60%;
+  }
+
+  .mySlides {
+    height: 300px;
+  }
+}

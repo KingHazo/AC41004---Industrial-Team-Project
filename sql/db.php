@@ -15,5 +15,3 @@ try {
 } catch (PDOException $e) {
     error_log("FATAL DB CONNECTION FAILURE: " . $e->getMessage());
 }
-
-?>

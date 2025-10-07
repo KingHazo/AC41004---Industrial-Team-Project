@@ -75,6 +75,7 @@ body {
   flex-direction: column;
   gap: 15px;
   transition: all 0.3s ease;
+  min-width: 0;
 }
 
 .card:hover {
@@ -84,7 +85,21 @@ body {
 
 .card h3 {
   color: #2c3e50;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+
+  /* prevent overflow and allow ellipsis to work */
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: break-word;
+  box-sizing: border-box;
 }
+
 
 .card p {
   font-size: 0.9rem;
@@ -148,10 +163,14 @@ body {
   justify-content: center;
   font-size: 0.8rem;
   font-weight: 600;
-  color: #333; 
+  color: #333;
   pointer-events: none;
-}
 
+  /* force single line display */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 
 .card-buttons {
@@ -211,5 +230,5 @@ body {
 }
 
 .submit-btn:hover {
-    background-color: #55c848;
+    background-color: #1e8449;
 }
