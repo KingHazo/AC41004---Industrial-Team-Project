@@ -14,7 +14,22 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'investor') {
 // include database connection
 include '../sql/db.php';
 
-$selected_tag_id = filter_input(INPUT_GET, 'tag_id', FILTER_VALIDATE_INT) ?? 0;
+$selected_tag_ids_raw = filter_input(INPUT_GET, 'tag_id', FILTER_DEFAULT) ?? '0';
+
+$selected_tag_ids_array = array_filter(
+    array_map('intval', explode(',', $selected_tag_ids_raw)),
+    fn($id) => $id >= 0
+);
+
+if (count($selected_tag_ids_array) > 1 && in_array(0, $selected_tag_ids_array)) {
+    $selected_tag_ids_array = array_filter($selected_tag_ids_array, fn($id) => $id > 0);
+}
+
+if (empty($selected_tag_ids_array)) {
+    $selected_tag_ids_array = [0];
+}
+
+$selected_tag_ids = $selected_tag_ids_array; 
 
 $all_tags = [];
 $all_tags[] = ['TagID' => 0, 'Name' => 'All']; 
@@ -40,6 +55,14 @@ try {
     <link rel="stylesheet" href="../footer.css">
     <script src="https://kit.fontawesome.com/004961d7c9.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        .filter-tag.selected {
+            background-color: #0b3d91; /* blue fill color when selected */
+            color: white;
+            border-color: #0b3d91;
+        }
+    </style>
 </head>
 
 <body>
@@ -51,12 +74,13 @@ try {
         <h2>Discover New Pitches</h2>
         <div class="search-filter">
             <input type="text" placeholder="Search pitches...">
-            <button class="filter-btn" aria-label="Filter">
+            <button class="filter-btn" id="filterButton" aria-label="Filter"> 
                 <i class="fa-solid fa-filter"></i>
+            </button>
             </button>
         </div>
 
-        <div class="tag-filters-container">
+        <div class="tag-filters-container" id="tagFiltersContainer" style="display: none;"> 
             <div class="active-filters" id="pitch-tags">
                 <?php foreach ($all_tags as $tag): 
                     if (!is_array($tag) || !isset($tag['TagID']) || !isset($tag['Name'])) {
@@ -64,7 +88,7 @@ try {
                         continue;
                     }
                     
-                    $is_selected = ($tag['TagID'] == $selected_tag_id) ? ' selected' : '';
+                    $is_selected = in_array($tag['TagID'], $selected_tag_ids) ? ' selected' : '';
                 ?>
                     <button class="filter-tag<?php echo $is_selected; ?>" data-tag="<?php echo htmlspecialchars($tag['TagID']); ?>">
                         <?php echo htmlspecialchars($tag['Name']); ?>
@@ -77,19 +101,31 @@ try {
             <?php
             try {
                 $sql = "SELECT p.PitchID, p.Title, p.ElevatorPitch, p.CurrentAmount, p.TargetAmount, p.ProfitSharePercentage 
-                        FROM Pitch p";
+                         FROM Pitch p";
                 
-                if ($selected_tag_id > 0) {
-                    $sql .= " JOIN PitchTag pt ON p.PitchID = pt.PitchID 
-                              WHERE pt.TagID = :tag_id";
+                $filter_needed = !in_array(0, $selected_tag_ids);
+
+                if ($filter_needed) {
+                    $placeholders = implode(',', array_fill(0, count($selected_tag_ids), '?'));
+                    
+                    // select pitches that have at least one of the tags
+                    $sql .= " WHERE EXISTS (
+                                SELECT 1 
+                                FROM PitchTag pt 
+                                WHERE pt.PitchID = p.PitchID 
+                                AND pt.TagID IN ($placeholders)
+                            )";
                 }
                 
                 $sql .= " ORDER BY p.PitchID DESC";
 
                 $stmt = $mysql->prepare($sql);
 
-                if ($selected_tag_id > 0) {
-                    $stmt->bindParam(':tag_id', $selected_tag_id, PDO::PARAM_INT);
+                if ($filter_needed) {
+                    foreach ($selected_tag_ids as $index => $tag_id) {
+                        // PDO uses 1-based indexing for bindValue position
+                        $stmt->bindValue($index + 1, $tag_id, PDO::PARAM_INT);
+                    }
                 }
 
                 $stmt->execute();

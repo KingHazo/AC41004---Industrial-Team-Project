@@ -2,30 +2,81 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    const filterBtn = document.getElementById('filterButton');
+    const tagsContainerWrapper = document.getElementById('tagFiltersContainer');
+
+    if (filterBtn && tagsContainerWrapper) {
+        if (tagsContainerWrapper.querySelector('.filter-tag.selected:not([data-tag="0"])')) {
+             tagsContainerWrapper.style.display = 'block'; // Show if filtered
+        }
+
+        filterBtn.addEventListener('click', () => {
+            if (tagsContainerWrapper.style.display === 'none' || tagsContainerWrapper.style.display === '') {
+                tagsContainerWrapper.style.display = 'block'; 
+                filterBtn.classList.add('active'); 
+            } else {
+                tagsContainerWrapper.style.display = 'none';
+                filterBtn.classList.remove('active');
+            }
+        });
+    }
+
     const tagContainer = document.getElementById('pitch-tags');
     
-    // tag filtering logic
+    const applyTagFilter = () => {
+        const selectedTags = [];
+        document.querySelectorAll('#pitch-tags .filter-tag.selected').forEach(button => {
+            const tagId = button.getAttribute('data-tag');
+            if (tagId !== '0') {
+                selectedTags.push(tagId);
+            }
+        });
+
+        const url = new URL(window.location.href);
+
+        if (selectedTags.length > 0) {
+            url.searchParams.set('tag_id', selectedTags.join(','));
+        } else {
+            // default to all tags
+            url.searchParams.delete('tag_id');
+        }
+
+        window.location.href = url.toString();
+    };
+
     if (tagContainer) {
         tagContainer.addEventListener('click', (event) => {
             const button = event.target.closest('.filter-tag');
             
             if (button) {
-                console.log("Filter button clicked:", button.textContent.trim());
-
                 const tagId = button.getAttribute('data-tag'); 
-                
-                const url = new URL(window.location.href);
-                
+                const allButton = document.querySelector('#pitch-tags .filter-tag[data-tag="0"]');
+
                 if (tagId === '0') {
-                    url.searchParams.delete('tag_id');
-                    console.log("Setting filter to: All (URL param deleted)");
+                    if (!button.classList.contains('selected')) {
+                        document.querySelectorAll('#pitch-tags .filter-tag').forEach(btn => {
+                            btn.classList.remove('selected');
+                        });
+                        button.classList.add('selected');
+                    } else {
+                        return; 
+                    }
                 } else {
-                    url.searchParams.set('tag_id', tagId);
-                    console.log("Setting filter to TagID:", tagId);
+                    button.classList.toggle('selected');
+
+                    const specificTagsSelected = document.querySelectorAll('#pitch-tags .filter-tag.selected:not([data-tag="0"])').length;
+
+                    if (specificTagsSelected > 0) {
+                        // deselect all when other tag is picked
+                        allButton.classList.remove('selected');
+                    } else {
+                        // all is selected if no other tags
+                        allButton.classList.add('selected');
+                    }
                 }
                 
-                console.log("Navigating to:", url.toString());
-                window.location.href = url.toString();
+                // apply filter and refresh
+                applyTagFilter();
             }
         });
     } else {
