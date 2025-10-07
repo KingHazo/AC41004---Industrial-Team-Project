@@ -56,8 +56,8 @@ body {
 }
 
 .status.funded {
-  background: #d7d9ff;  
-  color: #0b3d91;     
+  background: #d7d9ff;
+  color: #0b3d91;
 }
 
 /* Media Gallery */
@@ -77,7 +77,7 @@ body {
 /* Progress Bar */
 
 .progress-container {
-  position: relative; 
+  position: relative;
   background: #ecf0f1;
   border-radius: 10px;
   overflow: hidden;
@@ -88,7 +88,7 @@ body {
 .progress-bar {
   height: 100%;
   background: linear-gradient(90deg, #4CAF50, #4CAF50);
-  width: 0; 
+  width: 0;
   transition: width 1s ease-in-out;
   border-radius: 10px 0 0 10px;
 }
@@ -116,31 +116,33 @@ body {
 
 /* tiers table */
 .tiers-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
 }
 
 .tiers-table th,
 .tiers-table td {
-    border: 1px solid #ddd;
-    padding: 5px;
-    text-align: center;
+  border: 1px solid #ddd;
+  padding: 5px;
+  text-align: center;
 }
 
 .tiers-table th {
-    background: #f4f6f7;
-    color: #2c3e50;
+  background: #f4f6f7;
+  color: #2c3e50;
 }
 
 @media (max-width: 768px) {
-    .tiers-table th:nth-child(4) span {
-        display: none; /* hide full text */
-    }
+  .tiers-table th:nth-child(4) span {
+    display: none;
+    /* hide full text */
+  }
 
-    .tiers-table th:nth-child(4)::after {
-        content: "Mltp"; /* show shortened text */
-    }
+  .tiers-table th:nth-child(4)::after {
+    content: "Mltp";
+    /* show shortened text */
+  }
 }
 
 
@@ -155,42 +157,49 @@ body {
 .edit-btn,
 .profit-btn,
 .submit-btn {
-    display: inline-block;
-    padding: 12px 20px;   
-    border-radius: 6px;
-    font-size: 0.9rem;     
-    font-weight: 600;
-    color: #fff;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    border: none;
-    outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  border: none;
+  outline: none;
+  text-align: center;
+
+  /* shadow and depth */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);  
+    transition: all 0.3s ease;    
 }
 
 .edit-btn {
-    background-color: #f39c12;
+  background-color: #f39c12;
 }
 
 .submit-btn {
-    background-color: #4cd810;
+  background-color: #4cd810;
 }
 
 .submit-btn:hover {
-    background-color: #55c848;
+  background-color: #55c848;
 }
 
 
 .edit-btn:hover {
-    background-color: #d68910;
+  background-color: #d68910;
 }
 
 .profit-btn {
-    background-color: #27ae60;
+  background-color: #27ae60;
 }
 
 .profit-btn:hover {
-    background-color: #1e8449;
+  background-color: #1e8449;
 }
 
 /* tags */
@@ -227,7 +236,8 @@ body {
 }
 
 /* Next & previous buttons */
-.prev, .next {
+.prev,
+.next {
   cursor: pointer;
   position: absolute;
   top: 50%;
@@ -251,8 +261,9 @@ body {
 }
 
 /* On hover, add a black background color with a little bit see-through */
-.prev:hover, .next:hover {
-  background-color: rgba(0,0,0,0.8);
+.prev:hover,
+.next:hover {
+  background-color: rgba(0, 0, 0, 0.8);
 }
 
 /* The dots/bullets/indicators */
@@ -267,7 +278,8 @@ body {
   transition: background-color 0.6s ease;
 }
 
-.active, .dot:hover {
+.active,
+.dot:hover {
   background-color: #717171;
 }
 
@@ -278,8 +290,13 @@ body {
 }
 
 @keyframes fade {
-  from {opacity: .4}
-  to {opacity: 1}
+  from {
+    opacity: .4
+  }
+
+  to {
+    opacity: 1
+  }
 }
 
 /* Smaller screens: reduce slide height */
@@ -289,16 +306,16 @@ body {
   }
 
   .slideshow-container {
-    max-width: 90%; 
+    max-width: 90%;
   }
 }
 
 /* Desktop: bigger slides */
 @media (min-width: 1024px) {
   .slideshow-container {
-    max-width: 60%; 
+    max-width: 60%;
   }
-  
+
   .mySlides {
     height: 300px;
   }
