@@ -206,8 +206,10 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
       <h3>Funding Progress</h3>
       <div class="progress-container">
         <div class="progress-bar" style="width: <?php echo $progress; ?>%;">
+           <div class="progress-text">
           £<?php echo number_format($pitch['CurrentAmount'], 2); ?> /
           £<?php echo number_format($pitch['TargetAmount'], 2); ?>
+          </div>
         </div>
       </div>
       <p><strong>Funding Window End:</strong> <?php echo htmlspecialchars($pitch['WindowEndDate']); ?></p>
