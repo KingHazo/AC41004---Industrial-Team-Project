@@ -95,14 +95,21 @@ $status = $pitch['Status']; // <-- take real status from DB
 $disableEdit = false;
 $disableProfit = false;
 $now = date("Y-m-d");
-if ($pitch['WindowEndDate'] && $now > $pitch['WindowEndDate']) {
-  $status = "closed";
-  $disableEdit = true;
-} elseif ($pitch['CurrentAmount'] >= $pitch['TargetAmount'] && $pitch['TargetAmount'] > 0) {
-  $status = "funded";
-} elseif ($pitch['CurrentAmount'] > 0) {
-  $status = "active";
-}
+
+// fully funded takes priority
+if ($pitch['CurrentAmount'] >= $pitch['TargetAmount'] && $pitch['TargetAmount'] > 0) {
+    $status = "funded";
+    $disableEdit = true; 
+} 
+// funding window closed but not fully funded
+elseif ($pitch['WindowEndDate'] && $now > $pitch['WindowEndDate']) {
+    $status = "closed";
+    $disableEdit = true;
+} 
+// otherwise active
+elseif ($pitch['CurrentAmount'] > 0) {
+    $status = "active";
+} 
 
 // fetch investment tiers for this pitch
 $tierStmt = $mysql->prepare("SELECT * FROM InvestmentTier WHERE PitchID = :pitchId ORDER BY Min ASC");
