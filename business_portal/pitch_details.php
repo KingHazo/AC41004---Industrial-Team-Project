@@ -1,60 +1,57 @@
 <?php
 // start the session to check login
 if (session_status() === PHP_SESSION_NONE) {
-  session_start();
+    session_start();
 }
 
 // make sure user is logged in and is a business
 if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'business') {
-  header("Location: ../login/login_signup.php");
-  exit();
+    header("Location: ../login/login_signup.php");
+    exit();
 }
 
 // include database connection
 include '../sql/db.php';
 
 if (!$mysql) {
-  die("Database connection failed.");
+    die("Database connection failed.");
 }
-
 
 // get pitch ID from URL
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-  die("Pitch ID is missing.");
+    die("Pitch ID is missing.");
 }
 
 $pitchId = (int) $_GET['id'];
 
 // handle save using POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  header('Content-Type: application/json'); // <-- important!
+    header('Content-Type: application/json'); // <-- important!
 
-  $data = json_decode(file_get_contents('php://input'), true);
+    $data = json_decode(file_get_contents('php://input'), true);
 
-  if (!$data || !isset($_SESSION['userId'])) {
-    echo json_encode(['success' => false]);
-    exit; // stop HTML rendering
-  }
+    if (!$data || !isset($_SESSION['userId'])) {
+        echo json_encode(['success' => false]);
+        exit; // stop HTML rendering
+    }
 
-  $elevatorPitch = $data['elevatorPitch'];
-  $detailedPitch = $data['detailedPitch'];
+    $elevatorPitch = $data['elevatorPitch'];
+    $detailedPitch = $data['detailedPitch'];
 
-  $stmt = $mysql->prepare("
+    $stmt = $mysql->prepare("
         UPDATE Pitch 
         SET ElevatorPitch = :elevatorPitch, DetailedPitch = :detailedPitch 
         WHERE PitchID = :pitchId AND BusinessID = :businessId
     ");
-  $stmt->bindParam(':elevatorPitch', $elevatorPitch);
-  $stmt->bindParam(':detailedPitch', $detailedPitch);
-  $stmt->bindParam(':pitchId', $pitchId);
-  $stmt->bindParam(':businessId', $_SESSION['userId']);
-  $success = $stmt->execute();
+    $stmt->bindParam(':elevatorPitch', $elevatorPitch);
+    $stmt->bindParam(':detailedPitch', $detailedPitch);
+    $stmt->bindParam(':pitchId', $pitchId);
+    $stmt->bindParam(':businessId', $_SESSION['userId']);
+    $success = $stmt->execute();
 
-  echo json_encode(['success' => $success]);
-  exit; // <- critical! stops PHP from outputting the rest of the page
+    echo json_encode(['success' => $success]);
+    exit; // <- critical! stops PHP from outputting the rest of the page
 }
-
-
 
 // fetch pitch from DB
 $stmt = $mysql->prepare("SELECT * FROM Pitch WHERE PitchID = :pitchId AND BusinessID = :businessId");
@@ -64,7 +61,7 @@ $stmt->execute();
 $pitch = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$pitch) {
-  die("Pitch not found or you do not have permission to view it.");
+    die("Pitch not found or you do not have permission to view it.");
 }
 
 // fetch tags for this pitch
@@ -78,45 +75,35 @@ $tagStmt->bindParam(':pitchId', $pitchId);
 $tagStmt->execute();
 $tags = $tagStmt->fetchAll(PDO::FETCH_COLUMN); // get an array of tag names
 
-$status = $pitch['Status'];
 $payoutFrequency = $pitch['PayoutFrequency'];
 
-
-$disableEdit = !in_array($status, ['active', 'draft']);
-
-// disable edit if pitch is funded or closed
-$disableEdit = ($status === 'funded' || $status === 'closed');
-
-// calculate progress
+// Calculate progress
 $progress = $pitch['TargetAmount'] > 0 ? ($pitch['CurrentAmount'] / $pitch['TargetAmount']) * 100 : 0;
 
-// determine status
-$status = $pitch['Status']; // <-- take real status from DB
-$disableEdit = false;
-$disableProfit = false;
-$now = date("Y-m-d");
+// Determine status using DateTime for reliability
+$now = new DateTime();
+$windowEnd = !empty($pitch['WindowEndDate']) ? new DateTime($pitch['WindowEndDate']) : null;
 
-// fully funded takes priority
 if ($pitch['CurrentAmount'] >= $pitch['TargetAmount'] && $pitch['TargetAmount'] > 0) {
-  $status = "funded";
-  $disableEdit = true;
-}
-// funding window closed but not fully funded
-elseif ($pitch['WindowEndDate'] && $now > $pitch['WindowEndDate']) {
-  $status = "closed";
-  $disableEdit = true;
-}
-// otherwise active
-elseif ($pitch['CurrentAmount'] > 0) {
-  $status = "active";
+    $status = "funded";
+} elseif ($windowEnd && $now > $windowEnd) {
+    $status = "closed";
+} elseif ($pitch['CurrentAmount'] > 0) {
+    $status = "active";
+} else {
+    $status = $pitch['Status']; // e.g., draft
 }
 
-// fetch investment tiers for this pitch
+// Disable editing if pitch is funded or closed
+$disableEdit = ($status === 'funded' || $status === 'closed');
+
+// Fetch investment tiers for this pitch
 $tierStmt = $mysql->prepare("SELECT * FROM InvestmentTier WHERE PitchID = :pitchId ORDER BY Min ASC");
 $tierStmt->bindParam(':pitchId', $pitchId);
 $tierStmt->execute();
 $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">

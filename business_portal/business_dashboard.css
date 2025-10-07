@@ -75,6 +75,7 @@ body {
   flex-direction: column;
   gap: 15px;
   transition: all 0.3s ease;
+  min-width: 0;
 }
 
 .card:hover {
@@ -84,7 +85,21 @@ body {
 
 .card h3 {
   color: #2c3e50;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+
+  /* prevent overflow and allow ellipsis to work */
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: break-word;
+  box-sizing: border-box;
 }
+
 
 .card p {
   font-size: 0.9rem;

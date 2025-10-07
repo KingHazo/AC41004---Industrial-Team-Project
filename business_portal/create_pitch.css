@@ -58,7 +58,19 @@ body {
 .section h2 {
     margin-bottom: 20px;
     color: #2c3e50;
+    font-size: 1.5rem;
+    font-weight: 600;
+
+    /* handles long titles gracefully */
+    display: -webkit-box;
+    -webkit-line-clamp: 4; /* show max 4 lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    max-width: 100%;
 }
+
 
 .pitch-form {
     background: #fff;
