@@ -137,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p class="status <?php echo $status; ?>">Status: <?php echo ucfirst($status); ?></p>
 
             <label for="title">Product Title</label>
-            <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($pitch['Title']); ?>" <?php echo $disableOtherFields ? 'readonly' : ''; ?>>
+            <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($pitch['Title']); ?>" <?php echo $disableOtherFields ? 'readonly style="background:#eee;cursor:not-allowed;"' : ''; ?>>
 
 
             <label for="elevator">Elevator Pitch</label>
@@ -185,13 +185,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
             <label for="target">Target Investment (£)</label>
-            <input type="number" id="target" name="target" value="<?php echo $pitch['TargetAmount']; ?>">
+            <input type="number" id="target" name="target" value="<?php echo $pitch['TargetAmount']; ?>" <?php echo $disableOtherFields ? 'readonly style="background:#eee;cursor:not-allowed;"' : ''; ?>>
 
             <label for="end-date">Investment Window End Date</label>
-            <input type="date" id="end-date" name="end_date" value="<?php echo $pitch['WindowEndDate']; ?>">
+            <input type="date" id="end-date" name="end_date" value="<?php echo $pitch['WindowEndDate']; ?>" <?php echo $disableOtherFields ? 'readonly style="background:#eee;cursor:not-allowed;"' : ''; ?>>
 
             <label for="profit-share">Investor Profit Share %</label>
-            <input type="number" id="profit-share" name="profit_share" min="1" max="100" value="<?php echo $pitch['ProfitSharePercentage']; ?>">
+            <input type="number" id="profit-share" name="profit_share" min="1" max="100" value="<?php echo $pitch['ProfitSharePercentage']; ?>" <?php echo $disableOtherFields ? 'readonly style="background:#eee;cursor:not-allowed;"' : ''; ?>>
 
             <?php
             $payout = $pitch['PayoutFrequency'] ?? 'Quarterly'; // fallback
@@ -210,10 +210,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h3>Investment Tiers</h3>
                 <?php foreach ($tiers as $tier): ?>
                     <div class="tier-row">
-                        <input type="text" name="tier_name[]" value="<?php echo htmlspecialchars($tier['Name']); ?>">
-                        <input type="number" name="tier_min[]" value="<?php echo $tier['Min']; ?>">
-                        <input type="number" name="tier_max[]" value="<?php echo $tier['Max']; ?>">
-                        <input type="number" step="0.1" name="tier_multiplier[]" value="<?php echo $tier['Multiplier']; ?>">
+                        <input type="text" name="tier_name[]" value="<?php echo htmlspecialchars($tier['Name']); ?>" <?php echo $disableOtherFields ? 'readonly style="background:#eee;cursor:not-allowed;"' : ''; ?>>
+                        <input type="number" name="tier_min[]" value="<?php echo $tier['Min']; ?>" <?php echo $disableOtherFields ? 'readonly style="background:#eee;cursor:not-allowed;"' : ''; ?>>
+                        <input type="number" name="tier_max[]" value="<?php echo $tier['Max']; ?>" <?php echo $disableOtherFields ? 'readonly style="background:#eee;cursor:not-allowed;"' : ''; ?>>
+                        <input type="number" step="0.1" name="tier_multiplier[]" value="<?php echo $tier['Multiplier']; ?>" <?php echo $disableOtherFields ? 'readonly style="background:#eee;cursor:not-allowed;"' : ''; ?>>
                     </div>
                 <?php endforeach; ?>
             </div>

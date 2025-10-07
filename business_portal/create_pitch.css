@@ -91,6 +91,17 @@ body {
     box-shadow: 0 0 5px rgba(11, 61, 145, 0.3);
 }
 
+.pitch-form input[readonly],
+.pitch-form input:disabled,
+.pitch-form textarea[readonly],
+.pitch-form textarea:disabled,
+.pitch-form select:disabled {
+    background: #eee;       
+    cursor: not-allowed;     
+    pointer-events: none;
+}   
+
+
 .tiers {
     margin-top: 1rem;
 }
