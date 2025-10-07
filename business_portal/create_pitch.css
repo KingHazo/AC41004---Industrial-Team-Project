@@ -534,3 +534,19 @@ body {
   background: #d7d9ff;
   color: #0b3d91;
 }
+
+/* tags */
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.tag {
+  background-color: #070707;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
