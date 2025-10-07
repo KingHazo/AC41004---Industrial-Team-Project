@@ -31,6 +31,8 @@ if (empty($selected_tag_ids_array)) {
 
 $selected_tag_ids = $selected_tag_ids_array; 
 
+$search_term = filter_input(INPUT_GET, 'search_term', FILTER_SANITIZE_STRING) ?? '';
+
 $all_tags = [];
 $all_tags[] = ['TagID' => 0, 'Name' => 'All']; 
 
@@ -73,7 +75,7 @@ try {
     <section id="discover" class="section">
         <h2>Discover New Pitches</h2>
         <div class="search-filter">
-            <input type="text" placeholder="Search pitches...">
+            <input type="text" placeholder="Search pitches..." value="<?php echo htmlspecialchars($search_term); ?>" id="searchInput">
             <button class="filter-btn" id="filterButton" aria-label="Filter"> 
                 <i class="fa-solid fa-filter"></i>
             </button>
@@ -103,28 +105,45 @@ try {
                 $sql = "SELECT p.PitchID, p.Title, p.ElevatorPitch, p.CurrentAmount, p.TargetAmount, p.ProfitSharePercentage 
                          FROM Pitch p";
                 
-                $filter_needed = !in_array(0, $selected_tag_ids);
+                $tag_filter_needed = !in_array(0, $selected_tag_ids);
+                $text_search_needed = !empty($search_term);
+                $filter_needed = $tag_filter_needed || $text_search_needed;
 
-                if ($filter_needed) {
+                $where_conditions = [];
+                $bind_values = [];
+
+                if ($tag_filter_needed) {
                     $placeholders = implode(',', array_fill(0, count($selected_tag_ids), '?'));
                     
-                    // select pitches that have at least one of the tags
-                    $sql .= " WHERE EXISTS (
+                    $where_conditions[] = "EXISTS (
                                 SELECT 1 
                                 FROM PitchTag pt 
                                 WHERE pt.PitchID = p.PitchID 
                                 AND pt.TagID IN ($placeholders)
                             )";
+                    $bind_values = array_merge($bind_values, $selected_tag_ids);
+                }
+
+                if ($text_search_needed) {
+                    $where_conditions[] = "(p.Title LIKE ? OR p.ElevatorPitch LIKE ?)";
+                    $search_param = '%' . $search_term . '%';
+                    $bind_values[] = $search_param;
+                    $bind_values[] = $search_param;
+                }
+                
+                if ($filter_needed) {
+                    $sql .= " WHERE " . implode(' AND ', $where_conditions);
                 }
                 
                 $sql .= " ORDER BY p.PitchID DESC";
 
                 $stmt = $mysql->prepare($sql);
 
-                if ($filter_needed) {
-                    foreach ($selected_tag_ids as $index => $tag_id) {
-                        // PDO uses 1-based indexing for bindValue position
-                        $stmt->bindValue($index + 1, $tag_id, PDO::PARAM_INT);
+                // bind all values collected from both tags and search
+                if (!empty($bind_values)) {
+                    foreach ($bind_values as $index => $value) {
+                        $param_type = is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR;
+                        $stmt->bindValue($index + 1, $value, $param_type);
                     }
                 }
 
