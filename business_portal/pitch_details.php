@@ -206,9 +206,9 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
       <h3>Funding Progress</h3>
       <div class="progress-container">
         <div class="progress-bar" style="width: <?php echo $progress; ?>%;">
-           <div class="progress-text">
-          £<?php echo number_format($pitch['CurrentAmount'], 2); ?> /
-          £<?php echo number_format($pitch['TargetAmount'], 2); ?>
+          <div class="progress-text">
+            £<?php echo number_format($pitch['CurrentAmount'], 2); ?> /
+            £<?php echo number_format($pitch['TargetAmount'], 2); ?>
           </div>
         </div>
       </div>
@@ -247,9 +247,10 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
       <?php endif; ?>
 
       <div class="card-buttons">
-        <a href="edit_pitch.php?id=<?php echo $pitch['PitchID']; ?>" class="edit-btn" <?php echo $disableEdit ? "style='pointer-events: none; opacity: 0.5;'" : ""; ?>>
-          Edit Pitch
-        </a>
+        <?php if (!$disableEdit): ?>
+          <a href="edit_pitch.php?id=<?php echo $pitch['PitchID']; ?>" class="edit-btn">Edit Pitch</a>
+        <?php endif; ?>
+
         <?php if ($status === 'draft'): ?>
           <form action="submit_pitch.php" method="post" style="display:inline;">
             <input type="hidden" name="pitchId" value="<?php echo $pitch['PitchID']; ?>">
