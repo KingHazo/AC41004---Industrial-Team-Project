@@ -152,18 +152,29 @@ if ($business) {
         </section>
 
 
-        <!-- account actions -->
+        <!-- Danger Zone Section -->
         <section class="card danger-zone">
             <h3>Danger Zone</h3>
             <p>Closing your business account removes access to all pitches and funds. This cannot be undone.</p>
             <button class="btn danger outline" id="close-account">Close Business Account</button>
         </section>
+
+        <!-- Modal -->
+        <div id="contactModal" class="modal">
+            <div class="modal-content">
+                <h3>Contact Support</h3>
+                <p>To delete your account, please contact support at <strong>fundify@support.com</strong>.</p>
+                <div class="modal-actions">
+                    <button class="btn primary" id="modal-ok">OK</button>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <!-- Footer -->
     <?php include '../footer.php'; ?>
-
-    <script src="business_profile.js"></script>
+    <script src="business_profile.js?v=<?php echo time(); ?>"></script>
 </body>
 
 </html>

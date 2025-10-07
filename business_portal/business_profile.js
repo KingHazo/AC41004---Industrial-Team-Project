@@ -34,10 +34,19 @@ document.getElementById('upload-doc')?.addEventListener('click', () => {
     alert('document upload coming soo');
 });
 
-// Close account
-document.getElementById('close-account')?.addEventListener('click', () => {
-    if (confirm('Are you sure you want to close this business account? This cannot be undone')) {
-        alert('Business account closed (test mode).');
-        window.location.href = '../login.html';
+// Open modal on button click
+document.getElementById('close-account').addEventListener('click', function() {
+    document.getElementById('contactModal').style.display = 'flex';
+});
+
+// Close modal on OK button click
+document.getElementById('modal-ok').addEventListener('click', function() {
+    document.getElementById('contactModal').style.display = 'none';
+});
+
+// Optional: Close modal when clicking outside content
+window.addEventListener('click', function(e) {
+    if (e.target == document.getElementById('contactModal')) {
+        document.getElementById('contactModal').style.display = 'none';
     }
 });
