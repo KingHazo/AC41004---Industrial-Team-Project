@@ -215,8 +215,7 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
               <th>Tier Name</th>
               <th>Min (£)</th>
               <th>Max (£)</th>
-              <th>Share (%)</th>
-              <th>Multiplier</th>
+              <th><span>Multiplier</span></th>
             </tr>
           </thead>
           <tbody>
@@ -225,7 +224,6 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
                 <td><?php echo htmlspecialchars($tier['Name']); ?></td>
                 <td><?php echo number_format($tier['Min'], 2); ?></td>
                 <td><?php echo $tier['Max'] > 0 ? number_format($tier['Max'], 2) : '-'; ?></td>
-                <td><?php echo htmlspecialchars($tier['SharePercentage']); ?></td>
                 <td><?php echo htmlspecialchars($tier['Multiplier']); ?></td>
               </tr>
             <?php endforeach; ?>

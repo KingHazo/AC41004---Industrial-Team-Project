@@ -32,24 +32,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $totalProfit = floatval($_POST['profit']);
     $distributableProfit = ($totalProfit * $investorSharePercent) / 100;
 
-    // fetch all investments for this pitch
+    // fetch all investments for this pitch. 
     $stmt = $mysql->prepare("
-        SELECT i.InvestorID, i.Amount, t.Multiplier
+        SELECT i.InvestmentID, i.InvestorID, i.Amount, i.ROI, t.Multiplier
         FROM Investment i
         INNER JOIN InvestmentTier t
-            ON i.Amount BETWEEN t.Min AND t.Max AND t.PitchID = i.PitchID
+            ON i.PitchID = t.PitchID
         WHERE i.PitchID = :pitchId
+        AND (
+            -- 1. Standard Case: Amount falls within the tier's defined Min and Max
+            i.Amount BETWEEN t.Min AND t.Max
+            OR
+            -- 2. Overflow Case: The investment amount is greater than the MIN of the highest tier.
+            -- This assigns amounts exceeding the highest tier's Max to that tier.
+            (
+                i.Amount >= t.Min 
+                AND t.Min = (SELECT MAX(Min) FROM InvestmentTier WHERE PitchID = :pitchId)
+            )
+        )
     ");
     $stmt->bindParam(':pitchId', $pitchId);
+    $stmt->bindParam(':pitchId', $pitchId); 
     $stmt->execute();
-    $investors = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $investments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // calculate total shares
+    // calculate total shares (based on Investment Amount * Tier Multiplier)
     $totalShares = 0;
-    $investorShares = [];
-    foreach ($investors as $inv) {
+    foreach ($investments as $inv) {
         $shares = $inv['Amount'] * $inv['Multiplier'];
-        $investorShares[$inv['InvestorID']] = $shares;
         $totalShares += $shares;
     }
 
@@ -57,11 +67,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($totalShares > 0) {
         $profitPerShare = $distributableProfit / $totalShares;
 
-        // distribute profit to each investor and update their balance
-        foreach ($investorShares as $investorId => $shares) {
+        // Distribute profit to each investor, updating ROI and Balance
+        foreach ($investments as $inv) {
+            $investmentId = $inv['InvestmentID'];
+            $investorId = $inv['InvestorID'];
+            $shares = $inv['Amount'] * $inv['Multiplier'];
             $profitForInvestor = $shares * $profitPerShare;
+            
+            $stmt = $mysql->prepare("UPDATE Investment SET ROI = ROI + :profit WHERE InvestmentID = :investmentId");
+            $stmt->bindParam(':profit', $profitForInvestor);
+            $stmt->bindParam(':investmentId', $investmentId);
+            $stmt->execute();
 
-            // update Investor balance
             $stmt = $mysql->prepare("UPDATE Investor SET InvestorBalance = InvestorBalance + :profit WHERE InvestorID = :investorId");
             $stmt->bindParam(':profit', $profitForInvestor);
             $stmt->bindParam(':investorId', $investorId);
@@ -69,7 +86,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // store total distributable profit in ProfitDistribution table
     $stmt = $mysql->prepare("INSERT INTO ProfitDistribution (PitchID, Profit, DistributionDate) VALUES (:pitchId, :profit, NOW())");
     $stmt->bindParam(':pitchId', $pitchId);
     $stmt->bindParam(':profit', $distributableProfit);
@@ -123,15 +139,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <h2>Declare Profits – <?php echo $title; ?></h2>
       <p><strong>Status:</strong> <?php echo $status; ?></p>
       <p><strong>Raised:</strong> £<?php echo number_format($currentAmount, 2); ?> | 
-         <strong>Investor Share:</strong> <?php echo $investorSharePercent; ?>%</p>
+          <strong>Investor Share:</strong> <?php echo $investorSharePercent; ?>%</p>
 
       <form class="profit-form" method="POST" action="">
         <input type="hidden" name="pitch_id" value="<?php echo $pitchId; ?>">
 
-        <label for="profit">Total Profit (£)</label>
+        <label for="profit">Total Company Profit (£)</label>
         <input type="number" id="profit" name="profit" placeholder="Enter profit amount" required>
 
-        <label for="distributable">Distributable Profit (£)</label>
+        <label for="distributable">Total Distributable Profit (£)</label>
         <input type="text" id="distributable" readonly value="£0">
 
         <div class="form-buttons">
@@ -142,7 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </main>
   <?php include '../footer.php'; ?>
 
- <script>
+  <script>
     // live calculation for distributable profit
     const profitInput = document.getElementById('profit');
     const distributableField = document.getElementById('distributable');

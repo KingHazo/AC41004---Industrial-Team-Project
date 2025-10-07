@@ -61,44 +61,23 @@ try {
     $sql_investments = "
         SELECT 
             I.InvestmentID, 
-            I.Amount AS InvestmentAmount,            
+            I.Amount AS InvestmentAmount,
             P.PitchID,
-            P.Title AS PitchName,                    
-            P.TargetAmount AS FundingGoal,           
+            P.Title AS PitchName,
+            P.TargetAmount AS FundingGoal,
+            P.CurrentAmount AS CurrentFunding,
             P.ProfitSharePercentage
         FROM Investment I
         JOIN Pitch P ON I.PitchID = P.PitchID
         WHERE I.InvestorID = :investorID
         ORDER BY I.InvestmentID DESC
         LIMIT 3
-    ";
+        ";
+
     $stmt_investments = $mysql->prepare($sql_investments);
     $stmt_investments->bindParam(':investorID', $investorID);
     $stmt_investments->execute();
     $recentInvestments = $stmt_investments->fetchAll(PDO::FETCH_ASSOC);
-
-    // for each investment, fetch the current total funding for that pitch
-    $pitchIds = array_column($recentInvestments, 'PitchID');
-
-    if (!empty($pitchIds)) {
-        $inPlaceholders = str_repeat('?,', count($pitchIds) - 1) . '?';
-        
-        // add up all investments for the pitches involved
-        $sql_pitch_funding = "
-            SELECT 
-                PitchID, 
-                SUM(Amount) AS CurrentFunding
-            FROM Investment
-            WHERE PitchID IN ($inPlaceholders)
-            GROUP BY PitchID
-        ";
-        $stmt_pitch_funding = $mysql->prepare($sql_pitch_funding);
-        $stmt_pitch_funding->execute($pitchIds);
-
-        while ($row = $stmt_pitch_funding->fetch(PDO::FETCH_ASSOC)) {
-            $pitchFunding[$row['PitchID']] = $row['CurrentFunding'];
-        }
-    }
 
 } catch (PDOException $e) {
     $dbError = "Database Query Failed: " . $e->getMessage();
@@ -137,7 +116,7 @@ try {
                 <p class="kpi-value">£<?php echo htmlspecialchars($totalInvested); ?></p>
             </div>
             <div class="kpi-card">
-                <p class="kpi-label">Returns Received</p>
+                <p class="kpi-label">Return on Investments</p>
                 <p class="kpi-value">£<?php echo htmlspecialchars($totalReturns); ?></p>
             </div>
             <div class="kpi-card">
@@ -164,7 +143,7 @@ try {
             <?php elseif (!empty($recentInvestments)): ?>
                 <?php foreach ($recentInvestments as $investment): 
                     $pitchID = $investment['PitchID'];
-                    $currentFunding = $pitchFunding[$pitchID] ?? 0;
+                    $currentFunding = $investment['CurrentFunding'];
                     $fundingGoal = $investment['FundingGoal']; // TargetAmount
                     $investedAmount = $investment['InvestmentAmount']; // Amount
                     $profitShare = $investment['ProfitSharePercentage'];
@@ -175,6 +154,9 @@ try {
 
                     $pitchName = htmlspecialchars($investment['PitchName']); // Title
                     $investedDisplay = "£" . number_format($investedAmount, 2);
+
+                    // Check if the pitch is fully funded
+                    $isFullyFunded = ($currentFunding >= $fundingGoal);
                 ?>
                 <div class="card">
                     <h4><?php echo $pitchName; ?></h4>
@@ -191,7 +173,9 @@ try {
                     <div class="card-buttons">
                         <!-- PitchID is data id -->
                         <button class="view-btn" data-id="<?php echo $pitchID; ?>">View</button>
-                        <button class="cancel-btn" data-id="<?php echo $investment['InvestmentID']; ?>">Cancel Investment</button>
+                        <?php if (!$isFullyFunded): ?>
+                            <button class="cancel-btn" data-id="<?php echo $investment['InvestmentID']; ?>">Cancel Investment</button>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <?php endforeach; ?>

@@ -35,8 +35,8 @@ $pitches = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Business Dashboard</title>
   <link rel="stylesheet" href="business_dashboard.css?v=<?php echo time(); ?>"> <!--handles cache issues-->
-  <link rel="stylesheet" href="../footer.css">
   <link rel="stylesheet" href="../navbar.css">
+   <link rel="stylesheet" href="../footer.css?v=<?php echo time(); ?>"> 
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 

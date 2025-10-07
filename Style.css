@@ -25,14 +25,28 @@ body {
     padding: 1.25rem 2rem;
 }
 
-.home .logo,
-.home .nav-links {
-    color: #fff !important;
+/* only for homepage */
+body.home .logo {
+    color: #fff !important; 
 }
 
-.home .nav-links:hover {
-    color: rgba(255, 255, 255, 0.85) !important;
+/* hamburger bars on homepage */
+body.home .hamburger span {
+    background-color: #000 !important; 
 }
+
+body.home .hamburger:hover span {
+    background-color: #222 !important;
+}
+
+body.home .nav-links {
+    color: #fff;
+}
+
+body.home .nav-links:hover {
+    color: rgba(255, 255, 255, 0.85);
+}
+
 
 
 .hero {

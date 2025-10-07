@@ -143,11 +143,10 @@ function getPitchStatus($currentAmount, $targetAmount, $windowEndDate) {
                     $progressPct = ($inv['TargetAmount'] > 0) ? round(($inv['CurrentAmount'] / $inv['TargetAmount']) * 100) : 0;
                     $progressDisplay = "£" . number_format($inv['CurrentAmount'], 0) . " / £" . number_format($inv['TargetAmount'], 0);
                     
-                    // classes and button state
                     $statusClass = $pitchStatus;
                     $profitClass = ($inv['ROI'] > 0) ? 'good' : 'muted';
-                    $cancelDisabled = ($pitchStatus === 'funded' || $pitchStatus === 'closed') ? 'disabled' : '';
-                    $cancelTitle = $cancelDisabled ? 'title="Cannot cancel after funding closed or window expires"' : '';
+                    
+                    $showCancelButton = $pitchStatus === 'active';
                 ?>
                 <!-- Card -->
                 <article class="inv-card" data-status="<?php echo $pitchStatus; ?>">
@@ -158,7 +157,7 @@ function getPitchStatus($currentAmount, $targetAmount, $windowEndDate) {
 
                     <div class="grid">
                         <div class="col">
-                            <p class="muted">You invested</p>
+                            <p class="muted">Invested</p>
                             <p class="num">£<?php echo $investedAmount; ?></p>
                         </div>
                         <div class="col">
@@ -170,7 +169,7 @@ function getPitchStatus($currentAmount, $targetAmount, $windowEndDate) {
                             <p><?php echo $shares; ?></p>
                         </div>
                         <div class="col">
-                            <p class="muted">Profit to date</p>
+                            <p class="muted">ROI</p>
                             <p class="<?php echo $profitClass; ?>">£<?php echo $profitToDate; ?></p>
                         </div>
                     </div>
@@ -181,7 +180,15 @@ function getPitchStatus($currentAmount, $targetAmount, $windowEndDate) {
 
                     <div class="actions">
                         <button class="btn" data-action="view" data-id="<?php echo $inv['PitchID']; ?>">View Details</button>
-                        <button class="btn danger outline" data-action="cancel" data-id="<?php echo $inv['InvestmentID']; ?>" <?php echo $cancelDisabled; ?> <?php echo $cancelTitle; ?>>Cancel Investment</button>
+                        
+                        <?php if ($showCancelButton): ?>
+                        <button 
+                            class="btn danger outline" 
+                            data-action="cancel" 
+                            data-id="<?php echo $inv['InvestmentID']; ?>">
+                            Cancel Investment
+                        </button>
+                        <?php endif; ?>
                     </div>
                 </article>
                 <?php endforeach; ?>
@@ -190,10 +197,10 @@ function getPitchStatus($currentAmount, $targetAmount, $windowEndDate) {
     </main>
 
 
-     <?php include '../footer.php'; ?>
+      <?php include '../footer.php'; ?>
 
     <script src="my_investments.js"></script>
-  
+ 
 </body>
 
 </html>

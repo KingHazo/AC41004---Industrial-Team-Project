@@ -16,7 +16,7 @@ include '../sql/db.php';
 
 
 if (!$mysql) {
-    die("Database connection failed.");
+  die("Database connection failed.");
 }
 
 // get pitch id, make an integer
@@ -85,12 +85,12 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pitch Details - <?php echo htmlspecialchars($pitch['Title'] ?? 'Loading...'); ?></title>
-    <link rel="stylesheet" href="investor_pitch_details.css" />
+      <link rel="stylesheet" href="investor_pitch_details.css?v=<?php echo time(); ?>"> <!--handles cache issues-->
     <link rel="stylesheet" href="../navbar.css" />
     <link rel="stylesheet" href="../footer.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
-        rel="stylesheet" />
-    <!-- INLINE STYLE FOR NEW UI ELEMENTS -->
+    rel="stylesheet" />
+
     <style>
         .spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
@@ -153,10 +153,33 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
                 <p id="messageContent"></p>
             </div>
 
-            <!-- photos - PLACEHOLDERS -->
-            <div class="media-gallery">
-                <img src="https://placehold.co/400x200/50b857/white?text=Product+Image+1" alt="Pitch Image 1">
-                <img src="https://placehold.co/400x200/50b857/white?text=Product+Image+2" alt="Pitch Image 2">
+            <!-- Slideshow container for images-->
+             <!-- https://www.w3schools.com/howto/howto_js_slideshow.asp-->
+            <div class="slideshow-container">
+
+                <!-- Full-width images with number and caption text -->
+                <div class="mySlides fade">
+                    <img src="image1.jpg" style="width:100%">
+                </div>
+
+                <div class="mySlides fade">
+                    <img src="image2.jpg" style="width:100%">
+                </div>
+
+                <div class="mySlides fade">
+                    <img src="image3.jpg" style="width:100%">
+                </div>
+
+                <!-- Next and previous buttons -->
+                <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+                <a class="next" onclick="plusSlides(1)">&#10095;</a>
+            </div>
+
+            <!-- The dots/circles -->
+            <div style="text-align:center">
+                <span class="dot" onclick="currentSlide(1)"></span>
+                <span class="dot" onclick="currentSlide(2)"></span>
+                <span class="dot" onclick="currentSlide(3)"></span>
             </div>
 
             <h3>Elevator Pitch</h3>
@@ -199,8 +222,7 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
                         <th>Tier</th>
                         <th>Min (£)</th>
                         <th>Max (£)</th>
-                        <th>Profit Share (%)</th>
-                        <th>Multiplier</th>
+                        <th><span>Multiplier</span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -209,13 +231,12 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
                             $min = number_format((float)$tier['Min']);
                             $max = (float)$tier['Max'];
                             $mult = number_format((float)$tier['Multiplier'], 1);
-                            $share = number_format((float)$tier['SharePercentage'], 1);
 
-                            // display values for the table
-                            $maxDisplay = $max >= 9999999 ? $min . '+' : number_format($max);
-                            $maxAttr = $max >= 9999999 ? $max : $max;
-
-                            $maxTableCell = $max >= 9999999 ? '—' : number_format($max);
+                            $isUnlimited = $max >= 9999999;
+                            
+                            $maxTableCell = $isUnlimited ? 'No Limit' : number_format($max);
+                            
+                            $maxAttr = $max;
                         ?>
                             <tr data-tier="<?php echo htmlspecialchars($tier['Name']); ?>"
                                 data-min="<?php echo htmlspecialchars($tier['Min']); ?>"
@@ -224,7 +245,6 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
                                 <td><?php echo htmlspecialchars($tier['Name']); ?></td>
                                 <td><?php echo $min; ?></td>
                                 <td><?php echo $maxTableCell; ?></td>
-                                <td><?php echo $share; ?>%</td>
                                 <td><?php echo $mult; ?></td>
                             </tr>
                         <?php endforeach; ?>
@@ -237,62 +257,86 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
             </table>
 
             <!-- invest form -->
-            <div class="invest-card">
-                <h3><?php echo $existingInvestment ? 'Update Your Investment' : 'Invest Now'; ?></h3>
-                <form id="invest-form" class="invest-form">
-                    <!-- fields to pass context to js -->
-                    <input type="hidden" id="pitch-id" value="<?php echo $js_pitch_id; ?>">
-                    <input type="hidden" id="investment-id" value="<?php echo $js_investment_id; ?>">
+            <?php
+            $shouldShowInvestCard = $isInvestable;
+            if ($shouldShowInvestCard):
+            ?>
+                <div class="invest-card">
+                    <h3><?php echo $existingInvestment ? 'Update Your Investment' : 'Invest Now'; ?></h3>
+                    <form id="invest-form" class="invest-form">
+                        <!-- fields to pass context to js -->
+                        <input type="hidden" id="pitch-id" value="<?php echo $js_pitch_id; ?>">
+                        <input type="hidden" id="investment-id" value="<?php echo $js_investment_id; ?>">
 
-                    <label for="invest-amount">Amount (£)</label>
-                    <input type="number"
-                        id="invest-amount"
-                        min="1"
-                        placeholder="e.g., 1200"
-                        value="<?php echo $js_existing_amount; ?>"
-                        <?php echo $isInvestable ? '' : 'disabled'; ?>
-                        required />
+                        <label for="invest-amount">Amount (£)</label>
+                        <input type="number"
+                            id="invest-amount"
+                            min="1"
+                            placeholder="e.g., 1200"
+                            value="<?php echo $js_existing_amount; ?>"
+                            <?php echo $isInvestable ? '' : 'disabled'; ?>
+                            required />
 
-                    <div class="inline">
-                        <div class="pill"><span class="label">Detected Tier:</span> <span id="detected-tier">—</span>
+                        <div class="inline">
+                            <div class="pill"><span class="label">Detected Tier:</span> <span id="detected-tier">—</span>
+                            </div>
+                            <div class="pill"><span class="label">Multiplier:</span> <span id="detected-mult">—</span></div>
+                            <div class="pill"><span class="label">Calculated Shares:</span> <span id="calc-shares">—</span>
+                            </div>
                         </div>
-                        <div class="pill"><span class="label">Multiplier:</span> <span id="detected-mult">—</span></div>
-                        <div class="pill"><span class="label">Calculated Shares:</span> <span id="calc-shares">—</span>
-                        </div>
-                    </div>
 
-                    <div class="actions">
-                        <button type="submit"
-                            class="btn primary"
-                            id="confirm-btn"
-                            data-shares="0"
-                            <?php echo $isInvestable ? '' : 'disabled'; ?>>
-                            <span id="buttonText"><?php echo $existingInvestment ? 'Update Investment' : 'Confirm Investment'; ?></span>
-                            <div id="loadingSpinner" class="spinner"></div>
-                        </button>
-
-                        <?php if ($existingInvestment): ?>
-                            <button type="button"
-                                id="cancel-investment"
-                                class="btn danger outline"
-                                <?php echo $isInvestable ? '' : 'disabled'; ?>
-                                data-investment-id="<?php echo $js_investment_id; ?>">
-                                Cancel Investment
+                        <div class="actions">
+                            <button type="submit"
+                                class="btn primary"
+                                id="confirm-btn"
+                                data-shares="0"
+                                <?php echo $isInvestable ? '' : 'disabled'; ?>>
+                                <span id="buttonText"><?php echo $existingInvestment ? 'Update Investment' : 'Confirm Investment'; ?></span>
+                                <div id="loadingSpinner" class="spinner"></div>
                             </button>
-                        <?php endif; ?>
-                    </div>
-                    <?php if (!$isInvestable): ?>
-                        <p class="hint error-message">The investment window is closed or the pitch is fully funded.</p>
-                    <?php endif; ?>
 
-                    <p class="hint">You can update or cancel your investment while the funding window is open</p>
-                </form>
-            </div>
+                            <?php if ($existingInvestment): ?>
+                                <button type="button"
+                                    id="cancel-investment"
+                                    class="btn danger outline"
+                                    <?php echo $isInvestable ? '' : 'disabled'; ?>
+                                    data-investment-id="<?php echo $js_investment_id; ?>">
+                                    Cancel Investment
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                        <?php if (!$isInvestable): ?>
+                            <p class="hint error-message">The investment window is closed or the pitch is fully funded.</p>
+                        <?php endif; ?>
+
+                        <p class="hint">You can update or cancel your investment while the funding window is open</p>
+                    </form>
+                </div>
+            <?php else:
+                $blockReason = '';
+                if ($isFunded && $isClosed) {
+                    $blockReason = 'This pitch is fully funded and the investment window has closed.';
+                } elseif ($isFunded) {
+                    $blockReason = 'This pitch has reached its target funding amount and is now fully funded.';
+                } elseif ($isClosed) {
+                    $blockReason = 'The investment window for this pitch closed on ' . date('d M Y', strtotime($pitch['WindowEndDate'])) . '. Further investments or updates are not possible.';
+                }
+            ?>
+                <div class="invest-card invest-status-message">
+                    <h3>Investment Unavailable</h3>
+                    <p><?php echo nl2br(htmlspecialchars($blockReason)); ?></p>
+                    <?php if ($existingInvestment): ?>
+                        <p class="hint" style="margin-top: 1rem; color: #555;">
+                            You hold an existing investment of £<?php echo number_format($existingInvestment['Amount']); ?>. This investment is now locked and cannot be updated or canceled.
+                        </p>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </main>
 
     <?php include '../footer.php'; ?>
-    <script src="investor_pitch_details.js"></script>
+    <script src="investor_pitch_details.js?v=<?php echo time(); ?>"></script>
 </body>
 
 </html>

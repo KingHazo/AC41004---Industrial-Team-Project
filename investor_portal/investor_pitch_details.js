@@ -40,9 +40,9 @@ const showConfirmation = (message, onConfirm) => {
                 <p style="margin-bottom: 20px; color: #4b5563;">${message}</p>
                 <div style="display: flex; justify-content: flex-end; gap: 10px;">
                     <button id="cancel-no" style="padding: 10px 15px; border: 1px solid #d1d5db; 
-                                border-radius: 8px; background: #f9fafb; cursor: pointer; color: #4b5563;">No, Keep It</button>
+                                 border-radius: 8px; background: #f9fafb; cursor: pointer; color: #4b5563;">No, Keep It</button>
                     <button id="cancel-yes" style="padding: 10px 15px; border: none; border-radius: 8px; 
-                                background: #ef4444; color: white; cursor: pointer;">Yes, Cancel</button>
+                                 background: #ef4444; color: white; cursor: pointer;">Yes, Cancel</button>
                 </div>
             </div>
         </div>
@@ -65,13 +65,20 @@ window.showConfirmation = showConfirmation;
  * @param {string} investmentId - ID of investment to cancel.
  */
 const deleteInvestment = async (investmentId) => {
+    const cancelBtn = document.getElementById('cancel-investment');
+
+    // Simple state handling
+    const originalText = cancelBtn.textContent;
+    cancelBtn.disabled = true;
+    cancelBtn.textContent = 'Cancelling...';
+
     try {
-        // You're using alertMessage from the current file, which is fine
         alertMessage('Processing cancellation...', 'success'); 
         
         const response = await fetch('cancel_investment.php', {
             method: 'POST',
             headers: {
+                // Using URLSearchParams as the body requires 'application/x-www-form-urlencoded'
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: `investment_id=${investmentId}` 
@@ -81,9 +88,8 @@ const deleteInvestment = async (investmentId) => {
         
         if (result.success) {
             alertMessage(result.message, 'success');
-            // The existing my_investments.js logic reloads the page, which is what you want.
-            // It ensures the investment list and current amount on the page are updated.
-            setTimeout(() => window.location.reload(), 1500); 
+            // Reload page to show updated data
+            setTimeout(() => window.location.reload(), 500); 
         } else {
             alertMessage(result.message, 'error');
         }
@@ -91,10 +97,15 @@ const deleteInvestment = async (investmentId) => {
     } catch (error) {
         console.error('Cancellation failed:', error);
         alertMessage('An unexpected error occurred during cancellation.', 'error');
+    } finally {
+        // Reset state only if we didn't trigger a reload
+        if (cancelBtn) {
+            cancelBtn.disabled = false;
+            cancelBtn.textContent = originalText;
+        }
     }
 };
-// Attach to window scope for visibility inside the DOMContentLoaded listener
-window.deleteInvestment = deleteInvestment;
+
 document.addEventListener('DOMContentLoaded', () => {
     
     const pitchIdElement = document.getElementById('pitch-id');
@@ -104,8 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelBtn = document.getElementById('cancel-investment');
     
     if (!investForm) {
-         console.error("CRITICAL ERROR: Investment form (ID: 'invest-form') not found. Submission will fail.");
-         return;
+        console.error("CRITICAL ERROR: Investment form (ID: 'invest-form') not found. Submission will fail.");
+        return;
     }
 
     const PITCH_ID = pitchIdElement ? parseInt(pitchIdElement.value, 10) : 0;
@@ -146,11 +157,30 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // find the matching tier based on the amount
-        let selectedTier = tiers.find(t => amount >= t.min && (amount <= t.max || t.max >= 9999999));
+        let selectedTier = null;
+        let highestMin = 0;
+        
+        tiers.forEach(t => {
+            if (t.min > highestMin) {
+                highestMin = t.min;
+            }
+        });
+
+        for (const tier of tiers) {
+            
+            if (amount >= tier.min && tier.min === highestMin) {
+                selectedTier = tier;
+                break; 
+            }
+
+            if (amount >= tier.min && amount <= tier.max) {
+                selectedTier = tier;
+                break;
+            }
+        }
         
         if (selectedTier) {
-            const shares = Math.round(amount * selectedTier.multiplier);
+            const shares = Math.round(amount * selectedTier.multiplier); 
             
             detectedTierSpan.textContent = selectedTier.name;
             detectedMultSpan.textContent = selectedTier.multiplier.toFixed(1);
@@ -160,13 +190,17 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmBtn.setAttribute('data-shares', shares);
 
         } else {
-            // if the amount is outside any defined tier range
+            // if the amount is outside any defined tier range (e.g., too low)
             const minAllowed = tiers.length > 0 ? `£${tiers[0].min}` : 'N/A';
             detectedTierSpan.textContent = `N/A (Min ${minAllowed})`;
             detectedMultSpan.textContent = 'N/A';
             calcSharesSpan.textContent = '0';
             confirmBtn.disabled = true;
             confirmBtn.removeAttribute('data-shares');
+            
+            if (amount > 0 && tiers.length > 0 && amount < tiers[0].min) {
+                 alertMessage(`Investment must meet the minimum of the lowest tier: £${tiers[0].min.toLocaleString()}.`, 'error');
+            }
         }
     };
 
@@ -257,7 +291,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // debug
                 console.log('Investment confirmed. Initiating page reload...');
 
                 // reload page after a short delay to show updated data
@@ -284,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     cancelBtn?.addEventListener('click', () => {
-        if (!window.showConfirmation || !window.deleteInvestment) {
+        if (!window.showConfirmation) {
             return alertMessage('Cancellation utility functions are not available.', 'error');
         }
 
@@ -295,12 +328,72 @@ document.addEventListener('DOMContentLoaded', () => {
         const investmentIdToCancel = cancelBtn.getAttribute('data-investment-id');
 
         if (investmentIdToCancel) {
+            // Note: We are passing the local deleteInvestment function here.
             window.showConfirmation(
                 'Are you sure you want to permanently cancel this investment? This action cannot be undone and the funds will be returned to your balance.',
-                () => window.deleteInvestment(investmentIdToCancel)
+                () => deleteInvestment(investmentIdToCancel)
             );
         } else {
             alertMessage('No active investment ID found to cancel.', 'error');
         }
     });
 });
+
+
+
+
+//image slideshow/carousel animations
+let slideIndex = 1;
+showSlides(slideIndex);
+
+// Next/previous controls
+function plusSlides(n) {
+  showSlides(slideIndex += n);
+}
+
+// Thumbnail image controls
+function currentSlide(n) {
+  showSlides(slideIndex = n);
+}
+
+function showSlides(n) {
+  let i;
+  let slides = document.getElementsByClassName("mySlides");
+  let dots = document.getElementsByClassName("dot");
+  if (n > slides.length) {slideIndex = 1}
+  if (n < 1) {slideIndex = slides.length}
+  for (i = 0; i < slides.length; i++) {
+    slides[i].style.display = "none";
+  }
+  for (i = 0; i < dots.length; i++) {
+    dots[i].className = dots[i].className.replace(" active", "");
+  }
+  slides[slideIndex-1].style.display = "block";
+  dots[slideIndex-1].className += " active";
+}
+
+
+
+// --- touch support for mobile ---
+let startX = 0;
+let endX = 0;
+let slidesContainer = document.querySelector(".slideshow-container");
+
+slidesContainer.addEventListener("touchstart", function(e) {
+  startX = e.touches[0].clientX;
+}, false);
+
+slidesContainer.addEventListener("touchmove", function(e) {
+  endX = e.touches[0].clientX;
+}, false);
+
+slidesContainer.addEventListener("touchend", function() {
+  let diffX = startX - endX;
+  if (Math.abs(diffX) > 50) {
+    if (diffX > 0) {
+      plusSlides(1); 
+    } else {
+      plusSlides(-1); 
+    }
+  }
+}, false);
