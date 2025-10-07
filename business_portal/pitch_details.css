@@ -93,24 +93,36 @@ body {
   transition: width 1s ease-in-out;
 }
 
-/* Tiers Table */
+/* tiers table */
 .tiers-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
 }
 
 .tiers-table th,
 .tiers-table td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: center;
+    border: 1px solid #ddd;
+    padding: 5px;
+    text-align: center;
 }
 
 .tiers-table th {
-  background: #f4f6f7;
-  color: #2c3e50;
+    background: #f4f6f7;
+    color: #2c3e50;
 }
+
+@media (max-width: 768px) {
+    .tiers-table th:nth-child(4) span {
+        display: none; /* hide full text */
+    }
+
+    .tiers-table th:nth-child(4)::after {
+        content: "Mltp"; /* show shortened text */
+    }
+}
+
+
 
 /* Buttons */
 .card-buttons {

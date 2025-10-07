@@ -11,17 +11,11 @@ if (session_status() === PHP_SESSION_NONE) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fundify</title>
-
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="navbar.css">
+    <link rel="stylesheet" href="navbar.css?v=<?php echo time(); ?>"> <!--handles cache issues-->
+    <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>"> <!--handles cache issues-->
     <link rel="stylesheet" href="footer.css">
-
-    <!-- Google Fonts -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
 </head>
 
 <body class="home">
@@ -92,6 +86,21 @@ if (session_status() === PHP_SESSION_NONE) {
     <?php include 'footer.php'; ?>
 
     <script src="Script.js"></script>
+
+    <!--chnages the colour of the nav links if the hamburger menu is toggled-->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            window.addEventListener('menuToggled', (e) => {
+                const isOpen = e.detail.isOpen;
+                const navLinks = document.querySelectorAll('.nav-links');
+
+                navLinks.forEach(link => {
+                    link.style.setProperty('color', isOpen ? '#000' : '#fff', 'important');
+                });
+            });
+        });
+
+    </script>
 </body>
 
 </html>
