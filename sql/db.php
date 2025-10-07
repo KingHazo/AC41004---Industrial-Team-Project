@@ -1,9 +1,9 @@
 <?php
 
-$host = "database-3.ctcgqoecevan.us-east-1.rds.amazonaws.com";
+$host = "database.crwckgs6iy7z.us-east-1.rds.amazonaws.com";
 $username = "admin";
-$password = "admin123";
-$database = "database-3";
+$password = "admin1234";
+$database = "AC41004_DB";
 
 $mysql = null; 
 
@@ -15,5 +15,3 @@ try {
 } catch (PDOException $e) {
     error_log("FATAL DB CONNECTION FAILURE: " . $e->getMessage());
 }
-
-?>
