@@ -494,3 +494,32 @@ body {
     color: #fff;
     border-color: #fbfbfb;
 }
+
+
+.status {
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  width: fit-content;
+}
+
+.status.active {
+  background: #e0f7ec;
+  color: #27ae60;
+}
+
+.status.closed {
+  background: #fbeaea;
+  color: #e74c3c;
+}
+
+.status.draft {
+  background: #fff6e0;
+  color: #f39c12;
+}
+
+.status.funded {
+  background: #d7d9ff;
+  color: #0b3d91;
+}

@@ -132,8 +132,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <main class="section">
         <h2>Edit Pitch – <?php echo htmlspecialchars($pitch['Title']); ?></h2>
         <form class="pitch-form" method="POST" enctype="multipart/form-data">
+
+            <!-- Display Status -->
+            <p class="status <?php echo $status; ?>">Status: <?php echo ucfirst($status); ?></p>
+
             <label for="title">Product Title</label>
             <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($pitch['Title']); ?>" <?php echo $disableOtherFields ? 'readonly' : ''; ?>>
+
 
             <label for="elevator">Elevator Pitch</label>
             <textarea id="elevator" name="elevator" rows="2"><?php echo htmlspecialchars($pitch['ElevatorPitch']); ?></textarea>
@@ -145,20 +150,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="file" id="media" name="media[]" multiple accept="image/*,video/*" <?php echo $disableOtherFields ? 'disabled' : ''; ?>>
 
             <!-- Tags -->
-            <div class="dropdown">
-                <button type="button" class="dropbtn">Select Tags (max 5)</button>
-                <div class="dropdown-content">
-                    <?php foreach ($allTags as $tag): ?>
-                        <label class="checkbox">
-                            <input type="checkbox" name="tags[]" value="<?php echo $tag['TagID']; ?>"
-                                <?php echo in_array($tag['TagID'], $selectedTagsIds) ? 'checked' : ''; ?>
-                                onchange="limitTags(this)">
-                            <?php echo htmlspecialchars($tag['Name']); ?>
-                        </label>
-                    <?php endforeach; ?>
+
+            <h3>Tags</h3>
+            <?php if ($status === 'draft'): ?>
+                <div class="dropdown">
+                    <button type="button" class="dropbtn">Select Tags (max 5)</button>
+                    <div class="dropdown-content">
+                        <?php foreach ($allTags as $tag): ?>
+                            <label class="checkbox">
+                                <input type="checkbox" name="tags[]" value="<?php echo $tag['TagID']; ?>"
+                                    <?php echo in_array($tag['TagID'], $selectedTagsIds) ? 'checked' : ''; ?>
+                                    onchange="limitTags(this)">
+                                <?php echo htmlspecialchars($tag['Name']); ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
-            </div>
-            <p class="note">Select up to 5 tags.</p>
+                <p class="note">Select up to 5 tags.</p>
+            <?php else: ?>
+                <?php if ($selectedTagsIds): ?>
+                    <div class="tags-container">
+                        <?php
+                        foreach ($allTags as $tag) {
+                            if (in_array($tag['TagID'], $selectedTagsIds)) {
+                                echo '<span class="tag">' . htmlspecialchars($tag['Name']) . '</span> ';
+                            }
+                        }
+                        ?>
+                    </div>
+                <?php else: ?>
+                    <p>No tags assigned for this pitch.</p>
+                <?php endif; ?>
+            <?php endif; ?>
+
 
             <label for="target">Target Investment (£)</label>
             <input type="number" id="target" name="target" value="<?php echo $pitch['TargetAmount']; ?>">
@@ -174,8 +198,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ?>
             <label>Payout Frequency</label>
             <div class="payout-toggle">
-                <button type="button" class="toggle-btn <?php echo $payout === 'Quarterly' ? 'active' : ''; ?>" data-value="Quarterly">Quarterly</button>
-                <button type="button" class="toggle-btn <?php echo $payout === 'Annually' ? 'active' : ''; ?>" data-value="Annually">Annually</button>
+                <button type="button" class="toggle-btn <?php echo $payout === 'Quarterly' ? 'active' : ''; ?>"
+                    data-value="Quarterly" <?php echo $status !== 'draft' ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''; ?>>Quarterly</button>
+                <button type="button" class="toggle-btn <?php echo $payout === 'Annually' ? 'active' : ''; ?>"
+                    data-value="Annually" <?php echo $status !== 'draft' ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''; ?>>Annually</button>
             </div>
             <input type="hidden" name="payout_frequency" id="payout_frequency" value="<?php echo $payout; ?>" required>
 
@@ -193,9 +219,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div class="form-buttons">
-                <button type="button" class="ai-btn">Run AI Analysis</button>
+                <?php if ($status === 'draft'): ?>
+                    <button type="button" class="ai-btn">Run AI Analysis</button>
+                <?php endif; ?>
                 <button type="submit" class="submit-btn">Save Changes</button>
             </div>
+
         </form>
     </main>
 
