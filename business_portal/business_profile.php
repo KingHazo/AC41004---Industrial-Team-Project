@@ -55,32 +55,34 @@ if ($business) {
     <main class="section">
         <h2>My Account</h2>
         <section class="card summary">
-            <div class="avatar">
-                <img src="bottle.jpg" alt="Company Logo">
+            <div class="avatar placeholder-avatar">
+                <!-- No image, just grey block -->
             </div>
             <div class="info">
                 <h3 id="company-name"><?php echo htmlspecialchars($businessName ?? 'N/A'); ?></h3>
                 <p id="company-email"><?php echo htmlspecialchars($businessEmail ?? 'N/A'); ?></p>
-                <button class="btn small" id="change-logo">Change Logo</button>
+                <button class="btn small" id="change-logo" disabled>Change Logo</button>
             </div>
+
 
         </section>
 
         <!-- company details -->
         <section class="card">
             <h3>Business Details</h3>
+            <p class="placeholder-note">This is a placeholder.</p>
             <div class="grid">
                 <div class="field">
                     <label>Legal Name</label>
-                    <input id="legal-name" type="text" value="EcoBottle Ltd" />
+                    <input id="legal-name" type="text" value="My Company Ltd" disabled />
                 </div>
                 <div class="field">
                     <label>Registration No.</label>
-                    <input id="reg-no" type="text" value="SC123456" />
+                    <input id="reg-no" type="text" value="SC123456" disabled />
                 </div>
                 <div class="field">
                     <label>Sector</label>
-                    <select id="sector">
+                    <select id="sector" disabled>
                         <option>Consumer Goods</option>
                         <option selected>Greentech</option>
                         <option>Food & Beverage</option>
@@ -90,42 +92,42 @@ if ($business) {
                 </div>
                 <div class="field">
                     <label>Website</label>
-                    <input id="website" type="url" value="https://ecobottle.co.uk" />
+                    <input id="website" type="url" value="https://mycompany.co.uk" disabled />
                 </div>
                 <div class="field wide">
                     <label>Registered Address</label>
-                    <input id="address" type="text" value="12 Green Lane, Edinburgh, EH1 2AB" />
+                    <input id="address" type="text" value="12 Green Lane, Edinburgh, EH1 2AB" disabled />
                 </div>
                 <div class="field wide">
                     <label>Company Description</label>
-                    <textarea id="description"
-                        rows="3">We design connected, reusable bottles that help people stay hydrated while reducing single-use plastics.</textarea>
+                    <textarea id="description" rows="3" disabled>Enter a short description...</textarea>
                 </div>
             </div>
             <div class="actions">
-                <button class="btn primary" id="save-details">Save Details</button>
+                <button class="btn primary" id="save-details" disabled>Save Details</button>
             </div>
         </section>
 
         <!-- Banking -->
         <section class="card">
             <h3>Banking (Mock)</h3>
+            <p class="placeholder-note">This is a placeholder.</p>
             <div class="grid">
                 <div class="field">
                     <label>Account Name</label>
-                    <input id="acct-name" type="text" value="EcoBottle Ltd" />
+                    <input id="acct-name" type="text" value="My Company Ltd" disabled />
                 </div>
                 <div class="field">
                     <label>Sort Code</label>
-                    <input id="sort-code" type="text" placeholder="12-34-56" />
+                    <input id="sort-code" type="text" placeholder="12-34-56" disabled />
                 </div>
                 <div class="field">
                     <label>Account Number</label>
-                    <input id="acct-number" type="text" placeholder="12345678" />
+                    <input id="acct-number" type="text" placeholder="12345678" disabled />
                 </div>
                 <div class="field">
                     <label>Payout Preference</label>
-                    <select id="payout-pref">
+                    <select id="payout-pref" disabled>
                         <option selected>Manual Payout</option>
                         <option>Auto-Deposit on Profit Distribution</option>
                     </select>
@@ -133,20 +135,22 @@ if ($business) {
             </div>
             <p class="hint">Note: This is a simulated setup for demos; no real payments are processed.</p>
             <div class="actions">
-                <button class="btn" id="save-banking">Save Banking</button>
+                <button class="btn" id="save-banking" disabled>Save Banking</button>
             </div>
         </section>
 
         <!-- verification -->
-        <section class="card">
+        <section class="card readonly">
             <h3>Verification</h3>
+            <p class="placeholder-note">This is a placeholder. Verification coming soon...</p>
             <p>Status: <span class="badge verified" id="kyc-status">Verified</span></p>
             <ul class="doc-list" id="doc-list">
-                <li><a href="#" target="_blank">Certificate of Incorporation.pdf</a></li>
-                <li><a href="#" target="_blank">Proof of Address.pdf</a></li>
+                <li><a href="#" target="_blank" class="disabled-link">Certificate of Incorporation.pdf</a></li>
+                <li><a href="#" target="_blank" class="disabled-link">Proof of Address.pdf</a></li>
             </ul>
-            <button class="btn small" id="upload-doc">Upload Document</button>
+            <button class="btn small" id="upload-doc" disabled>Upload Document</button>
         </section>
+
 
         <!-- account actions -->
         <section class="card danger-zone">

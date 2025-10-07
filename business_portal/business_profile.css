@@ -234,3 +234,29 @@ textarea:focus {
         grid-template-columns: 1fr;
     }
 }
+
+.disabled-link {
+    pointer-events: none; 
+    color: #999;          
+    text-decoration: none;
+}
+
+.field input,
+.field select,
+.field textarea {
+    width: 100%; /* fill parent column */
+}
+
+
+.placeholder-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #ccc; 
+}
+
+.btn:disabled {
+    background-color: #999;
+    cursor: not-allowed;    
+    filter: none;            
+}
