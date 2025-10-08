@@ -3,10 +3,9 @@ session_start();
 include __DIR__ . '/../sql/db.php';
 
 if (!$mysql) {
-  die("Database connection failed.");
+  // database connection failed
+  die(json_encode(['error' => 'Database connection failed.']));
 }
-
-
 
 // check if form was submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -19,12 +18,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // basic validation
     if (empty($name) || empty($email) || empty($password)) {
-        header("Location: signup_{$type}.php?error=Please+fill+all+fields");
+        echo json_encode(['error' => 'Please fill all fields']);
         exit();
     }
 
     if ($password !== $confirm_password) {
-        header("Location: signup_{$type}.php?error=Passwords+do+not+match");
+        echo json_encode(['error' => 'Passwords do not match']);
         exit();
     }
 
@@ -33,12 +32,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         if ($type === 'business') {
+            // insert into Business table
             $stmt = $mysql->prepare("INSERT INTO Business (Name, Email, Password) VALUES (:name, :email, :password)");
             $stmt->bindParam(':name', $name);
             $stmt->bindParam(':email', $email);
             $stmt->bindParam(':password', $hashed_password);
             $stmt->execute();
-           } elseif ($type === 'investor') {
+            $userId = $mysql->lastInsertId();
+        } elseif ($type === 'investor') {
             // insert into Investor
             $stmt = $mysql->prepare("INSERT INTO Investor (Name, Email, Password) VALUES (:name, :email, :password)");
             $stmt->bindParam(':name', $name);
@@ -46,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bindParam(':password', $hashed_password);
             $stmt->execute();
 
-            $investorId = $mysql->lastInsertId(); // ✅ Save before inserting into Bank
+            $userId = $mysql->lastInsertId(); // ✅ Save before inserting into Bank
 
             // generate mock bank account details
             $accountNumber = str_pad(mt_rand(10000000, 99999999), 8, '0', STR_PAD_LEFT);
@@ -62,39 +63,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $bankStmt->bindParam(':holderName', $holderName);
             $bankStmt->bindParam(':balance', $initialBalance);
             $bankStmt->execute();
-
-            // set correct session data
-            $_SESSION['userId'] = $investorId;
-            $_SESSION['userType'] = 'investor';
-            $_SESSION['logged_in'] = true;
-
-            header("Location: ../investor_portal/investor_portal_home.php");
+        } else {
+            echo json_encode(['error' => 'Invalid user type']);
             exit();
-           }
+        }
 
         // set session for auto login
-        $_SESSION['userId'] = $mysql->lastInsertId();
+        $_SESSION['userId'] = $userId;
         $_SESSION['userType'] = $type;
         $_SESSION['logged_in'] = true;
 
-        // redirect based on type
-        if ($type === 'business') {
-            header("Location: ../business_portal/business_dashboard.php");
-        } else {
-            header("Location: ../investor_portal/investor_portal_home.php");
-        }
+        // return success for frontend JS
+        echo json_encode(['success' => true, 'userType' => $type]);
         exit();
 
     } catch (PDOException $e) {
         // checks for duplicate email
         if ($e->getCode() === '23000') {
-            header("Location: signup_{$type}.php?error=email_exists");
+            echo json_encode(['error' => 'Email already exists']);
         } else {
-            header("Location: signup_{$type}.php?error=" . urlencode($e->getMessage()));
+            echo json_encode(['error' => $e->getMessage()]);
         }
         exit();
     }
 } else {
-    header("Location: signup_business.php");
+    echo json_encode(['error' => 'Invalid request']);
     exit();
 }

@@ -11,7 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
-
     <style>
         /* toggle slider container */
         .toggle-container {
@@ -99,42 +98,150 @@
 
     <?php include '../footer.php'; ?>
     <script src="login_signup.js?v=<?php echo time(); ?>"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <script>
-        const loginForm = document.getElementById("mainForm");
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const mainForm = document.getElementById("mainForm");
 
-        loginForm.addEventListener("submit", async (e) => {
-            e.preventDefault(); // prevent normal form submission
+    mainForm.addEventListener("submit", async (e) => {
+        e.preventDefault(); // prevent default form submission
 
-            const formData = new FormData(loginForm);
+        const isSignup = mainForm.action.includes('signup.php');
+        const password = document.getElementById("password").value.trim();
+        const confirmPassword = document.getElementById("confirmPassword").value.trim();
+        const nameField = document.getElementById("nameField");
+        const email = document.getElementById("email").value.trim();
 
-            const response = await fetch("login.php", {
-                method: "POST",
-                body: formData
-            });
-
-            const result = await response.json();
-
-            if (result.error) {
+        // ===== SIGNUP VALIDATION =====
+        if (isSignup) {
+            // Check if name is filled
+            if (nameField && nameField.style.display !== 'none' && !document.getElementById("name").value.trim()) {
                 Toastify({
-                    text:  result.error,
+                    text: "Please enter your name",
                     duration: 5000,
                     gravity: "top",
                     position: "right",
                     backgroundColor: "#e74c3c",
                     close: true
                 }).showToast();
-            } else if (result.success) {
-                // redirect after successful login
-                if (result.userType === 'investor') {
-                    window.location.href = "../investor_portal/investor_portal_home.php";
-                } else {
-                    window.location.href = "../business_portal/business_dashboard.php";
-                }
+                return;
             }
-        });
-    </script>
+
+            // Check email format
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(email)) {
+                Toastify({
+                    text: "Please enter a valid email address",
+                    duration: 5000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#e74c3c",
+                    close: true
+                }).showToast();
+                return;
+            }
+
+            // Check if passwords match
+            if (password !== confirmPassword) {
+                Toastify({
+                    text: "Passwords do not match",
+                    duration: 5000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#e74c3c",
+                    close: true
+                }).showToast();
+                return;
+            }
+
+            // Submit signup via fetch to handle duplicate email and other errors
+            const formData = new FormData(mainForm);
+
+            try {
+                const response = await fetch(mainForm.action, {
+                    method: "POST",
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.error) {
+                    // Show Toastify popup for duplicate email or other errors
+                    Toastify({
+                        text: result.error,
+                        duration: 5000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#e74c3c",
+                        close: true
+                    }).showToast();
+                } else if (result.success) {
+                    // Redirect based on user type
+                    if (result.userType === 'investor') {
+                        window.location.href = "../investor_portal/investor_portal_home.php";
+                    } else {
+                        window.location.href = "../business_portal/business_dashboard.php";
+                    }
+                }
+            } catch (err) {
+                console.error("Fetch error:", err);
+                Toastify({
+                    text: "Unexpected error, try again.",
+                    duration: 5000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#e74c3c",
+                    close: true
+                }).showToast();
+            }
+
+            return;
+        }
+
+        // ===== LOGIN VALIDATION =====
+        if (mainForm.action.includes('login.php')) {
+            const formData = new FormData(mainForm);
+
+            try {
+                const response = await fetch(mainForm.action, {
+                    method: "POST",
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.error) {
+                    Toastify({
+                        text: result.error,
+                        duration: 5000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#e74c3c",
+                        close: true
+                    }).showToast();
+                } else if (result.success) {
+                    if (result.userType === 'investor') {
+                        window.location.href = "../investor_portal/investor_portal_home.php";
+                    } else {
+                        window.location.href = "../business_portal/business_dashboard.php";
+                    }
+                }
+            } catch (err) {
+                console.error("Fetch error:", err);
+                Toastify({
+                    text: "Unexpected error, try again.",
+                    duration: 5000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#e74c3c",
+                    close: true
+                }).showToast();
+            }
+        }
+    });
+});
+</script>
+
 
 </body>
 
