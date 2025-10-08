@@ -23,6 +23,7 @@ if (!$mysql) {
 
 // Include GCP
 require __DIR__ . '/../vendor/autoload.php';
+
 use Google\Cloud\Storage\StorageClient;
 
 // Initialize GCP Storage using JSON file in root
@@ -33,11 +34,14 @@ try {
     ]);
 
     $bucket = $storage->bucket('fundify-media-bucket');
-
 } catch (Exception $e) {
     error_log("GCP init error: " . $e->getMessage());
     die("Could not initialize Google Cloud Storage");
 }
+
+ini_set('post_max_size', '500M');
+ini_set('upload_max_filesize', '100M');
+ini_set('memory_limit', '300M');
 
 // Fetch tags
 $tagStmt = $mysql->prepare("SELECT * FROM Tag ORDER BY Name ASC");
@@ -46,15 +50,23 @@ $tags = $tagStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Handle POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
     $businessId = $_SESSION['userId'];
-    $title = htmlspecialchars($_POST['title']);
-    $elevator = htmlspecialchars($_POST['elevator']);
-    $details = htmlspecialchars($_POST['details']);
-    $target = $_POST['target'];
-    $endDate = $_POST['end_date'];
-    $profitShare = $_POST['profit_share'];
+
+    // Sanitize and validate POST data
+    $title = isset($_POST['title']) ? htmlspecialchars(trim($_POST['title'])) : '';
+    $elevator = isset($_POST['elevator']) ? htmlspecialchars(trim($_POST['elevator'])) : '';
+    $details = isset($_POST['details']) ? htmlspecialchars(trim($_POST['details'])) : '';
+    $target = isset($_POST['target']) ? (float)$_POST['target'] : null;
+    $endDate = isset($_POST['end_date']) ? $_POST['end_date'] : null;
+    $profitShare = isset($_POST['profit_share']) ? (float)$_POST['profit_share'] : null;
     $payoutFrequency = $_POST['payout_frequency'] ?? null;
     $status = $_POST['status'] ?? 'draft';
+
+    // Required field validation
+    if (!$title || !$elevator || !$details || !$target || !$endDate || !$profitShare) {
+        die("<script>alert('Please fill in all required fields.'); window.history.back();</script>");
+    }
 
     // Insert pitch
     $stmt = $mysql->prepare("
@@ -77,12 +89,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $pitchId = $mysql->lastInsertId();
 
-    // Upload media files (if any)
+    // Handle media uploads
     if (!empty($_FILES['media']['name'][0])) {
+
+        $maxFiles = 5;
+        $maxTotalSize = 200 * 1024 * 1024; // 200MB
+        $maxFileSize = 100 * 1024 * 1024;  // 100MB per file
+
+        $fileCount = count($_FILES['media']['name']);
+        $totalSize = array_sum($_FILES['media']['size']);
+
+        if ($fileCount > $maxFiles) {
+            die("<script>alert('You can upload a maximum of 5 files.'); window.history.back();</script>");
+        }
+
+        if ($totalSize > $maxTotalSize) {
+            die("<script>alert('Total upload size exceeds 200MB. Please reduce file sizes.'); window.history.back();</script>");
+        }
+
         foreach ($_FILES['media']['tmp_name'] as $index => $tmpName) {
+
             $error = $_FILES['media']['error'][$index];
+            $size = $_FILES['media']['size'][$index];
+
             if ($error !== UPLOAD_ERR_OK) {
                 error_log("Upload error index $index: $error");
+                continue;
+            }
+
+            if ($size > $maxFileSize) {
+                error_log("File too large: {$_FILES['media']['name'][$index]}");
                 continue;
             }
 
@@ -92,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $object = $bucket->upload(fopen($tmpName, 'r'), ['name' => $fileName]);
                 $publicUrl = "https://storage.googleapis.com/{$bucket->name()}/{$fileName}";
-                error_log("Uploaded to GCP: $fileName");
+                error_log("✅ Uploaded to GCP: $fileName");
 
                 // Insert into Media table
                 $stmt = $mysql->prepare("INSERT INTO Media (FilePath, PitchID) VALUES (:filePath, :pitchId)");
@@ -107,7 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Insert selected tags (max 5)
+    // Handle tags (max 5)
     if (!empty($_POST['tags'])) {
         $selectedTags = array_slice($_POST['tags'], 0, 5);
         $stmt = $mysql->prepare("INSERT INTO PitchTag (PitchID, TagID) VALUES (:pitchId, :tagId)");
@@ -119,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Insert investment tiers
+    // Handle investment tiers
     if (!empty($_POST['tier_name'])) {
         $stmt = $mysql->prepare("
             INSERT INTO InvestmentTier 
@@ -131,9 +167,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $stmt->execute([
                 ':name' => $_POST['tier_name'][$i],
-                ':min' => $_POST['tier_min'][$i],
-                ':max' => $_POST['tier_max'][$i],
-                ':multiplier' => $_POST['tier_multiplier'][$i],
+                ':min' => $_POST['tier_min'][$i] ?? 0,
+                ':max' => $_POST['tier_max'][$i] ?? 0,
+                ':multiplier' => $_POST['tier_multiplier'][$i] ?? 1,
                 ':pitchId' => $pitchId,
                 ':share' => $profitShare
             ]);
@@ -148,6 +184,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     exit();
 }
+
 ?>
 
 
@@ -189,7 +226,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 required></textarea>
 
             <!-- Media upload -->
-            <label for="media">Upload Images/Videos</label>
+            <label for="media">Upload Images/Videos (max 5 files, 200MB total)</label>
             <input type="file" id="media" name="media[]" multiple accept="image/*,video/*">
 
             <!-- Tags dropdown -->

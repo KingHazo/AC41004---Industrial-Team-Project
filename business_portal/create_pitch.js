@@ -337,3 +337,45 @@ document.querySelector(".pitch-form").addEventListener("submit", function (e) {
         return false;
     }
 });
+
+
+document.querySelector('.pitch-form').addEventListener('submit', function (e) {
+    const files = document.getElementById('media').files;
+
+    // Max 5 files
+    if (files.length > 5) {
+        e.preventDefault();
+        Toastify({
+            text: "You can upload a maximum of 5 files.",
+            backgroundColor: "#f44336",
+            duration: 4000
+        }).showToast();
+        return;
+    }
+
+    // File size limits
+    let totalSize = 0;
+    for (let file of files) {
+        totalSize += file.size;
+
+        if (file.size > 100 * 1024 * 1024) { // 100MB per file
+            e.preventDefault();
+            Toastify({
+                text: `File "${file.name}" exceeds 100MB limit.`,
+                backgroundColor: "#f44336",
+                duration: 4000
+            }).showToast();
+            return;
+        }
+    }
+
+    if (totalSize > 200 * 1024 * 1024) {
+        e.preventDefault();
+        Toastify({
+            text: "Total upload size exceeds 200MB.",
+            backgroundColor: "#f44336",
+            duration: 4000
+        }).showToast();
+        return;
+    }
+});

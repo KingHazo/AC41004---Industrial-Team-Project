@@ -1,56 +1,56 @@
 <?php
 // start the session to check login
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+  session_start();
 }
 
 // make sure user is logged in and is a business
 if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'business') {
-    header("Location: ../login/login_signup.php");
-    exit();
+  header("Location: ../login/login_signup.php");
+  exit();
 }
 
 // include database connection
 include '../sql/db.php';
 
 if (!$mysql) {
-    die("Database connection failed.");
+  die("Database connection failed.");
 }
 
 // get pitch ID from URL
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    die("Pitch ID is missing.");
+  die("Pitch ID is missing.");
 }
 
 $pitchId = (int) $_GET['id'];
 
 // handle save using POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    header('Content-Type: application/json'); // <-- important!
+  header('Content-Type: application/json'); // <-- important!
 
-    $data = json_decode(file_get_contents('php://input'), true);
+  $data = json_decode(file_get_contents('php://input'), true);
 
-    if (!$data || !isset($_SESSION['userId'])) {
-        echo json_encode(['success' => false]);
-        exit; // stop HTML rendering
-    }
+  if (!$data || !isset($_SESSION['userId'])) {
+    echo json_encode(['success' => false]);
+    exit; // stop HTML rendering
+  }
 
-    $elevatorPitch = $data['elevatorPitch'];
-    $detailedPitch = $data['detailedPitch'];
+  $elevatorPitch = $data['elevatorPitch'];
+  $detailedPitch = $data['detailedPitch'];
 
-    $stmt = $mysql->prepare("
+  $stmt = $mysql->prepare("
         UPDATE Pitch 
         SET ElevatorPitch = :elevatorPitch, DetailedPitch = :detailedPitch 
         WHERE PitchID = :pitchId AND BusinessID = :businessId
     ");
-    $stmt->bindParam(':elevatorPitch', $elevatorPitch);
-    $stmt->bindParam(':detailedPitch', $detailedPitch);
-    $stmt->bindParam(':pitchId', $pitchId);
-    $stmt->bindParam(':businessId', $_SESSION['userId']);
-    $success = $stmt->execute();
+  $stmt->bindParam(':elevatorPitch', $elevatorPitch);
+  $stmt->bindParam(':detailedPitch', $detailedPitch);
+  $stmt->bindParam(':pitchId', $pitchId);
+  $stmt->bindParam(':businessId', $_SESSION['userId']);
+  $success = $stmt->execute();
 
-    echo json_encode(['success' => $success]);
-    exit; // <- critical! stops PHP from outputting the rest of the page
+  echo json_encode(['success' => $success]);
+  exit; // <- critical! stops PHP from outputting the rest of the page
 }
 
 // fetch pitch from DB
@@ -61,7 +61,7 @@ $stmt->execute();
 $pitch = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$pitch) {
-    die("Pitch not found or you do not have permission to view it.");
+  die("Pitch not found or you do not have permission to view it.");
 }
 
 // fetch media files for this pitch
@@ -92,13 +92,13 @@ $now = new DateTime();
 $windowEnd = !empty($pitch['WindowEndDate']) ? new DateTime($pitch['WindowEndDate']) : null;
 
 if ($pitch['CurrentAmount'] >= $pitch['TargetAmount'] && $pitch['TargetAmount'] > 0) {
-    $status = "funded";
+  $status = "funded";
 } elseif ($windowEnd && $now > $windowEnd) {
-    $status = "closed";
+  $status = "closed";
 } elseif ($pitch['CurrentAmount'] > 0) {
-    $status = "active";
+  $status = "active";
 } else {
-    $status = $pitch['Status']; // e.g., draft
+  $status = $pitch['Status']; // e.g., draft
 }
 
 // Disable editing if pitch is funded or closed
@@ -158,33 +158,37 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
       <p id="detailedPitchText"><?php echo nl2br(htmlspecialchars($pitch['DetailedPitch'])); ?></p>
 
       <!-- Slideshow container for images-->
-      <!-- https://www.w3schools.com/howto/howto_js_slideshow.asp-->
-      <div class="slideshow-container">
+      <!-- edited the template from https://www.w3schools.com/howto/howto_js_slideshow.asp-->
+      <?php if ($mediaFiles): ?>
+        <div class="slideshow-container">
+          <?php foreach ($mediaFiles as $index => $fileUrl): ?>
+            <div class="mySlides fade">
+              <?php if (preg_match('/\.(jpg|jpeg|png|gif)$/i', $fileUrl)): ?>
+                <img src="<?php echo htmlspecialchars($fileUrl); ?>" style="width:100%">
+              <?php elseif (preg_match('/\.(mp4|webm|ogg)$/i', $fileUrl)): ?>
+                <video controls style="width:100%">
+                  <source src="<?php echo htmlspecialchars($fileUrl); ?>">
+                  Your browser does not support the video tag.
+                </video>
+              <?php endif; ?>
+            </div>
+          <?php endforeach; ?>
 
-        <!-- Full-width images with number and caption text -->
-        <div class="mySlides fade">
-          <img src="../investor_portal/image1.jpg" style="width:100%">
+          <!-- Next and previous buttons -->
+          <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+          <a class="next" onclick="plusSlides(1)">&#10095;</a>
         </div>
 
-        <div class="mySlides fade">
-          <img src="../investor_portal/image2.jpg" style="width:100%">
+        <!-- The dots/circles -->
+        <div style="text-align:center">
+          <?php foreach ($mediaFiles as $index => $fileUrl): ?>
+            <span class="dot" onclick="currentSlide(<?php echo $index + 1; ?>)"></span>
+          <?php endforeach; ?>
         </div>
+      <?php else: ?>
+        <p>No media uploaded for this pitch.</p>
+      <?php endif; ?>
 
-        <div class="mySlides fade">
-          <img src="../investor_portal/image3.jpg" style="width:100%">
-        </div>
-
-        <!-- Next and previous buttons -->
-        <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
-        <a class="next" onclick="plusSlides(1)">&#10095;</a>
-      </div>
-
-      <!-- The dots/circles -->
-      <div style="text-align:center">
-        <span class="dot" onclick="currentSlide(1)"></span>
-        <span class="dot" onclick="currentSlide(2)"></span>
-        <span class="dot" onclick="currentSlide(3)"></span>
-      </div>
 
       <h3>Tags</h3>
       <?php if ($tags): ?>
@@ -196,25 +200,7 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
       <?php else: ?>
         <p>No tags added for this pitch.</p>
       <?php endif; ?>
-
-      <h3>Media</h3>
-      <?php if ($mediaFiles): ?>
-        <div class="media-container">
-          <?php foreach ($mediaFiles as $fileUrl): ?>
-            <?php if (preg_match('/\.(jpg|jpeg|png|gif)$/i', $fileUrl)): ?>
-              <img src="<?php echo htmlspecialchars($fileUrl); ?>" alt="Pitch Media" class="pitch-image">
-            <?php elseif (preg_match('/\.(mp4|webm|ogg)$/i', $fileUrl)): ?>
-              <video controls class="pitch-video">
-                <source src="<?php echo htmlspecialchars($fileUrl); ?>">
-                Your browser does not support the video tag.
-              </video>
-            <?php endif; ?>
-          <?php endforeach; ?>
-        </div>
-      <?php else: ?>
-        <p>No media uploaded for this pitch.</p>
-      <?php endif; ?>
-
+      
       <h3>Funding Progress</h3>
       <div class="progress-container">
         <div class="progress-bar" style="width: <?php echo $progress; ?>%;">

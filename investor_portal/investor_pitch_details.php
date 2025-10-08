@@ -16,7 +16,7 @@ include '../sql/db.php';
 
 
 if (!$mysql) {
-  die("Database connection failed.");
+    die("Database connection failed.");
 }
 
 // get pitch id, make an integer
@@ -48,10 +48,17 @@ try {
     $stmt_pitch->execute();
     $pitch = $stmt_pitch->fetch(PDO::FETCH_ASSOC);
 
+
     if (!$pitch) {
         header('Location: investor_portal_home.php?error=pitch_not_found');
         exit();
     }
+
+    // fetch media files for this pitch
+    $mediaStmt = $mysql->prepare("SELECT FilePath FROM Media WHERE PitchID = :pitchID ORDER BY MediaID ASC");
+    $mediaStmt->bindParam(':pitchID', $pitchID, PDO::PARAM_INT);
+    $mediaStmt->execute();
+    $mediaFiles = $mediaStmt->fetchAll(PDO::FETCH_COLUMN);
 
     // check if pitch is closed/funded for stopping investments
     $isFunded = (float)$pitch['CurrentAmount'] >= (float)$pitch['TargetAmount'];
@@ -85,11 +92,11 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pitch Details - <?php echo htmlspecialchars($pitch['Title'] ?? 'Loading...'); ?></title>
-      <link rel="stylesheet" href="investor_pitch_details.css?v=<?php echo time(); ?>"> <!--handles cache issues-->
+    <link rel="stylesheet" href="investor_pitch_details.css?v=<?php echo time(); ?>"> <!--handles cache issues-->
     <link rel="stylesheet" href="../navbar.css" />
     <link rel="stylesheet" href="../footer.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
-    rel="stylesheet" />
+        rel="stylesheet" />
 
     <style>
         .spinner {
@@ -154,33 +161,36 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
             </div>
 
             <!-- Slideshow container for images-->
-             <!-- https://www.w3schools.com/howto/howto_js_slideshow.asp-->
-            <div class="slideshow-container">
+            <!-- edited the template from https://www.w3schools.com/howto/howto_js_slideshow.asp-->
+            <?php if ($mediaFiles): ?>
+                <div class="slideshow-container">
+                    <?php foreach ($mediaFiles as $index => $fileUrl): ?>
+                        <div class="mySlides fade">
+                            <?php if (preg_match('/\.(jpg|jpeg|png|gif)$/i', $fileUrl)): ?>
+                                <img src="<?php echo htmlspecialchars($fileUrl); ?>" style="width:100%">
+                            <?php elseif (preg_match('/\.(mp4|webm|ogg)$/i', $fileUrl)): ?>
+                                <video controls style="width:100%">
+                                    <source src="<?php echo htmlspecialchars($fileUrl); ?>">
+                                    Your browser does not support the video tag.
+                                </video>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
 
-                <!-- Full-width images with number and caption text -->
-                <div class="mySlides fade">
-                    <img src="image1.jpg" style="width:100%">
+                    <!-- Next and previous buttons -->
+                    <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+                    <a class="next" onclick="plusSlides(1)">&#10095;</a>
                 </div>
 
-                <div class="mySlides fade">
-                    <img src="image2.jpg" style="width:100%">
+                <!-- The dots/circles -->
+                <div style="text-align:center">
+                    <?php foreach ($mediaFiles as $index => $fileUrl): ?>
+                        <span class="dot" onclick="currentSlide(<?php echo $index + 1; ?>)"></span>
+                    <?php endforeach; ?>
                 </div>
-
-                <div class="mySlides fade">
-                    <img src="image3.jpg" style="width:100%">
-                </div>
-
-                <!-- Next and previous buttons -->
-                <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
-                <a class="next" onclick="plusSlides(1)">&#10095;</a>
-            </div>
-
-            <!-- The dots/circles -->
-            <div style="text-align:center">
-                <span class="dot" onclick="currentSlide(1)"></span>
-                <span class="dot" onclick="currentSlide(2)"></span>
-                <span class="dot" onclick="currentSlide(3)"></span>
-            </div>
+            <?php else: ?>
+                <p>No media uploaded for this pitch.</p>
+            <?php endif; ?>
 
             <h3>Elevator Pitch</h3>
             <p><?php echo htmlspecialchars($pitch['ElevatorPitch'] ?? 'Description not available.'); ?></p>
@@ -233,9 +243,9 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
                             $mult = number_format((float)$tier['Multiplier'], 1);
 
                             $isUnlimited = $max >= 9999999;
-                            
+
                             $maxTableCell = $isUnlimited ? 'No Limit' : number_format($max);
-                            
+
                             $maxAttr = $max;
                         ?>
                             <tr data-tier="<?php echo htmlspecialchars($tier['Name']); ?>"
