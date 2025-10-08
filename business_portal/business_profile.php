@@ -41,7 +41,7 @@ if ($business) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Business Profile</title>
+    <title >Business Profile</title>
     <link rel="stylesheet" href="business_profile.css?v=<?php echo time(); ?>"> <!--handles cache issues-->
     <link rel="stylesheet" href="../footer.css" />
     <link rel="stylesheet" href="../navbar.css" />
@@ -52,16 +52,16 @@ if ($business) {
 <body>
     <?php include '../navbar.php'; ?>
 
-    <main class="section">
+    <main  tabindex="0" class="section">
         <h2>My Account</h2>
-        <section class="card summary">
+        <section tabindex="0" class="card summary">
             <div class="avatar placeholder-avatar">
                 <!-- No image, just grey block -->
             </div>
-            <div class="info">
+            <div class="info" tabindex="0">
                 <h3 id="company-name"><?php echo htmlspecialchars($businessName ?? 'N/A'); ?></h3>
                 <p id="company-email"><?php echo htmlspecialchars($businessEmail ?? 'N/A'); ?></p>
-                <button class="btn small" id="change-logo" disabled>Change Logo</button>
+                <button tabindex="0" class="btn small" id="change-logo" >Change Logo</button>
             </div>
 
 
