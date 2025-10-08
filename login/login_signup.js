@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //Check the URL parameter
     const urlParams = new URLSearchParams(window.location.search);
-    const typeParam = urlParams.get('type'); 
+    const typeParam = urlParams.get('type');
     //console.log('URL type parameter:', typeParam); // for debugging
 
     // business/investor toggle
@@ -21,8 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // function to select user type visually
     function selectUserType(type) {
         options.forEach(o => o.classList.remove('active'));
-        if(type === 'investor') {
-            options[1].classList.add('active'); 
+        if (type === 'investor') {
+            options[1].classList.add('active');
             slider.style.left = '50%';
             userTypeInput.value = 'investor';
         } else {
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     //toggle based on URL param
-    if(typeParam === 'business' || typeParam === 'investor') {
+    if (typeParam === 'business' || typeParam === 'investor') {
         selectUserType(typeParam);
     }
 
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
             options.forEach(o => o.classList.remove('active'));
             option.classList.add('active');
 
-            if(option.dataset.role === 'business'){
+            if (option.dataset.role === 'business') {
                 slider.style.left = '0%';
                 userTypeInput.value = 'business';
             } else {
@@ -60,23 +60,37 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleMode.addEventListener('click', (e) => {
         e.preventDefault();
 
-        if(mainForm.action.includes('login.php')){
+        if (mainForm.action.includes('login.php')) {
             mainForm.action = 'signup.php';
             formTitle.textContent = 'Sign Up';
             submitButton.textContent = 'Sign Up';
             toggleMode.textContent = 'Already have an account? Login';
-            if(nameField) nameField.style.display = 'block';
-            if(confirmLabel) confirmLabel.style.display = 'block';
-            if(confirmPassword) confirmPassword.style.display = 'block';
+            if (nameField) nameField.style.display = 'block';
+            if (confirmLabel) confirmLabel.style.display = 'block';
+            if (confirmPassword) confirmPassword.style.display = 'block';
         } else {
             mainForm.action = 'login.php';
             formTitle.textContent = 'Login';
             submitButton.textContent = 'Login';
             toggleMode.textContent = 'Don’t have an account? Sign up';
-            if(nameField) nameField.style.display = 'none';
-            if(confirmLabel) confirmLabel.style.display = 'none';
-            if(confirmPassword) confirmPassword.style.display = 'none';
+            if (nameField) nameField.style.display = 'none';
+            if (confirmLabel) confirmLabel.style.display = 'none';
+            if (confirmPassword) confirmPassword.style.display = 'none';
         }
     });
 
+});
+
+const toggleContainer = document.getElementById('loginToggle');
+const toggleOptions = document.querySelectorAll('.toggle-option');
+const slider = document.querySelector('.slider');
+const userTypeInput = document.getElementById('userType');
+
+toggleOptions.forEach(option => {
+    option.addEventListener('click', () => {
+        toggleOptions.forEach(opt => opt.classList.remove('active'));
+        option.classList.add('active');
+        slider.style.left = option.dataset.role === 'business' ? '0%' : '50%';
+        userTypeInput.value = option.dataset.role;
+    });
 });

@@ -246,13 +246,13 @@ $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
 
       <div class="card-buttons">
         <?php if (!$disableEdit): ?>
-          <a href="edit_pitch.php?id=<?php echo $pitch['PitchID']; ?>" class="edit-btn">Edit Pitch</a>
+          <a tabindex="0" href="edit_pitch.php?id=<?php echo $pitch['PitchID']; ?>" class="edit-btn">Edit Pitch</a>
         <?php endif; ?>
 
         <?php if ($status === 'draft'): ?>
           <form action="submit_pitch.php" method="post" style="display:inline;">
             <input type="hidden" name="pitchId" value="<?php echo $pitch['PitchID']; ?>">
-            <button type="submit" class="submit-btn">Submit Pitch</button>
+            <button tabindex="0" type="submit" class="submit-btn">Submit Pitch</button>
           </form>
         <?php endif; ?>
         <?php if ($status === 'funded'): ?>
