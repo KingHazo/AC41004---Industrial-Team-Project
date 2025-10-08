@@ -187,7 +187,10 @@ try {
                             Investor Profit Share: <strong><?php echo htmlspecialchars($row['ProfitSharePercentage'] ?? '0'); ?>%</strong>
                         </div>
                         <div class="card-buttons">
-                            <button class="invest-btn">Invest</button>
+                            <?php if ($currentAmount < $targetAmount): ?>
+                                <button class="invest-btn">Invest</button>
+                            <?php endif; ?>
+
                             <button class="more-btn" data-pitch-id="<?php echo htmlspecialchars($pitch_id); ?>">Find Out More</button>
                         </div>
                     </div>

@@ -44,6 +44,12 @@ body {
     color: #27ae60;
 }
 
+.status.funded {
+  background: #d7d9ff;
+  color: #0b3d91;
+}
+
+
 .status.closed {
     background: #fbeaea;
     color: #e74c3c;
