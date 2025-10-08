@@ -12,7 +12,7 @@ async function runAnalysis(title, elevator, details) {
     const rag = document.getElementById('rag');
     const feedbackList = document.getElementById('ai-feedback');
 
-    // Show loading
+    // Show loading state
     rag.textContent = "Analyzing...";
     rag.className = "";
     feedbackList.innerHTML = "<p>Please wait, running AI analysis...</p>";
@@ -36,18 +36,15 @@ async function runAnalysis(title, elevator, details) {
 
         feedbackList.innerHTML = "";
 
-
-        // Loop through each field
+        // Loop through each field (title, elevator, details)
         for (const field in data.analysis) {
             const { original, feedback, suggestion } = data.analysis[field];
 
             const block = document.createElement("div");
             block.className = "feedback-block";
 
-            // Determine if suggestion is different from original
             const hasFeedback = feedback && feedback.trim().length > 0;
             const isSuggestionDifferent = suggestion && suggestion.trim() !== original.trim();
-
             const showButtons = hasFeedback && isSuggestionDifferent;
 
             block.innerHTML = `
@@ -55,23 +52,35 @@ async function runAnalysis(title, elevator, details) {
                 <p class="feedback-original"><strong>Original:</strong> ${original}</p>
                 ${showButtons
                     ? `
-                    <p class="feedback-message">⚠️ ${feedback}</p>
-                    <p class="feedback-suggestion">✅ ${suggestion}</p>
-                    <div class="feedback-actions">
-                        <button class="apply-btn" data-field="${field}">Apply Feedback</button>
-                        <button class="apply-rerun-btn" data-field="${field}">Apply & Re-run</button>
-                    </div>
+                        <p class="feedback-message">⚠️ ${feedback}</p>
+                        <p class="feedback-suggestion">✅ ${suggestion}</p>
+                        <div class="feedback-actions">
+                            <button class="apply-btn" data-field="${field}">Apply Feedback</button>
+                            <button class="apply-rerun-btn" data-field="${field}">Apply & Re-run</button>
+                        </div>
                     `
                     : `<p class="feedback-message text-success">✅ No changes suggested.</p>`
                 }
             `;
-
             feedbackList.appendChild(block);
         }
 
+        //  Hide Apply All button if no feedback differences exist
+        const hasAnySuggestions = Object.values(data.analysis).some(item => {
+            return (
+                item.suggestion &&
+                item.suggestion.trim() !== item.original.trim() &&
+                item.feedback &&
+                item.feedback.trim().length > 0
+            );
+        });
 
+        const applyAllBtnContainer = document.getElementById('apply-all');
+        if (applyAllBtnContainer) {
+            applyAllBtnContainer.style.display = hasAnySuggestions ? 'inline-block' : 'none';
+        }
 
-        // Adding  event listeners for "Apply" buttons
+        // Add event listeners for "Apply Feedback" buttons
         feedbackList.querySelectorAll(".apply-btn").forEach(btn => {
             btn.addEventListener("click", () => {
                 const field = btn.dataset.field;
@@ -89,7 +98,7 @@ async function runAnalysis(title, elevator, details) {
             });
         });
 
-        // Adding  event listeners for "Apply & Re-run" buttons
+        // Add event listeners for "Apply & Re-run" buttons
         feedbackList.querySelectorAll(".apply-rerun-btn").forEach(btn => {
             btn.addEventListener("click", () => {
                 const field = btn.dataset.field;
@@ -128,7 +137,7 @@ async function runAnalysis(title, elevator, details) {
     }
 }
 
-// Open modal and run AI analysis
+//  Open modal and run AI analysis
 if (aiBtn) {
     aiBtn.addEventListener('click', () => {
         modal.style.display = "flex";
@@ -139,7 +148,7 @@ if (aiBtn) {
     });
 }
 
-// Close modal
+//  Close modal
 if (closeBtn) {
     closeBtn.addEventListener('click', () => {
         modal.style.display = "none";
@@ -180,7 +189,7 @@ if (applyAllBtn) {
     });
 }
 
-// Submit Anyway
+//  Submit Anyway
 if (submitAnywayBtn) {
     submitAnywayBtn.addEventListener('click', async () => {
         modal.style.display = "none";
