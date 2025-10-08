@@ -197,50 +197,10 @@ if (applyAllBtn) {
 
 //  Submit Anyway
 if (submitAnywayBtn) {
-    submitAnywayBtn.addEventListener('click', async () => {
+    submitAnywayBtn.addEventListener('click', () => {
         modal.style.display = "none";
-
-        const title = document.getElementById('title').value;
-        const elevator = document.getElementById('elevator').value;
-        const details = document.getElementById('details').value;
-
-        try {
-            const res = await fetch("https://air-service-backend-147cb4fc9b81.herokuapp.com/submit-pitch", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title, elevator, details })
-            });
-
-            if (!res.ok) throw new Error("Failed to submit pitch");
-
-            const data = await res.json();
-
-            Toastify({
-                text: "✅ " + data.message,
-                duration: 5000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#4CAF50",
-                close: true
-            }).showToast();
-
-            document.querySelector('.pitch-form').reset();
-
-        } catch (err) {
-            console.error("Submission error:", err);
-
-            Toastify({
-                text: "❌ Failed to submit pitch. Please try again.",
-                duration: 5000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#B00020",
-                close: true
-            }).showToast();
-        }
     });
 }
-
 
 
 //function to limit the tags
