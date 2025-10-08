@@ -69,38 +69,3 @@ if (isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] === "POST") 
 }
 ?>
 
-<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-<script>
-const loginForm = document.getElementById("login-form");
-
-loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault(); // prevent normal form submission
-
-    const formData = new FormData(loginForm);
-
-    const response = await fetch("login.php", {
-        method: "POST",
-        body: formData
-    });
-
-    const result = await response.json();
-
-    if (result.error) {
-        Toastify({
-            text: "❌ " + result.error,
-            duration: 5000,
-            gravity: "top",
-            position: "right",
-            backgroundColor: "#e74c3c",
-            close: true
-        }).showToast();
-    } else if (result.success) {
-        // redirect after successful login
-        if (result.userType === 'investor') {
-            window.location.href = "../investor_portal/investor_portal_home.php";
-        } else {
-            window.location.href = "../business_portal/business_dashboard.php";
-        }
-    }
-});
-</script>
