@@ -36,6 +36,22 @@ try {
         exit();
     }
 
+    $bankData = [];
+
+    try {
+        $sql_bank = "SELECT AccountNumber, Balance 
+                 FROM Bank 
+                 WHERE HolderName = :name 
+                 LIMIT 1"; // or use InvestorID if you have it in Bank table
+        $stmt_bank = $mysql->prepare($sql_bank);
+        $stmt_bank->bindParam(':name', $investorData['Name']);
+        $stmt_bank->execute();
+        $bankData = $stmt_bank->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Bank Data Fetch Error: " . $e->getMessage());
+    }
+
+
     // what money symbol to use
     $currencySymbol = htmlspecialchars($investorData['PreferredCurrency'] === 'USD' ? '$' : '£');
 
@@ -143,16 +159,18 @@ try {
                 </div>
                 <div class="detail-row">
                     <span class="label">Account Number:</span>
-                    <span class="value">12345678</span>
+                    <span class="value"><?php echo htmlspecialchars($bankData['AccountNumber'] ?? '12345678'); ?></span>
                 </div>
                 <div class="detail-row">
                     <span class="label">Mock Bank Balance:</span>
-                    <span class="value"><?php echo $currencySymbol . number_format($investorData['InvestorBalance'] ?? 0.00, 2); ?></span>
+                    <span
+                        class="value"><?php echo $currencySymbol . number_format($bankData['Balance'] ?? 0.00, 2); ?></span>
                 </div>
             </div>
             <p class="note">⚠️ These details are for <strong>mock/demo</strong> purposes only. No real transactions will
                 occur.</p>
         </section>
+
 
 
         <section class="card stats">
@@ -229,11 +247,11 @@ try {
                     <label class="label" for="edit-currency-inline">Preferred Currency</label>
                     <select id="edit-currency-inline" name="currency">
                         <option value="GBP" <?php if (($investorData['PreferredCurrency'] ?? 'GBP') === 'GBP')
-                                                echo 'selected'; ?>>GBP (£)</option>
+                            echo 'selected'; ?>>GBP (£)</option>
                         <option value="USD" <?php if (($investorData['PreferredCurrency'] ?? '') === 'USD')
-                                                echo 'selected'; ?>>USD ($)</option>
+                            echo 'selected'; ?>>USD ($)</option>
                         <option value="EUR" <?php if (($investorData['PreferredCurrency'] ?? '') === 'EUR')
-                                                echo 'selected'; ?>>EUR (€)</option>
+                            echo 'selected'; ?>>EUR (€)</option>
                     </select>
                 </div>
 
@@ -294,11 +312,11 @@ try {
                     <label for="edit-currency">Preferred Currency</label>
                     <select id="edit-currency" name="currency">
                         <option value="GBP" <?php if (($investorData['PreferredCurrency'] ?? 'GBP') === 'GBP')
-                                                echo 'selected'; ?>>GBP (£) - British Pound</option>
+                            echo 'selected'; ?>>GBP (£) - British Pound</option>
                         <option value="USD" <?php if (($investorData['PreferredCurrency'] ?? '') === 'USD')
-                                                echo 'selected'; ?>>USD ($) - US Dollar</option>
+                            echo 'selected'; ?>>USD ($) - US Dollar</option>
                         <option value="EUR" <?php if (($investorData['PreferredCurrency'] ?? '') === 'EUR')
-                                                echo 'selected'; ?>>EUR (€) - Euro</option>
+                            echo 'selected'; ?>>EUR (€) - Euro</option>
                     </select>
                 </div>
 
