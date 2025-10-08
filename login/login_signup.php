@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="../navbar.css?v=<?php echo time(); ?>"> <!--handles cache issues-->
     <link rel="stylesheet" href="../footer.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
 
     <style>
         /* toggle slider container */
@@ -87,7 +89,7 @@
                 style="display:none;">
 
             <button type="submit" id="submitButton">Login</button>
-            
+
             <p class="alt-link">
                 <a href="#" id="toggleMode">Don’t have an account? Sign up</a>
             </p>
@@ -96,7 +98,44 @@
     </main>
 
     <?php include '../footer.php'; ?>
-     <script src="login_signup.js?v=<?php echo time(); ?>"></script>
+    <script src="login_signup.js?v=<?php echo time(); ?>"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        const loginForm = document.getElementById("mainForm");
+
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault(); // prevent normal form submission
+
+            const formData = new FormData(loginForm);
+
+            const response = await fetch("login.php", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.error) {
+                Toastify({
+                    text:  result.error,
+                    duration: 5000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#e74c3c",
+                    close: true
+                }).showToast();
+            } else if (result.success) {
+                // redirect after successful login
+                if (result.userType === 'investor') {
+                    window.location.href = "../investor_portal/investor_portal_home.php";
+                } else {
+                    window.location.href = "../business_portal/business_dashboard.php";
+                }
+            }
+        });
+    </script>
+
 </body>
 
 </html>
