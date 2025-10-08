@@ -111,7 +111,7 @@ try {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Investor Profile</title>
-    <link rel="stylesheet" href="investor_profile.css" />
+    <link rel="stylesheet" href="investor_profile.css?v=<?php echo time(); ?>"> <!--handles cache issues-->
     <link rel="stylesheet" href="../footer.css" />
     <link rel="stylesheet" href="../navbar.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"

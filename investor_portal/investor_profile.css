@@ -305,3 +305,46 @@ body {
     background: #f0f0f0;
     filter: none;
 }
+
+/* fix form overflow on smaller screens */
+@media (max-width: 600px) {
+    .modal-content {
+        width: 95%;
+        padding: 1.5rem;
+    }
+
+    .modal-content .field.wide {
+        flex-direction: column; 
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .modal-content label {
+        flex-basis: auto;
+        width: 100%;
+        text-align: left;
+        white-space: normal; 
+    }
+
+
+.modal-content input[type="text"],
+.modal-content input[type="number"],
+.modal-content select {
+    padding: 10px 12px;       
+    line-height: 1.4;         
+    height: auto;             
+    border: 1px solid #ccc;   
+    border-radius: 6px;   
+        width: 100%;           
+}
+
+
+    .modal-content .actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .modal-content .actions .btn {
+        width: 100%; 
+    }
+}
