@@ -1,4 +1,4 @@
-<?php 
+<?php
 // start the session
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -10,10 +10,10 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'investor') {
 }
 
 // include database connection
-include '../sql/db.php'; 
+include '../sql/db.php';
 
 if (!$mysql) {
-  die("Database connection failed.");
+    die("Database connection failed.");
 }
 
 $investorID = $_SESSION['userId'];
@@ -36,15 +36,31 @@ try {
         exit();
     }
 
-     // what money symbol to use
+    $bankData = [];
+
+    try {
+        $sql_bank = "SELECT AccountNumber, Balance 
+                 FROM Bank 
+                 WHERE HolderName = :name 
+                 LIMIT 1"; // or use InvestorID if you have it in Bank table
+        $stmt_bank = $mysql->prepare($sql_bank);
+        $stmt_bank->bindParam(':name', $investorData['Name']);
+        $stmt_bank->execute();
+        $bankData = $stmt_bank->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Bank Data Fetch Error: " . $e->getMessage());
+    }
+
+
+    // what money symbol to use
     $currencySymbol = htmlspecialchars($investorData['PreferredCurrency'] === 'USD' ? '$' : '£');
 
-    
+
     // format DateOfBirth for HTML input YYYY-MM-DD
     $formattedDOB = $investorData['DateOfBirth'] ? date('Y-m-d', strtotime($investorData['DateOfBirth'])) : '';
     // format DateOfBirth for display 05 May 1992
     $displayDOB = $investorData['DateOfBirth'] ? date('d M Y', strtotime($investorData['DateOfBirth'])) : 'Not provided';
-    
+
 
     // calculate total invested
     $sql_invested = "SELECT SUM(Amount) AS TotalInvested FROM Investment WHERE InvestorID = :investorID";
@@ -53,7 +69,7 @@ try {
     $stmt_invested->execute();
     $result_invested = $stmt_invested->fetch(PDO::FETCH_ASSOC);
     $totalInvested = $result_invested['TotalInvested'] ?? 0.00;
-    
+
     // total roi
     $sql_returned = "SELECT SUM(ROI) AS TotalReturned FROM Investment WHERE InvestorID = :investorID";
     $stmt_returned = $mysql->prepare($sql_returned);
@@ -84,8 +100,6 @@ try {
     $stmt_closed->bindParam(':investorID', $investorID);
     $stmt_closed->execute();
     $closedPitchesCount = $stmt_closed->fetchColumn();
-
-
 } catch (PDOException $e) {
     error_log("Database Fetch Error: " . $e->getMessage());
 }
@@ -106,15 +120,15 @@ try {
 
 <body>
     <!-- Navbar -->
-      <?php include '../navbar.php'; ?>
+    <?php include '../navbar.php'; ?>
 
-     <main class="section">
+    <main class="section">
         <h2>My Profile</h2>
         <section class="card summary">
             <div class="avatar">
                 <img src="corporate-headshot.jpg" alt="Profile Photo">
             </div>
-            
+
             <div class="info">
                 <h3 id="full-name"><?php echo htmlspecialchars($investorData['Name'] ?? 'N/A'); ?></h3>
                 <p id="email"><?php echo htmlspecialchars($investorData['Email'] ?? 'N/A'); ?></p>
@@ -135,6 +149,29 @@ try {
                 <button class="btn danger outline small" id="withdraw-funds-btn">Withdraw Funds</button>
             </div>
         </section>
+
+        <section class="card mock-bank">
+            <h3>Your Mock Bank Account Details</h3>
+            <div class="mock-bank-details">
+                <div class="detail-row">
+                    <span class="label">Account Holder Name:</span>
+                    <span class="value"><?php echo htmlspecialchars($investorData['Name'] ?? 'Test User'); ?></span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Account Number:</span>
+                    <span class="value"><?php echo htmlspecialchars($bankData['AccountNumber'] ?? '12345678'); ?></span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Mock Bank Balance:</span>
+                    <span
+                        class="value"><?php echo $currencySymbol . number_format($bankData['Balance'] ?? 0.00, 2); ?></span>
+                </div>
+            </div>
+            <p class="note">⚠️ These details are for <strong>mock/demo</strong> purposes only. No real transactions will
+                occur.</p>
+        </section>
+
+
 
         <section class="card stats">
             <h3>Investment Stats</h3>
@@ -168,39 +205,53 @@ try {
 
         <section class="card details">
             <h3>Personal Information</h3>
-            
+
             <div id="display-details">
-                <div class="detail-row"><span class="label">Address:</span> <span id="display-address"><?php echo htmlspecialchars($investorData['Address'] ?? 'Not provided'); ?></span></div>
-                <div class="detail-row"><span class="label">Date of Birth:</span> <span id="display-dob"><?php echo htmlspecialchars($displayDOB); ?></span></div>
-                <div class="detail-row"><span class="label">Nationality:</span> <span id="display-nationality"><?php echo htmlspecialchars($investorData['Nationality'] ?? 'Not provided'); ?></span></div>
-                <div class="detail-row"><span class="label">Preferred Currency:</span> <span id="display-currency"><?php echo htmlspecialchars($investorData['PreferredCurrency'] ?? 'GBP'); ?> (<?php echo htmlspecialchars($investorData['PreferredCurrency'] === 'USD' ? '$' : '£'); ?>)</span></div>
-                
+                <div class="detail-row"><span class="label">Address:</span> <span
+                        id="display-address"><?php echo htmlspecialchars($investorData['Address'] ?? 'Not provided'); ?></span>
+                </div>
+                <div class="detail-row"><span class="label">Date of Birth:</span> <span
+                        id="display-dob"><?php echo htmlspecialchars($displayDOB); ?></span></div>
+                <div class="detail-row"><span class="label">Nationality:</span> <span
+                        id="display-nationality"><?php echo htmlspecialchars($investorData['Nationality'] ?? 'Not provided'); ?></span>
+                </div>
+                <div class="detail-row"><span class="label">Preferred Currency:</span> <span
+                        id="display-currency"><?php echo htmlspecialchars($investorData['PreferredCurrency'] ?? 'GBP'); ?>
+                        (<?php echo htmlspecialchars($investorData['PreferredCurrency'] === 'USD' ? '$' : '£'); ?>)</span>
+                </div>
+
                 <button class="btn small primary" id="edit-details-btn">Edit Details</button>
             </div>
 
             <form id="inline-edit-form" style="display:none;">
-                
+
                 <div class="form-group detail-row">
                     <label class="label" for="edit-address-inline">Address</label>
-                    <input type="text" id="edit-address-inline" name="address" value="<?php echo htmlspecialchars($investorData['Address'] ?? ''); ?>">
+                    <input type="text" id="edit-address-inline" name="address"
+                        value="<?php echo htmlspecialchars($investorData['Address'] ?? ''); ?>">
                 </div>
 
                 <div class="form-group detail-row">
                     <label class="label" for="edit-dob-inline">Date of Birth</label>
-                    <input type="date" id="edit-dob-inline" name="dob" value="<?php echo htmlspecialchars($formattedDOB); ?>"> 
+                    <input type="date" id="edit-dob-inline" name="dob"
+                        value="<?php echo htmlspecialchars($formattedDOB); ?>">
                 </div>
 
                 <div class="form-group detail-row">
                     <label class="label" for="edit-nationality-inline">Nationality</label>
-                    <input type="text" id="edit-nationality-inline" name="nationality" value="<?php echo htmlspecialchars($investorData['Nationality'] ?? ''); ?>">
+                    <input type="text" id="edit-nationality-inline" name="nationality"
+                        value="<?php echo htmlspecialchars($investorData['Nationality'] ?? ''); ?>">
                 </div>
 
                 <div class="form-group detail-row">
                     <label class="label" for="edit-currency-inline">Preferred Currency</label>
                     <select id="edit-currency-inline" name="currency">
-                        <option value="GBP" <?php if (($investorData['PreferredCurrency'] ?? 'GBP') === 'GBP') echo 'selected'; ?>>GBP (£)</option>
-                        <option value="USD" <?php if (($investorData['PreferredCurrency'] ?? '') === 'USD') echo 'selected'; ?>>USD ($)</option>
-                        <option value="EUR" <?php if (($investorData['PreferredCurrency'] ?? '') === 'EUR') echo 'selected'; ?>>EUR (€)</option>
+                        <option value="GBP" <?php if (($investorData['PreferredCurrency'] ?? 'GBP') === 'GBP')
+                            echo 'selected'; ?>>GBP (£)</option>
+                        <option value="USD" <?php if (($investorData['PreferredCurrency'] ?? '') === 'USD')
+                            echo 'selected'; ?>>USD ($)</option>
+                        <option value="EUR" <?php if (($investorData['PreferredCurrency'] ?? '') === 'EUR')
+                            echo 'selected'; ?>>EUR (€)</option>
                     </select>
                 </div>
 
@@ -228,42 +279,44 @@ try {
             </div>
         </section>
     </main>
-    
+
     <div id="edit-profile-modal" class="modal" style="display:none;">
         <div class="modal-content">
             <span class="close-btn">&times;</span>
             <h4>Edit Personal Information</h4>
-            <form id="edit-profile-form">   
+            <form id="edit-profile-form">
                 <div class="form-group">
                     <label for="edit-name">Full Name</label>
-                    <input type="text" id="edit-name" name="name" 
-                    value="<?php echo htmlspecialchars($investorData['Name'] ?? ''); ?>" required>
+                    <input type="text" id="edit-name" name="name"
+                        value="<?php echo htmlspecialchars($investorData['Name'] ?? ''); ?>" required>
                 </div>
                 <hr>
                 <div class="form-group">
                     <label for="edit-address">Address</label>
-                    <input type="text" id="edit-address" name="address" 
-                    value="<?php echo htmlspecialchars($investorData['Address'] ?? ''); ?>">
+                    <input type="text" id="edit-address" name="address"
+                        value="<?php echo htmlspecialchars($investorData['Address'] ?? ''); ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="edit-dob">Date of Birth</label>
-                    <input type="date" id="edit-dob" name="dob" 
-                    value="<?php echo htmlspecialchars($formattedDOB); ?>"> 
+                    <input type="date" id="edit-dob" name="dob" value="<?php echo htmlspecialchars($formattedDOB); ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="edit-nationality">Nationality</label>
-                    <input type="text" id="edit-nationality" name="nationality" 
+                    <input type="text" id="edit-nationality" name="nationality"
                         value="<?php echo htmlspecialchars($investorData['Nationality'] ?? ''); ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="edit-currency">Preferred Currency</label>
                     <select id="edit-currency" name="currency">
-                        <option value="GBP" <?php if (($investorData['PreferredCurrency'] ?? 'GBP') === 'GBP') echo 'selected'; ?>>GBP (£) - British Pound</option>
-                        <option value="USD" <?php if (($investorData['PreferredCurrency'] ?? '') === 'USD') echo 'selected'; ?>>USD ($) - US Dollar</option>
-                        <option value="EUR" <?php if (($investorData['PreferredCurrency'] ?? '') === 'EUR') echo 'selected'; ?>>EUR (€) - Euro</option>
+                        <option value="GBP" <?php if (($investorData['PreferredCurrency'] ?? 'GBP') === 'GBP')
+                            echo 'selected'; ?>>GBP (£) - British Pound</option>
+                        <option value="USD" <?php if (($investorData['PreferredCurrency'] ?? '') === 'USD')
+                            echo 'selected'; ?>>USD ($) - US Dollar</option>
+                        <option value="EUR" <?php if (($investorData['PreferredCurrency'] ?? '') === 'EUR')
+                            echo 'selected'; ?>>EUR (€) - Euro</option>
                     </select>
                 </div>
 
@@ -278,63 +331,63 @@ try {
     <div id="deposit-modal" class="modal-overlay">
         <div class="modal-content card">
             <h3>Deposit Funds</h3>
-            
+
             <div class="form-grid">
-                
+
                 <div class="field wide">
                     <label for="bank-account-number">Account Number</label>
                     <input type="text" id="bank-account-number" placeholder="12345678" required>
                 </div>
-                
+
                 <div class="field wide">
                     <label for="bank-holder-name">Holder Name</label>
                     <input type="text" id="bank-holder-name" placeholder="Name" required>
                 </div>
-                
+
                 <div class="field wide">
                     <label for="deposit-amount">Deposit Amount (£)</span></label>
                     <input type="number" id="deposit-amount" min="100" placeholder="e.g., 500.00" required>
                 </div>
             </div>
-            
+
             <div class="actions">
                 <button class="btn" id="cancel-deposit-btn">Cancel</button>
                 <button class="btn primary" id="confirm-deposit-btn">Deposit</button>
             </div>
         </div>
     </div>
-    
+
     <div id="withdrawal-modal" class="modal-overlay" style="display:none;">
         <div class="modal-content card">
             <h3>Withdraw Funds</h3>
-            
+
             <div class="form-grid">
-                
+
                 <div class="field wide">
                     <label for="withdraw-bank-account-number">Account Number</label>
                     <input type="text" id="withdraw-bank-account-number" placeholder="12345678" required>
                 </div>
-                
+
                 <div class="field wide">
                     <label for="withdraw-bank-holder-name">Holder Name</label>
                     <input type="text" id="withdraw-bank-holder-name" placeholder="Name" required>
                 </div>
-                
+
                 <div class="field wide">
                     <label for="withdrawal-amount">Amount (£)</span></label>
                     <input type="number" id="withdrawal-amount" min="1" placeholder="e.g., 100.00" required>
                 </div>
             </div>
-            
+
             <div class="actions">
                 <button class="btn" id="cancel-withdrawal-btn">Cancel</button>
                 <button class="btn primary danger" id="confirm-withdrawal-btn">Withdraw</button>
             </div>
         </div>
     </div>
-    
+
     <!-- Footer -->
-     <?php include '../footer.php'; ?>
+    <?php include '../footer.php'; ?>
     <script src="investor_profile.js"></script>
 </body>
 

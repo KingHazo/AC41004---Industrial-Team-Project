@@ -5,7 +5,7 @@ include __DIR__ . '/../sql/db.php';
 // check if form was submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $type = $_POST['user_type'] ?? ''; // either  busines or investor
+    $type = $_POST['user_type'] ?? ''; // either business or investor
     $email = htmlspecialchars(trim($_POST['email']));
     $password = trim($_POST['password']);
     $confirm_password = trim($_POST['confirm_password']);
@@ -28,17 +28,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         if ($type === 'business') {
             $stmt = $mysql->prepare("INSERT INTO Business (Name, Email, Password) VALUES (:name, :email, :password)");
+            $stmt->bindParam(':name', $name);
+            $stmt->bindParam(':email', $email);
+            $stmt->bindParam(':password', $hashed_password);
+            $stmt->execute();
         } elseif ($type === 'investor') {
+            // insert into Investor
             $stmt = $mysql->prepare("INSERT INTO Investor (Name, Email, Password) VALUES (:name, :email, :password)");
+            $stmt->bindParam(':name', $name);
+            $stmt->bindParam(':email', $email);
+            $stmt->bindParam(':password', $hashed_password);
+            $stmt->execute();
+
+            $investorId = $mysql->lastInsertId();
+
+            // generate mock bank account details
+            $accountNumber = str_pad(mt_rand(10000000, 99999999), 8, '0', STR_PAD_LEFT);
+            $holderName = $name;
+            $initialBalance = 50000;
+
+            // insert into Bank table
+            $bankStmt = $mysql->prepare("
+                INSERT INTO Bank (AccountNumber, HolderName, Balance)
+                VALUES (:accountNumber, :holderName, :balance)
+            ");
+            $bankStmt->bindParam(':accountNumber', $accountNumber);
+            $bankStmt->bindParam(':holderName', $holderName);
+            $bankStmt->bindParam(':balance', $initialBalance);
+            $bankStmt->execute();
         } else {
             header("Location: signup_business.php?error=Invalid+signup+type");
             exit();
         }
-
-        $stmt->bindParam(':name', $name);
-        $stmt->bindParam(':email', $email);
-        $stmt->bindParam(':password', $hashed_password);
-        $stmt->execute();
 
         // set session for auto login
         $_SESSION['userId'] = $mysql->lastInsertId();
@@ -55,17 +76,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     } catch (PDOException $e) {
         // checks for duplicate email
-        if ($e->getCode() === '23000') { // integrity constraint violation
-            $errorMessage = "Email+already+exists";
+        if ($e->getCode() === '23000') {
+            header("Location: signup_{$type}.php?error=email_exists");
         } else {
-            $errorMessage = urlencode($e->getMessage());
+            header("Location: signup_{$type}.php?error=" . urlencode($e->getMessage()));
         }
-        header("Location: signup_{$type}.php?error={$errorMessage}");
         exit();
     }
-
 } else {
-    // redirect if accessed directly
     header("Location: signup_business.php");
     exit();
 }
