@@ -232,7 +232,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="modal-buttons">
                 <button id="apply-all" class="ai-btn">Apply All & Re-run</button>
-                <button id="submit-anyway" class="submit-btn">Submit Anyway</button>
+                <button id="submit-anyway" class="submit-btn">Close AI Analysis</button>
             </div>
         </div>
     </div>
