@@ -65,7 +65,7 @@ async function runAnalysis(title, elevator, details) {
             feedbackList.appendChild(block);
         }
 
-        //  Hide Apply All button if no feedback differences exist
+        // ✅ Hide Apply All button if no feedback differences exist
         const hasAnySuggestions = Object.values(data.analysis).some(item => {
             return (
                 item.suggestion &&
@@ -169,23 +169,29 @@ if (applyAllBtn) {
             return;
         }
 
-        document.getElementById('title').value = latestAnalysis.analysis.title.suggestion;
-        document.getElementById('elevator').value = latestAnalysis.analysis.elevator.suggestion;
-        document.getElementById('details').value = latestAnalysis.analysis.details.suggestion;
+        // ✅ Safely apply only non-empty, different suggestions
+        ["title", "elevator", "details"].forEach(field => {
+            const original = latestAnalysis.analysis[field].original?.trim() || "";
+            const suggestion = latestAnalysis.analysis[field].suggestion?.trim() || "";
+
+            if (suggestion && suggestion !== original) {
+                document.getElementById(field).value = suggestion;
+            }
+        });
 
         Toastify({
-            text: "✅ Applied all AI suggestions! Re-running analysis...",
+            text: "✅ Applied valid AI suggestions! Re-running analysis...",
             duration: 4000,
             gravity: "top",
             position: "right",
             backgroundColor: "#4CAF50"
         }).showToast();
 
-        runAnalysis(
-            latestAnalysis.analysis.title.suggestion,
-            latestAnalysis.analysis.elevator.suggestion,
-            latestAnalysis.analysis.details.suggestion
-        );
+        const newTitle = document.getElementById('title').value;
+        const newElevator = document.getElementById('elevator').value;
+        const newDetails = document.getElementById('details').value;
+
+        runAnalysis(newTitle, newElevator, newDetails);
     });
 }
 
@@ -362,3 +368,4 @@ document.querySelector(".pitch-form").addEventListener("submit", function (e) {
         return false;
     }
 });
+ 
