@@ -13,6 +13,11 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'investor') {
 // include database connection
 include '../sql/db.php';
 
+if (!$mysql) {
+  die("Database connection failed.");
+}
+
+
 $investorID = $_SESSION['userId'];
 $totalInvested = 0;
 $recentInvestments = [];
