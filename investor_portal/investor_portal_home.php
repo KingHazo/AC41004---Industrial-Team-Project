@@ -108,27 +108,29 @@ try {
         <div class="pitches">
             <?php
             try {
-                $sql = "SELECT p.PitchID, p.Title, p.ElevatorPitch, p.CurrentAmount, p.TargetAmount, p.ProfitSharePercentage 
-                FROM Pitch p
-                WHERE p.Status NOT IN ('draft', 'closed')";
+                $sql = "SELECT 
+            p.PitchID, 
+            p.Title, 
+            p.ElevatorPitch, 
+            p.CurrentAmount, 
+            p.TargetAmount, 
+            p.ProfitSharePercentage 
+            FROM Pitch p";
 
+                $where_conditions = ["p.Status NOT IN ('draft', 'closed')"]; // always exclude drafts and closed pitches
+                $bind_values = [];
 
                 $tag_filter_needed = !in_array(0, $selected_tag_ids);
                 $text_search_needed = !empty($search_term);
-                $filter_needed = $tag_filter_needed || $text_search_needed;
-
-                $where_conditions = [];
-                $bind_values = [];
 
                 if ($tag_filter_needed) {
                     $placeholders = implode(',', array_fill(0, count($selected_tag_ids), '?'));
-
                     $where_conditions[] = "EXISTS (
-                                SELECT 1 
-                                FROM PitchTag pt 
-                                WHERE pt.PitchID = p.PitchID 
-                                AND pt.TagID IN ($placeholders)
-                            )";
+                SELECT 1 
+                FROM PitchTag pt 
+                WHERE pt.PitchID = p.PitchID 
+                AND pt.TagID IN ($placeholders)
+            )";
                     $bind_values = array_merge($bind_values, $selected_tag_ids);
                 }
 
@@ -139,11 +141,10 @@ try {
                     $bind_values[] = $search_param;
                 }
 
-                if ($filter_needed) {
-                    $sql .= " WHERE " . implode(' AND ', $where_conditions);
-                }
-
+                // combine everything into one WHERE clause
+                $sql .= " WHERE " . implode(' AND ', $where_conditions);
                 $sql .= " ORDER BY p.PitchID DESC";
+
 
                 $stmt = $mysql->prepare($sql);
 
@@ -193,6 +194,8 @@ try {
 
                             <button class="more-btn" data-pitch-id="<?php echo htmlspecialchars($pitch_id); ?>">Find Out More</button>
                         </div>
+
+
                     </div>
             <?php
                 }
