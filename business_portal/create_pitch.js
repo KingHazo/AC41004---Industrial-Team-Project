@@ -12,7 +12,7 @@ async function runAnalysis(title, elevator, details) {
     const rag = document.getElementById('rag');
     const feedbackList = document.getElementById('ai-feedback');
 
-    // Show loading
+    // Show loading state
     rag.textContent = "Analyzing...";
     rag.className = "";
     feedbackList.innerHTML = "<p>Please wait, running AI analysis...</p>";
@@ -36,26 +36,51 @@ async function runAnalysis(title, elevator, details) {
 
         feedbackList.innerHTML = "";
 
-        // Loop through each field
+        // Loop through each field (title, elevator, details)
         for (const field in data.analysis) {
             const { original, feedback, suggestion } = data.analysis[field];
 
             const block = document.createElement("div");
             block.className = "feedback-block";
+
+            const hasFeedback = feedback && feedback.trim().length > 0;
+            const isSuggestionDifferent = suggestion && suggestion.trim() !== original.trim();
+            const showButtons = hasFeedback && isSuggestionDifferent;
+
             block.innerHTML = `
                 <h4>${field.toUpperCase()}</h4>
                 <p class="feedback-original"><strong>Original:</strong> ${original}</p>
-                <p class="feedback-message">⚠️ ${feedback}</p>
-                <p class="feedback-suggestion">✅ ${suggestion}</p>
-                <div class="feedback-actions">
-                  <button class="apply-btn" data-field="${field}">Apply Feedback</button>
-                  <button class="apply-rerun-btn" data-field="${field}">Apply & Re-run</button>
-                </div>
+                ${showButtons
+                    ? `
+                        <p class="feedback-message">⚠️ ${feedback}</p>
+                        <p class="feedback-suggestion">✅ ${suggestion}</p>
+                        <div class="feedback-actions">
+                            <button class="apply-btn" data-field="${field}">Apply Feedback</button>
+                            <button class="apply-rerun-btn" data-field="${field}">Apply & Re-run</button>
+                        </div>
+                    `
+                    : `<p class="feedback-message text-success">✅ No changes suggested.</p>`
+                }
             `;
             feedbackList.appendChild(block);
         }
 
-        // Adding  event listeners for "Apply" buttons
+        // ✅ Hide Apply All button if no feedback differences exist
+        const hasAnySuggestions = Object.values(data.analysis).some(item => {
+            return (
+                item.suggestion &&
+                item.suggestion.trim() !== item.original.trim() &&
+                item.feedback &&
+                item.feedback.trim().length > 0
+            );
+        });
+
+        const applyAllBtnContainer = document.getElementById('apply-all');
+        if (applyAllBtnContainer) {
+            applyAllBtnContainer.style.display = hasAnySuggestions ? 'inline-block' : 'none';
+        }
+
+        // Add event listeners for "Apply Feedback" buttons
         feedbackList.querySelectorAll(".apply-btn").forEach(btn => {
             btn.addEventListener("click", () => {
                 const field = btn.dataset.field;
@@ -73,7 +98,7 @@ async function runAnalysis(title, elevator, details) {
             });
         });
 
-        // Adding  event listeners for "Apply & Re-run" buttons
+        // Add event listeners for "Apply & Re-run" buttons
         feedbackList.querySelectorAll(".apply-rerun-btn").forEach(btn => {
             btn.addEventListener("click", () => {
                 const field = btn.dataset.field;
@@ -112,7 +137,7 @@ async function runAnalysis(title, elevator, details) {
     }
 }
 
-// Open modal and run AI analysis
+//  Open modal and run AI analysis
 if (aiBtn) {
     aiBtn.addEventListener('click', () => {
         modal.style.display = "flex";
@@ -123,7 +148,7 @@ if (aiBtn) {
     });
 }
 
-// Close modal
+//  Close modal
 if (closeBtn) {
     closeBtn.addEventListener('click', () => {
         modal.style.display = "none";
@@ -144,28 +169,33 @@ if (applyAllBtn) {
             return;
         }
 
-        document.getElementById('title').value = latestAnalysis.analysis.title.suggestion;
-        document.getElementById('elevator').value = latestAnalysis.analysis.elevator.suggestion;
-        document.getElementById('details').value = latestAnalysis.analysis.details.suggestion;
+        // ✅ Safely apply only non-empty, different suggestions
+        ["title", "elevator", "details"].forEach(field => {
+            const original = latestAnalysis.analysis[field].original?.trim() || "";
+            const suggestion = latestAnalysis.analysis[field].suggestion?.trim() || "";
+
+            if (suggestion && suggestion !== original) {
+                document.getElementById(field).value = suggestion;
+            }
+        });
 
         Toastify({
-            text: "✅ Applied all AI suggestions! Re-running analysis...",
+            text: "✅ Applied valid AI suggestions! Re-running analysis...",
             duration: 4000,
             gravity: "top",
             position: "right",
             backgroundColor: "#4CAF50"
         }).showToast();
 
-        runAnalysis(
-            latestAnalysis.analysis.title.suggestion,
-            latestAnalysis.analysis.elevator.suggestion,
-            latestAnalysis.analysis.details.suggestion
-        );
+        const newTitle = document.getElementById('title').value;
+        const newElevator = document.getElementById('elevator').value;
+        const newDetails = document.getElementById('details').value;
+
+        runAnalysis(newTitle, newElevator, newDetails);
     });
 }
 
-// Submit Anyway
-// Close AI Analysis Popup
+//  Submit Anyway
 if (submitAnywayBtn) {
     submitAnywayBtn.addEventListener('click', () => {
         modal.style.display = "none";
@@ -233,7 +263,7 @@ document.querySelector(".pitch-form").addEventListener("submit", function (e) {
     const minMultiplier = 0.1, maxMultiplier = 10;
 
     // Date validation
-    const today = new Date(); today.setHours(0,0,0,0);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
     const minDate = new Date(today); minDate.setDate(minDate.getDate() + 1);
     const selectedDate = new Date(endDate);
 
@@ -275,10 +305,10 @@ document.querySelector(".pitch-form").addEventListener("submit", function (e) {
 
         // Check for overlapping
         if (!errorMsg) {
-            tiers.sort((a,b)=>a.min-b.min);
-            for(let i=1;i<tiers.length;i++){
-                if(tiers[i].min <= tiers[i-1].max){
-                    errorMsg = `Tier ${tiers[i].index} overlaps with Tier ${tiers[i-1].index}. Adjust min/max ranges.`; break;
+            tiers.sort((a, b) => a.min - b.min);
+            for (let i = 1; i < tiers.length; i++) {
+                if (tiers[i].min <= tiers[i - 1].max) {
+                    errorMsg = `Tier ${tiers[i].index} overlaps with Tier ${tiers[i - 1].index}. Adjust min/max ranges.`; break;
                 }
             }
         }
@@ -293,8 +323,9 @@ document.querySelector(".pitch-form").addEventListener("submit", function (e) {
             gravity: "top",
             position: "center",
             backgroundColor: "#e74c3c",
-            style: { fontWeight:"500", borderRadius:"10px" }
+            style: { fontWeight: "500", borderRadius: "10px" }
         }).showToast();
         return false;
     }
 });
+ 

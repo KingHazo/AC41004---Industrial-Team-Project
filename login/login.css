@@ -9,8 +9,6 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    margin: 0;
-    font-family: 'Montserrat', sans-serif;
     background: #f5f7fa;
 }
 
@@ -21,6 +19,69 @@ main {
     align-items: center;
 }
 
+/* ======== TOGGLE CONTAINER ======== */
+.toggle-container {
+    width: 220px;
+    margin: 20px auto;
+    background: #f0f0f0;
+    border-radius: 25px;
+    display: flex;
+    position: relative;
+    border: 5px solid #f0f0f0;
+}
+
+/* Reset button styles — make toggle buttons look like divs */
+.toggle-option {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    font-weight: 600;
+    background: transparent;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    z-index: 1;
+    color: #333;
+    font-family: inherit;
+
+    /* remove default button styling across browsers */
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    box-shadow: none;
+    background-image: none;
+    border-width: 0;
+    line-height: normal;
+    margin: 0;
+    padding-block: 10px;
+    padding-inline: 0;
+}
+
+/* Focus ring for keyboard navigation */
+.toggle-option:focus {
+    outline: 2px solid #0b3d91;
+    outline-offset: 2px;
+}
+
+/* Active (selected) toggle */
+.toggle-option.active {
+    color: white;
+    font-weight: 700;
+}
+
+/* Blue moving background */
+.slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background: #0b3d91;
+    border-radius: 25px;
+    transition: left 0.3s ease;
+}
+
+/* ======== LOGIN FORM ======== */
 .login-form {
     background: #fff;
     padding: 2rem;
@@ -51,7 +112,7 @@ main {
     border: 1px solid #ccc;
     border-radius: 6px;
     font-size: 1rem;
-      box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 .login-form input:focus {
@@ -60,7 +121,8 @@ main {
     box-shadow: 0 0 5px rgba(11, 61, 145, 0.3);
 }
 
-.login-form button {
+/* ======== SUBMIT BUTTON (separate from toggle buttons) ======== */
+.login-form button[type="submit"] {
     width: 100%;
     padding: 0.75rem;
     background: #0b3d91;
@@ -73,10 +135,11 @@ main {
     transition: background 0.3s ease;
 }
 
-.login-form button:hover {
+.login-form button[type="submit"]:hover {
     background: #072a61;
 }
 
+/* ======== LINK ======== */
 .login-form a {
     display: block;
     text-align: center;
@@ -90,6 +153,7 @@ main {
     text-decoration: underline;
 }
 
+/* ======== MOBILE RESPONSIVE ======== */
 @media (max-width: 500px) {
     .login-options {
         flex-direction: column;
@@ -98,7 +162,6 @@ main {
 
     .login-options span {
         display: none;
-
     }
 }
 
