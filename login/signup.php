@@ -2,6 +2,12 @@
 session_start();
 include __DIR__ . '/../sql/db.php';
 
+if (!$mysql) {
+  die("Database connection failed.");
+}
+
+
+
 // check if form was submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -32,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bindParam(':email', $email);
             $stmt->bindParam(':password', $hashed_password);
             $stmt->execute();
-        } elseif ($type === 'investor') {
+           } elseif ($type === 'investor') {
             // insert into Investor
             $stmt = $mysql->prepare("INSERT INTO Investor (Name, Email, Password) VALUES (:name, :email, :password)");
             $stmt->bindParam(':name', $name);
@@ -40,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bindParam(':password', $hashed_password);
             $stmt->execute();
 
-            $investorId = $mysql->lastInsertId();
+            $investorId = $mysql->lastInsertId(); // ✅ Save before inserting into Bank
 
             // generate mock bank account details
             $accountNumber = str_pad(mt_rand(10000000, 99999999), 8, '0', STR_PAD_LEFT);
@@ -56,10 +62,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $bankStmt->bindParam(':holderName', $holderName);
             $bankStmt->bindParam(':balance', $initialBalance);
             $bankStmt->execute();
-        } else {
-            header("Location: signup_business.php?error=Invalid+signup+type");
+
+            // set correct session data
+            $_SESSION['userId'] = $investorId;
+            $_SESSION['userType'] = 'investor';
+            $_SESSION['logged_in'] = true;
+
+            header("Location: ../investor_portal/investor_portal_home.php");
             exit();
-        }
+           }
 
         // set session for auto login
         $_SESSION['userId'] = $mysql->lastInsertId();
