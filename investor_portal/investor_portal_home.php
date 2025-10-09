@@ -58,7 +58,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Investor Portal Home</title>
-    <link rel="stylesheet" href="investor_portal_home.css">
+    <link rel="stylesheet" href="investor_portal_home.css?v=<?php echo time(); ?>"> <!--handles cache issues-->
     <link rel="stylesheet" href="../footer.css">
     <script src="https://kit.fontawesome.com/004961d7c9.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -180,7 +180,8 @@ try {
                         <h3><?php echo htmlspecialchars($row['Title'] ?? 'N/A'); ?></h3>
                         <p><?php echo htmlspecialchars($row['ElevatorPitch'] ?? 'N/A'); ?></p>
                         <div class="progress-container">
-                            <div class="progress-bar" style="width: <?php echo $progress_percentage; ?>%;">
+                            <div class="progress-bar" style="width: <?php echo $progress_percentage; ?>%;"></div>
+                            <div class="progress-text">
                                 £<?php echo number_format($currentAmount); ?> / £<?php echo number_format($targetAmount); ?>
                             </div>
                         </div>
