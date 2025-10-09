@@ -81,7 +81,8 @@ try {
     <section id="discover" class="section">
         <h2>Discover New Pitches</h2>
         <div class="search-filter">
-            <input type="text" placeholder="Search pitches..." value="<?php echo htmlspecialchars($search_term); ?>" id="searchInput">
+            <input type="text" placeholder="Search pitches..." value="<?php echo htmlspecialchars($search_term); ?>"
+                id="searchInput">
             <button class="filter-btn" id="filterButton" aria-label="Filter">
                 <i class="fa-solid fa-filter"></i>
             </button>
@@ -98,7 +99,8 @@ try {
 
                     $is_selected = in_array($tag['TagID'], $selected_tag_ids) ? ' selected' : '';
                 ?>
-                    <button class="filter-tag<?php echo $is_selected; ?>" data-tag="<?php echo htmlspecialchars($tag['TagID']); ?>">
+                    <button class="filter-tag<?php echo $is_selected; ?>"
+                        data-tag="<?php echo htmlspecialchars($tag['TagID']); ?>">
                         <?php echo htmlspecialchars($tag['Name']); ?>
                     </button>
                 <?php endforeach; ?>
@@ -167,6 +169,17 @@ try {
                         error_log("Skipping pitch card due to missing PitchID in database record.");
                         continue;
                     }
+                    // Fetch tags for this pitch
+                    $tag_stmt = $mysql->prepare("
+                    SELECT t.Name 
+                    FROM Tag t
+                    INNER JOIN PitchTag pt ON t.TagID = pt.TagID
+                    WHERE pt.PitchID = :pitchId
+                    ");
+                    $tag_stmt->bindParam(':pitchId', $pitch_id, PDO::PARAM_INT);
+                    $tag_stmt->execute();
+                    $tags = $tag_stmt->fetchAll(PDO::FETCH_COLUMN);
+
 
                     // stop division by zero error
                     $currentAmount = $row['CurrentAmount'] ?? 0;
@@ -178,6 +191,13 @@ try {
             ?>
                     <div class="card">
                         <h3><?php echo htmlspecialchars($row['Title'] ?? 'N/A'); ?></h3>
+                        <?php if (!empty($tags)): ?>
+                            <div class="tags-container">
+                                <?php foreach ($tags as $tag): ?>
+                                    <span class="tag"><?php echo htmlspecialchars($tag); ?></span>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
                         <p><?php echo htmlspecialchars($row['ElevatorPitch'] ?? 'N/A'); ?></p>
                         <div class="progress-container">
                             <div class="progress-bar" style="width: <?php echo $progress_percentage; ?>%;"></div>
@@ -186,14 +206,16 @@ try {
                             </div>
                         </div>
                         <div class="profit-share">
-                            Investor Profit Share: <strong><?php echo htmlspecialchars($row['ProfitSharePercentage'] ?? '0'); ?>%</strong>
+                            Investor Profit Share:
+                            <strong><?php echo htmlspecialchars($row['ProfitSharePercentage'] ?? '0'); ?>%</strong>
                         </div>
                         <div class="card-buttons">
                             <?php if ($currentAmount < $targetAmount): ?>
                                 <button class="invest-btn">Invest</button>
                             <?php endif; ?>
 
-                            <button class="more-btn" data-pitch-id="<?php echo htmlspecialchars($pitch_id); ?>">Find Out More</button>
+                            <button class="more-btn" data-pitch-id="<?php echo htmlspecialchars($pitch_id); ?>">Find Out
+                                More</button>
                         </div>
 
 

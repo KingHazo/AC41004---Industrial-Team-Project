@@ -53,6 +53,18 @@ try {
         exit();
     }
 
+    // fetch tags for this pitch
+    $tagStmt = $mysql->prepare("
+    SELECT t.Name
+    FROM Tag t
+    INNER JOIN PitchTag pt ON t.TagID = pt.TagID
+    WHERE pt.PitchID = :pitchID
+");
+    $tagStmt->bindParam(':pitchID', $pitchID, PDO::PARAM_INT);
+    $tagStmt->execute();
+    $tags = $tagStmt->fetchAll(PDO::FETCH_COLUMN); // array of tag names
+
+
     // check if pitch is closed/funded for stopping investments
     $isFunded = (float)$pitch['CurrentAmount'] >= (float)$pitch['TargetAmount'];
     $isClosed = strtotime($pitch['WindowEndDate']) < time();
@@ -182,6 +194,13 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
                 <span class="dot" onclick="currentSlide(3)"></span>
             </div>
 
+            <?php if (!empty($tags)): ?>
+                <div class="tags-container">
+                    <?php foreach ($tags as $tag): ?>
+                        <span class="tag"><?php echo htmlspecialchars($tag); ?></span>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
             <h3>Elevator Pitch</h3>
             <p><?php echo htmlspecialchars($pitch['ElevatorPitch'] ?? 'Description not available.'); ?></p>
 
