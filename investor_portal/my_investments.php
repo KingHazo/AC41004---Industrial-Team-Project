@@ -1,4 +1,4 @@
-<?php 
+<?php
 // start the session to get current business
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -56,14 +56,14 @@ try {
         }
         $tiersByPitch[$pitchId][] = $tier;
     }
-
 } catch (PDOException $e) {
     $dbError = "Database Query Failed: " . $e->getMessage();
     error_log("Database Error in my_investments.php: " . $dbError);
 }
 
 // finds the tier details based on the amount and pitch
-function getInvestmentTier($pitchID, $amount, $tiersByPitch) {
+function getInvestmentTier($pitchID, $amount, $tiersByPitch)
+{
     if (!isset($tiersByPitch[$pitchID])) {
         return ['Name' => 'N/A', 'Multiplier' => 1.0];
     }
@@ -82,7 +82,8 @@ function getInvestmentTier($pitchID, $amount, $tiersByPitch) {
 }
 
 // current status of pitch
-function getPitchStatus($currentAmount, $targetAmount, $windowEndDate) {
+function getPitchStatus($currentAmount, $targetAmount, $windowEndDate)
+{
     if ($currentAmount >= $targetAmount) {
         return 'funded';
     }
@@ -102,8 +103,8 @@ function getPitchStatus($currentAmount, $targetAmount, $windowEndDate) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Investments</title>
     <link rel="stylesheet" href="my_investments.css" />
-
-     <link rel="stylesheet" href="../footer.css" />
+    <link rel="stylesheet" href="my_investments.css?v=<?php echo time(); ?>"> <!--handles cache issues-->
+    <link rel="stylesheet" href="../footer.css" />
     <link rel="stylesheet" href="../navbar.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
         rel="stylesheet" />
@@ -111,8 +112,8 @@ function getPitchStatus($currentAmount, $targetAmount, $windowEndDate) {
 
 <body>
     <!-- navbar -->
-   
-     <?php include '../navbar.php'; ?>
+
+    <?php include '../navbar.php'; ?>
 
     <main class="section">
         <h2>My Investments</h2>
@@ -130,77 +131,81 @@ function getPitchStatus($currentAmount, $targetAmount, $windowEndDate) {
             <?php if (empty($investmentsData) && !$dbError): ?>
                 <p style="padding: 20px; text-align: center; color: #555;">You have not made any investments yet.</p>
             <?php elseif (!empty($investmentsData)): ?>
-                <?php foreach ($investmentsData as $inv): 
+                <?php foreach ($investmentsData as $inv):
                     $pitchStatus = getPitchStatus($inv['CurrentAmount'], $inv['TargetAmount'], $inv['WindowEndDate']);
                     $tier = getInvestmentTier($inv['PitchID'], $inv['Amount'], $tiersByPitch);
-                    
+
                     $tierName = htmlspecialchars($tier['Name']);
                     $multiplier = htmlspecialchars(number_format($tier['Multiplier'], 1));
                     $investedAmount = htmlspecialchars(number_format($inv['Amount'], 2));
                     $shares = htmlspecialchars(number_format($inv['Amount'] * $tier['Multiplier'], 0)); // calculate shares
                     $profitToDate = htmlspecialchars(number_format($inv['ROI'], 2)); // ROI for profit
-                    
+
                     $progressPct = ($inv['TargetAmount'] > 0) ? round(($inv['CurrentAmount'] / $inv['TargetAmount']) * 100) : 0;
                     $progressDisplay = "£" . number_format($inv['CurrentAmount'], 0) . " / £" . number_format($inv['TargetAmount'], 0);
-                    
+
                     $statusClass = $pitchStatus;
                     $profitClass = ($inv['ROI'] > 0) ? 'good' : 'muted';
-                    
+
                     $showCancelButton = $pitchStatus === 'active';
                 ?>
-                <!-- Card -->
-                <article class="inv-card" data-status="<?php echo $pitchStatus; ?>">
-                    <div class="inv-head">
-                        <h3><?php echo htmlspecialchars($inv['Title']); ?></h3>
-                        <span class="status badge <?php echo $statusClass; ?>"><?php echo ucfirst($pitchStatus); ?></span>
-                    </div>
+                    <!-- Card -->
+                    <article class="inv-card" data-status="<?php echo $pitchStatus; ?>">
+                        <div class="inv-head">
+                            <h3><?php echo htmlspecialchars($inv['Title']); ?></h3>
+                            <span class="status badge <?php echo $statusClass; ?>"><?php echo ucfirst($pitchStatus); ?></span>
+                        </div>
 
-                    <div class="grid">
-                        <div class="col">
-                            <p class="muted">Invested</p>
-                            <p class="num">£<?php echo $investedAmount; ?></p>
+                        <div class="grid">
+                            <div class="col">
+                                <p class="muted">Invested</p>
+                                <p class="num">£<?php echo $investedAmount; ?></p>
+                            </div>
+                            <div class="col">
+                                <p class="muted">Tier</p>
+                                <p><?php echo $tierName; ?> (×<?php echo $multiplier; ?>)</p>
+                            </div>
+                            <div class="col">
+                                <p class="muted">Shares</p>
+                                <p><?php echo $shares; ?></p>
+                            </div>
+                            <div class="col">
+                                <p class="muted">ROI</p>
+                                <p class="<?php echo $profitClass; ?>">£<?php echo $profitToDate; ?></p>
+                            </div>
                         </div>
-                        <div class="col">
-                            <p class="muted">Tier</p>
-                            <p><?php echo $tierName; ?> (×<?php echo $multiplier; ?>)</p>
-                        </div>
-                        <div class="col">
-                            <p class="muted">Shares</p>
-                            <p><?php echo $shares; ?></p>
-                        </div>
-                        <div class="col">
-                            <p class="muted">ROI</p>
-                            <p class="<?php echo $profitClass; ?>">£<?php echo $profitToDate; ?></p>
-                        </div>
-                    </div>
 
-                    <div class="progress-container">
-                        <div class="progress-bar" style="width:<?php echo $progressPct; ?>%;"><?php echo $progressDisplay; ?></div>
-                    </div>
+                        <div class="progress-container">
+                            <!-- Progress Bar Fill -->
+                            <div class="progress-bar" style="width: <?php echo $progressPct; ?>%;"></div>
+                            <div class="progress-text">
+                                <?php echo $progressDisplay; ?>
+                            </div>
+                        </div>
 
-                    <div class="actions">
-                        <button class="btn" data-action="view" data-id="<?php echo $inv['PitchID']; ?>">View Details</button>
-                        
-                        <?php if ($showCancelButton): ?>
-                        <button 
-                            class="btn danger outline" 
-                            data-action="cancel" 
-                            data-id="<?php echo $inv['InvestmentID']; ?>">
-                            Cancel Investment
-                        </button>
-                        <?php endif; ?>
-                    </div>
-                </article>
+                        <div class="actions">
+                            <button class="btn" data-action="view" data-id="<?php echo $inv['PitchID']; ?>">View Details</button>
+
+                            <?php if ($showCancelButton): ?>
+                                <button
+                                    class="btn danger outline"
+                                    data-action="cancel"
+                                    data-id="<?php echo $inv['InvestmentID']; ?>">
+                                    Cancel Investment
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                    </article>
                 <?php endforeach; ?>
             <?php endif; ?>
         </div>
     </main>
 
 
-      <?php include '../footer.php'; ?>
+    <?php include '../footer.php'; ?>
 
     <script src="my_investments.js"></script>
- 
+
 </body>
 
 </html>
