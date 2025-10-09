@@ -1,4 +1,4 @@
-<?php 
+<?php
 // start the session to get current investor
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -14,7 +14,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'investor') {
 include '../sql/db.php';
 
 if (!$mysql) {
-  die("Database connection failed.");
+    die("Database connection failed.");
 }
 
 
@@ -31,7 +31,7 @@ try {
     $stmt_total->bindParam(':investorID', $investorID);
     $stmt_total->execute();
     $result_total = $stmt_total->fetch(PDO::FETCH_ASSOC);
-    
+
     if ($result_total && $result_total['TotalInvested'] !== null) {
         // round to 2 decimal places
         $totalInvested = number_format($result_total['TotalInvested'], 2);
@@ -83,11 +83,10 @@ try {
     $stmt_investments->bindParam(':investorID', $investorID);
     $stmt_investments->execute();
     $recentInvestments = $stmt_investments->fetchAll(PDO::FETCH_ASSOC);
-
 } catch (PDOException $e) {
     $dbError = "Database Query Failed: " . $e->getMessage();
     error_log("Database Error in investor_portal_home.php: " . $dbError);
-    $totalInvested = "DB Error"; 
+    $totalInvested = "DB Error";
     $recentInvestments = [];
 }
 
@@ -100,7 +99,7 @@ try {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Investor Dashboard</title>
-    <link rel="stylesheet" href="investor_dashboard.css" />
+    <link rel="stylesheet" href="investor_dashboard.css?v=<?php echo time(); ?>"> <!--handles cache issues-->
     <link rel="stylesheet" href="../navbar.css" />
     <link rel="stylesheet" href="../footer.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
@@ -108,10 +107,10 @@ try {
 </head>
 
 <body>
-     <?php include '../navbar.php'; ?>
+    <?php include '../navbar.php'; ?>
 
     <main class="section">
-        
+
         <h2>My Portfolio</h2>
 
         <!-- kpi cards -->
@@ -139,20 +138,20 @@ try {
         <!-- recent holdings -->
         <h3>Recent Holdings (Last <?php echo count($recentInvestments); ?> Investments)</h3>
         <div class="pitches">
-            
+
             <?php if (empty($recentInvestments) && !$dbError): ?>
                 <p>You have no recent investments.</p>
                 <?php if ($totalInvested === number_format(0, 2)): ?>
                     <!-- <p style="color: blue;">(Total Invested is £0.00)</p> -->
                 <?php endif; ?>
             <?php elseif (!empty($recentInvestments)): ?>
-                <?php foreach ($recentInvestments as $investment): 
+                <?php foreach ($recentInvestments as $investment):
                     $pitchID = $investment['PitchID'];
                     $currentFunding = $investment['CurrentFunding'];
                     $fundingGoal = $investment['FundingGoal']; // TargetAmount
                     $investedAmount = $investment['InvestmentAmount']; // Amount
                     $profitShare = $investment['ProfitSharePercentage'];
-                    
+
                     // progress percentage
                     $progressPct = ($fundingGoal > 0) ? round(($currentFunding / $fundingGoal) * 100) : 0;
                     $progressDisplay = "£" . number_format($currentFunding, 0) . " / £" . number_format($fundingGoal, 0);
@@ -163,26 +162,30 @@ try {
                     // Check if the pitch is fully funded
                     $isFullyFunded = ($currentFunding >= $fundingGoal);
                 ?>
-                <div class="card">
-                    <h4><?php echo $pitchName; ?></h4>
-                    <div class="progress-container">
-                        <!-- progress Bar -->
-                        <div class="progress-bar" style="width: <?php echo $progressPct; ?>%;"><?php echo $progressDisplay; ?></div>
+                    <div class="card">
+                        <h4><?php echo $pitchName; ?></h4>
+                        <div class="progress-container">
+                            <!-- Progress Bar Fill -->
+                            <div class="progress-bar" style="width: <?php echo $progressPct; ?>%;"></div>
+                            <div class="progress-text">
+                                <?php echo $progressDisplay; ?>
+                            </div>
+                        </div>
+
+                        <div class="meta">
+                            <!-- profit share -->
+                            <span class="profit-share">Profit Share: <strong><?php echo htmlspecialchars($profitShare); ?>%</strong></span>
+                            <!-- amount invested -->
+                            <span class="invested">You invested: <strong><?php echo $investedDisplay; ?></strong></span>
+                        </div>
+                        <div class="card-buttons">
+                            <!-- PitchID is data id -->
+                            <button class="view-btn" data-id="<?php echo $pitchID; ?>">View</button>
+                            <?php if (!$isFullyFunded): ?>
+                                <button class="cancel-btn" data-id="<?php echo $investment['InvestmentID']; ?>">Cancel Investment</button>
+                            <?php endif; ?>
+                        </div>
                     </div>
-                    <div class="meta">
-                        <!-- profit share -->
-                        <span class="profit-share">Profit Share: <strong><?php echo htmlspecialchars($profitShare); ?>%</strong></span>
-                        <!-- amount invested -->
-                        <span class="invested">You invested: <strong><?php echo $investedDisplay; ?></strong></span>
-                    </div>
-                    <div class="card-buttons">
-                        <!-- PitchID is data id -->
-                        <button class="view-btn" data-id="<?php echo $pitchID; ?>">View</button>
-                        <?php if (!$isFullyFunded): ?>
-                            <button class="cancel-btn" data-id="<?php echo $investment['InvestmentID']; ?>">Cancel Investment</button>
-                        <?php endif; ?>
-                    </div>
-                </div>
                 <?php endforeach; ?>
             <?php endif; ?>
 
@@ -192,7 +195,7 @@ try {
 
     <div id="footer-placeholder"></div>
 
-    
+
     <script src="investor_dashboard.js"></script>
     <script src="../load_footer.js"></script>
 </body>
