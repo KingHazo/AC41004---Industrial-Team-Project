@@ -59,7 +59,7 @@ $pitches = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ">
     Pitch saved successfully!
   </div>
-
+  <main>
   <section id="dashboard" class="section">
     <h2>My Pitches</h2>
 
@@ -157,6 +157,7 @@ $pitches = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <?php endforeach; ?>
     </div>
   </section>
+  </main>
   <?php include '../footer.php'; ?>
 
   <script>

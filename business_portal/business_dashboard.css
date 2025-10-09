@@ -232,3 +232,17 @@ body {
 .submit-btn:hover {
     background-color: #1e8449;
 }
+/* --- makes the footer stick to the bottom --- */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+footer {
+  margin-top: auto;
+}
