@@ -15,7 +15,7 @@ include '../sql/db.php';
 
 
 if (!$mysql) {
-  die("Database connection failed.");
+    die("Database connection failed.");
 }
 
 
@@ -53,6 +53,18 @@ try {
         exit();
     }
 
+    // fetch tags for this pitch
+    $tagStmt = $mysql->prepare("
+    SELECT t.Name
+    FROM Tag t
+    INNER JOIN PitchTag pt ON t.TagID = pt.TagID
+    WHERE pt.PitchID = :pitchID
+");
+    $tagStmt->bindParam(':pitchID', $pitchID, PDO::PARAM_INT);
+    $tagStmt->execute();
+    $tags = $tagStmt->fetchAll(PDO::FETCH_COLUMN); // array of tag names
+
+
     // check if pitch is closed/funded for stopping investments
     $isFunded = (float)$pitch['CurrentAmount'] >= (float)$pitch['TargetAmount'];
     $isClosed = strtotime($pitch['WindowEndDate']) < time();
@@ -85,11 +97,11 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pitch Details - <?php echo htmlspecialchars($pitch['Title'] ?? 'Loading...'); ?></title>
-      <link rel="stylesheet" href="investor_pitch_details.css?v=<?php echo time(); ?>"> <!--handles cache issues-->
+    <link rel="stylesheet" href="investor_pitch_details.css?v=<?php echo time(); ?>"> <!--handles cache issues-->
     <link rel="stylesheet" href="../navbar.css" />
     <link rel="stylesheet" href="../footer.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
-    rel="stylesheet" />
+        rel="stylesheet" />
 
     <style>
         .spinner {
@@ -154,7 +166,7 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
             </div>
 
             <!-- Slideshow container for images-->
-             <!-- https://www.w3schools.com/howto/howto_js_slideshow.asp-->
+            <!-- https://www.w3schools.com/howto/howto_js_slideshow.asp-->
             <div class="slideshow-container">
 
                 <!-- Full-width images with number and caption text -->
@@ -182,6 +194,13 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
                 <span class="dot" onclick="currentSlide(3)"></span>
             </div>
 
+            <?php if (!empty($tags)): ?>
+                <div class="tags-container">
+                    <?php foreach ($tags as $tag): ?>
+                        <span class="tag"><?php echo htmlspecialchars($tag); ?></span>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
             <h3>Elevator Pitch</h3>
             <p><?php echo htmlspecialchars($pitch['ElevatorPitch'] ?? 'Description not available.'); ?></p>
 
@@ -201,7 +220,12 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
             $progress = ($target > 0) ? round(($current / $target) * 100) : 0;
             ?>
             <div class="progress-container">
-                <div class="progress-bar" style="width: <?php echo $progress; ?>%;">£<?php echo number_format($current); ?> / £<?php echo number_format($target); ?></div>
+                <div class="progress-bar" style="width: <?php echo $progress; ?>%;">
+                    <div class="progress-text">
+                        £<?php echo number_format($pitch['CurrentAmount'], 2); ?> /
+                        £<?php echo number_format($pitch['TargetAmount'], 2); ?>
+                    </div>
+                </div>
             </div>
             <p class="meta-line"><strong>Funding Window Ends:</strong> <?php echo date('d M Y', strtotime($pitch['WindowEndDate'] ?? '')); ?></p>
 
@@ -233,9 +257,9 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
                             $mult = number_format((float)$tier['Multiplier'], 1);
 
                             $isUnlimited = $max >= 9999999;
-                            
+
                             $maxTableCell = $isUnlimited ? 'No Limit' : number_format($max);
-                            
+
                             $maxAttr = $max;
                         ?>
                             <tr data-tier="<?php echo htmlspecialchars($tier['Name']); ?>"

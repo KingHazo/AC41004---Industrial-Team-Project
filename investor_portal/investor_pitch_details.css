@@ -78,22 +78,44 @@ body {
     margin-top: .25rem;
 }
 
+/* Progress Bar */
+
 .progress-container {
-    background: #ecf0f1;
-    border-radius: 10px;
-    overflow: hidden;
-    height: 20px;
-    width: 100%;
+  position: relative;
+  background: #ecf0f1;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 20px;
+  width: 100%;
 }
 
 .progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #169e5f, #075116);
-    text-align: center;
-    color: #fff;
-    font-size: .8rem;
-    line-height: 20px;
-    transition: width 1s ease-in-out;
+  height: 100%;
+  background: linear-gradient(90deg, #b2fba5, #7ef29d);
+  width: 0;
+  transition: width 1s ease-in-out;
+  border-radius: 10px 0 0 10px;
+}
+
+/* text over the progress bar */
+.progress-text {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #333;
+  pointer-events: none;
+
+  /* force single line display */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* tiers table */
@@ -324,4 +346,20 @@ body {
   .mySlides {
     height: 300px;
   }
+}
+
+/* tags */
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.tag {
+  background-color: #070707;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
 }

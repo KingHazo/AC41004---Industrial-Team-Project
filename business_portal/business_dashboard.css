@@ -145,7 +145,7 @@ body {
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #4CAF50, #4CAF50);
+  background: linear-gradient(90deg, #b2fba5, #7ef29d);
   width: 0; 
   transition: width 1s ease-in-out;
   border-radius: 10px 0 0 10px;
@@ -231,4 +231,18 @@ body {
 
 .submit-btn:hover {
     background-color: #1e8449;
+}
+/* --- makes the footer stick to the bottom --- */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+footer {
+  margin-top: auto;
 }
