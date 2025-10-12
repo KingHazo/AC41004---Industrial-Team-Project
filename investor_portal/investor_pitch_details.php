@@ -10,6 +10,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['userType'] !== 'investor') {
     exit();
 }
 
+
 // include database connection
 include '../sql/db.php';
 
@@ -17,7 +18,6 @@ include '../sql/db.php';
 if (!$mysql) {
     die("Database connection failed.");
 }
-
 
 // get pitch id, make an integer
 $pitchID = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -48,11 +48,17 @@ try {
     $stmt_pitch->execute();
     $pitch = $stmt_pitch->fetch(PDO::FETCH_ASSOC);
 
+
     if (!$pitch) {
         header('Location: investor_portal_home.php?error=pitch_not_found');
         exit();
     }
 
+    // fetch media files for this pitch
+    $mediaStmt = $mysql->prepare("SELECT FilePath FROM Media WHERE PitchID = :pitchID ORDER BY MediaID ASC");
+    $mediaStmt->bindParam(':pitchID', $pitchID, PDO::PARAM_INT);
+    $mediaStmt->execute();
+    $mediaFiles = $mediaStmt->fetchAll(PDO::FETCH_COLUMN);
     // fetch tags for this pitch
     $tagStmt = $mysql->prepare("
     SELECT t.Name
@@ -166,33 +172,36 @@ $js_is_investable = $isInvestable ? 'true' : 'false';
             </div>
 
             <!-- Slideshow container for images-->
-            <!-- https://www.w3schools.com/howto/howto_js_slideshow.asp-->
-            <div class="slideshow-container">
+            <!-- edited the template from https://www.w3schools.com/howto/howto_js_slideshow.asp-->
+            <?php if ($mediaFiles): ?>
+                <div class="slideshow-container">
+                    <?php foreach ($mediaFiles as $index => $fileUrl): ?>
+                        <div class="mySlides fade">
+                            <?php if (preg_match('/\.(jpg|jpeg|png|gif)$/i', $fileUrl)): ?>
+                                <img src="<?php echo htmlspecialchars($fileUrl); ?>" style="width:100%">
+                            <?php elseif (preg_match('/\.(mp4|webm|ogg)$/i', $fileUrl)): ?>
+                                <video controls style="width:100%">
+                                    <source src="<?php echo htmlspecialchars($fileUrl); ?>">
+                                    Your browser does not support the video tag.
+                                </video>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
 
-                <!-- Full-width images with number and caption text -->
-                <div class="mySlides fade">
-                    <img src="image1.jpg" style="width:100%">
+                    <!-- Next and previous buttons -->
+                    <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+                    <a class="next" onclick="plusSlides(1)">&#10095;</a>
                 </div>
 
-                <div class="mySlides fade">
-                    <img src="image2.jpg" style="width:100%">
+                <!-- The dots/circles -->
+                <div style="text-align:center">
+                    <?php foreach ($mediaFiles as $index => $fileUrl): ?>
+                        <span class="dot" onclick="currentSlide(<?php echo $index + 1; ?>)"></span>
+                    <?php endforeach; ?>
                 </div>
-
-                <div class="mySlides fade">
-                    <img src="image3.jpg" style="width:100%">
-                </div>
-
-                <!-- Next and previous buttons -->
-                <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
-                <a class="next" onclick="plusSlides(1)">&#10095;</a>
-            </div>
-
-            <!-- The dots/circles -->
-            <div style="text-align:center">
-                <span class="dot" onclick="currentSlide(1)"></span>
-                <span class="dot" onclick="currentSlide(2)"></span>
-                <span class="dot" onclick="currentSlide(3)"></span>
-            </div>
+            <?php else: ?>
+                <p>No media uploaded for this pitch.</p>
+            <?php endif; ?>
 
             <?php if (!empty($tags)): ?>
                 <div class="tags-container">

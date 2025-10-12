@@ -39,3 +39,6 @@
 
 # debug information files
 *.dwo
+
+# Google Cloud service account key
+fundify-474122.json

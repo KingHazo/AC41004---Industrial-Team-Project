@@ -8,5 +8,5 @@ $_SESSION = [];
 session_destroy();
 
 // redirect to homepage or login page
-header("Location: /AC41004---Industrial-Team-Project/index.php");
+header("Location: /index.php");
 exit();
