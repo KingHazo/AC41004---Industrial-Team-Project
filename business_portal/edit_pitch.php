@@ -15,6 +15,28 @@ if (!$mysql) {
     die("Database connection failed.");
 }
 
+// Include GCP
+require __DIR__ . '/../vendor/autoload.php';
+
+use Google\Cloud\Storage\StorageClient;
+
+// Initialize GCP Storage using JSON file in root
+try {
+    $storage = new StorageClient([
+        'projectId' => 'fundify-474122',
+        'keyFilePath' => __DIR__ . '/../fundify-474122.json' // path to JSON credentials
+    ]);
+
+    $bucket = $storage->bucket('fundify-media-bucket');
+} catch (Exception $e) {
+    error_log("GCP init error: " . $e->getMessage());
+    die("Could not initialize Google Cloud Storage");
+}
+
+ini_set('post_max_size', '500M');
+ini_set('upload_max_filesize', '100M');
+ini_set('memory_limit', '300M');
+
 // get PitchID from GET
 $pitchId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if (!$pitchId) die("Pitch ID missing.");
@@ -48,6 +70,7 @@ $disableOtherFields = in_array($status, ['active', 'closed', 'funded']);
 
 // handle save
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Sanitize form inputs
     $title = htmlspecialchars($_POST['title']);
     $elevator = htmlspecialchars($_POST['elevator']);
     $details = htmlspecialchars($_POST['details']);
@@ -56,6 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $profitShare = $_POST['profit_share'];
     $payoutFrequency = $_POST['payout_frequency'];
 
+    // Update Pitch table
     $stmt = $mysql->prepare("
         UPDATE Pitch SET
         ElevatorPitch=:elevator,
@@ -76,11 +100,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bindParam(':businessId', $_SESSION['userId']);
     $stmt->execute();
 
-    // update tags + tiers if editable
-    if (!$disableOtherFields) {
-        $mysql->prepare("DELETE FROM InvestmentTier WHERE PitchID=$pitchId")->execute();
-        $mysql->prepare("DELETE FROM PitchTag WHERE PitchID=$pitchId")->execute();
 
+    // Handle media uploads (only if pitch is editable)
+    if (!$disableOtherFields && !empty($_FILES['media']['name'][0])) {
+
+        $maxFiles = 5;
+        $maxTotalSize = 200 * 1024 * 1024; 
+        $maxFileSize = 100 * 1024 * 1024;  
+
+        $fileCount = count($_FILES['media']['name']);
+        $totalSize = array_sum($_FILES['media']['size']);
+
+        // Validate number of files
+        if ($fileCount > $maxFiles) {
+            die("<script>alert('You can upload a maximum of 5 files.'); window.history.back();</script>");
+        }
+
+        // Validate total size
+        if ($totalSize > $maxTotalSize) {
+            die("<script>alert('Total upload size exceeds 200MB. Please reduce file sizes.'); window.history.back();</script>");
+        }
+
+        // Loop through each uploaded file
+        foreach ($_FILES['media']['tmp_name'] as $index => $tmpName) {
+            $error = $_FILES['media']['error'][$index];
+            $size = $_FILES['media']['size'][$index];
+
+            if ($error !== UPLOAD_ERR_OK) {
+                error_log("Upload error index $index: $error");
+                continue;
+            }
+
+            if ($size > $maxFileSize) {
+                error_log("File too large: {$_FILES['media']['name'][$index]}");
+                continue;
+            }
+
+            $originalName = basename($_FILES['media']['name'][$index]);
+            $fileName = uniqid() . '_' . $originalName;
+
+            try {
+                // Upload to GCP bucket
+                $object = $bucket->upload(fopen($tmpName, 'r'), ['name' => $fileName]);
+                $publicUrl = "https://storage.googleapis.com/{$bucket->name()}/{$fileName}";
+                error_log("✅ Uploaded to GCP: $fileName");
+
+                // Insert media record into database
+                $stmt = $mysql->prepare("INSERT INTO Media (FilePath, PitchID) VALUES (:filePath, :pitchId)");
+                $stmt->execute([
+                    ':filePath' => $publicUrl,
+                    ':pitchId' => $pitchId
+                ]);
+
+            } catch (Exception $e) {
+                error_log("GCP upload error: " . $e->getMessage());
+            }
+        }
+    }
+
+    // update tags and tiers if editable
+
+    if (!$disableOtherFields) {
+        // Delete existing tiers and tags
+        $stmt = $mysql->prepare("DELETE FROM InvestmentTier WHERE PitchID=:pitchId");
+        $stmt->execute([':pitchId' => $pitchId]);
+
+        $stmt = $mysql->prepare("DELETE FROM PitchTag WHERE PitchID=:pitchId");
+        $stmt->execute([':pitchId' => $pitchId]);
+
+        // Add updated tiers
         if (!empty($_POST['tier_name'])) {
             foreach ($_POST['tier_name'] as $i => $name) {
                 if (!empty($name)) {
@@ -98,17 +186,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        // Add updated tags (limit to 5)
         if (!empty($_POST['tags'])) {
             $selectedTags = array_slice($_POST['tags'], 0, 5);
             foreach ($selectedTags as $tagId) {
-                $mysql->prepare("INSERT INTO PitchTag (PitchID, TagID) VALUES ($pitchId, $tagId)")->execute();
+                $stmt = $mysql->prepare("INSERT INTO PitchTag (PitchID, TagID) VALUES (:pitchId, :tagId)");
+                $stmt->execute([
+                    ':pitchId' => $pitchId,
+                    ':tagId' => $tagId
+                ]);
             }
         }
     }
 
+    // Redirect back to dashboard after save
     header("Location: business_dashboard.php?saved=1");
     exit();
 }
+
 ?>
 
 <!DOCTYPE html>
