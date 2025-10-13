@@ -19,3 +19,6 @@ To design and implement a scalable crowdfunding style investment platform where 
 ## Fundify User Manual
 **A link to the Fundify User Manual can be found [here](https://drive.google.com/file/d/1K4igY1_E1X4D-bGG-4tbUMe7tUtWS_wM/view?usp=sharing)**
 
+## Fundify Website
+**The Link to the Website can be found [here](http://fundify.us-east-1.elasticbeanstalk.com/)**
+Please note, the website might not be active, if so, email either 2502464@dundee.ac.uk or 2501402@dundee.ac.uk
